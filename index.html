@@ -6,41 +6,58 @@
     <title>MithrilARM Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; text-align: center; color: #333; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        img { width: 100%; max-width: 220px; border-radius: 12px; margin-bottom: 10px; }
-        h3 { margin: 10px 0; font-size: 1.2em; }
-        .price { color: #0088cc; font-weight: bold; font-size: 1.3em; margin-bottom: 15px; }
-        .btn { display: block; width: 100%; background: #0088cc; color: white; padding: 12px; border-radius: 10px; text-decoration: none; cursor: pointer; border: none; font-weight: bold; font-size: 16px; }
-        .btn:active { background: #006699; }
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; text-align: center; }
+        .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        img { width: 100%; max-width: 150px; border-radius: 10px; }
+        .btn { background: #0088cc; color: white; padding: 10px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-weight: bold; }
+        #cart-status { background: #333; color: white; padding: 15px; position: fixed; bottom: 0; left: 0; right: 0; display: none; }
     </style>
 </head>
 <body>
     <h1>MithrilARM</h1>
-    
+
     <div class="card">
-        <img src="Shopify-Axe.webp" alt="Ручка">
+        <img src="Shopify-Axe.webp">
         <h3>Ручка для армрестлинга</h3>
-        <div class="price">3 500 ₽</div>
-        <button class="btn" onclick="sendOrder('Ручка для армрестлинга')">Заказать в боте</button>
+        <p>3 500 ₽</p>
+        <button class="btn" onclick="addToCart('Ручка', 3500)">Добавить в корзину</button>
     </div>
 
     <div class="card">
-        <img src="expander.webp" alt="Эспандер">
+        <img src="expander.webp">
         <h3>Эспандер Mithril</h3>
-        <div class="price">1 200 ₽</div>
-        <button class="btn" onclick="sendOrder('Эспандер Mithril')">Заказать в боте</button>
+        <p>1 200 ₽</p>
+        <button class="btn" onclick="addToCart('Эспандер', 1200)">Добавить в корзину</button>
+    </div>
+
+    <div id="cart-status">
+        <span id="cart-text">В корзине: 0 товаров</span>
+        <button class="btn" style="background: #28a745; margin-top: 10px;" onclick="sendOrder()">Оформить заказ</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); 
+        let cart = [];
 
-        function sendOrder(item) {
-            tg.sendData(item); 
-            tg.close(); 
+        function addToCart(name, price) {
+            cart.push({name, price});
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartStatus = document.getElementById('cart-status');
+            const cartText = document.getElementById('cart-text');
+            cartStatus.style.display = 'block';
+            cartText.innerText = `В корзине: ${cart.length} тов. на сумму ${cart.reduce((sum, item) => sum + item.price, 0)} ₽`;
+        }
+
+        function sendOrder() {
+            if (cart.length === 0) return;
+            // Собираем все товары в одну строку
+            let orderString = cart.map(item => item.name).join(", ");
+            tg.sendData("Заказ: " + orderString); // Отправляем данные боту
+            tg.close(); // Закрываем только ПОСЛЕ оформления
         }
     </script>
 </body>
-
 </html>
