@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MithrilARM Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; text-align: center; color: #333; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        img { width: 100%; max-width: 220px; border-radius: 12px; margin-bottom: 10px; }
+        h3 { margin: 10px 0; font-size: 1.2em; }
+        .price { color: #0088cc; font-weight: bold; font-size: 1.3em; margin-bottom: 15px; }
+        .btn { display: block; width: 100%; background: #0088cc; color: white; padding: 12px; border-radius: 10px; text-decoration: none; cursor: pointer; border: none; font-weight: bold; font-size: 16px; }
+        .btn:active { background: #006699; }
+    </style>
+</head>
+<body>
+    <h1>MithrilARM</h1>
+    
+    <div class="card">
+        <img src="Shopify-Axe.webp" alt="Ручка">
+        <h3>Ручка для армрестлинга</h3>
+        <div class="price">3 500 ₽</div>
+        <button class="btn" onclick="sendOrder('Ручка для армрестлинга')">Заказать в боте</button>
+    </div>
+
+    <div class="card">
+        <img src="expander.webp" alt="Эспандер">
+        <h3>Эспандер Mithril</h3>
+        <div class="price">1 200 ₽</div>
+        <button class="btn" onclick="sendOrder('Эспандер Mithril')">Заказать в боте</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); 
+
+        function sendOrder(item) {
+            tg.sendData(item); 
+            tg.close(); 
+        }
+    </script>
+</body>
+</html>
