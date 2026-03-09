@@ -1,7 +1,5 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
-tg.setHeaderColor('#000000');
-tg.setBackgroundColor('#000000');
 
 let cart = {};
 
@@ -17,19 +15,23 @@ function changeCount(name, price, delta) {
 
 function updateMainButton() {
     let total = 0;
+    let items = [];
     for (let key in cart) {
-        total += cart[key].count * cart[key].price;
+        if (cart[key].count > 0) {
+            total += cart[key].count * cart[key].price;
+            items.push(`${key} (x${cart[key].count})`);
+        }
     }
 
     if (total > 0) {
         tg.MainButton.text = `ПРОСМОТРЕТЬ ЗАКАЗ (${total} ₽)`;
         tg.MainButton.show();
-        tg.MainButton.setParams({ color: '#28a745' });
     } else {
         tg.MainButton.hide();
     }
 }
 
+// ФУНКЦИЯ ДЛЯ ВЫЗОВА CHECKOUT
 tg.MainButton.onClick(() => {
     let items = [];
     let total = 0;
@@ -39,6 +41,12 @@ tg.MainButton.onClick(() => {
             total += cart[key].count * cart[key].price;
         }
     }
-    // Отправляем данные боту
-    tg.sendData(JSON.stringify({ items: items.join(", "), total: total }));
+
+    const order = {
+        title: "Ваш заказ в MithrilARM",
+        description: items.join(", "),
+        total: total
+    };
+
+    tg.sendData(JSON.stringify(order));
 });
