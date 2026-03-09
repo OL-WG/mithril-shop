@@ -29,7 +29,6 @@ function updateMainButton() {
     for (let key in cart) total += cart[key].count * cart[key].price;
 
     if (total > 0) {
-        // Кнопка стала ЧЕРНОЙ (текст белый)
         tg.MainButton.setParams({
             text: `ПРОСМОТРЕТЬ КОРЗИНУ ($${total.toFixed(2)})`,
             color: "#000000",
@@ -52,7 +51,6 @@ tg.MainButton.onClick(() => {
 function showCart() {
     document.getElementById('main-screen').style.display = 'none';
     document.getElementById('cart-screen').style.display = 'block';
-    
     let list = document.getElementById('cart-items-list');
     list.innerHTML = ''; 
     let total = 0;
@@ -63,7 +61,6 @@ function showCart() {
             total += itemTotal;
             let img = key === 'Handle' ? 'ruchka.webp' : 'expander.webp';
             let name = key === 'Handle' ? 'Ручка Arm' : 'Эспандер';
-            
             list.innerHTML += `
                 <div class="cart-item">
                     <img src="${img}">
@@ -73,13 +70,7 @@ function showCart() {
         }
     }
     document.getElementById('cart-total-price').innerText = `$${total.toFixed(2)}`;
-    
-    // Кнопка в корзине тоже ЧЕРНО-БЕЛАЯ
-    tg.MainButton.setParams({
-        text: "ОФОРМИТЬ ЗАКАЗ",
-        color: "#ffffff",
-        text_color: "#000000"
-    });
+    tg.MainButton.setParams({ text: "ОФОРМИТЬ ЗАКАЗ", color: "#ffffff", text_color: "#000000" });
     tg.BackButton.show();
 }
 
