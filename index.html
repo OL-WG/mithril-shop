@@ -1,28 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MithrilARM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; text-align: center; }
         .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-        .product-item b { font-size: 16px; margin-bottom: 5px; display: block; }
-        .price { color: #aaa; margin-bottom: 10px; font-weight: bold; }
+        .price { color: #888; margin-bottom: 10px; }
         
-        /* Кнопки */
-        .add-btn { background: #f39c12; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
+        /* Кнопки ЧЕРНО-БЕЛЫЕ (для 1 скрина) */
+        .add-btn { background: #fff; color: #000; border: none; padding: 8px; border-radius: 8px; font-weight: bold; width: 100%; }
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
-        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; }
+        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; }
         
-        /* Корзина (Durger King Style) */
+        /* Корзина (для 3 скрина) */
         .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; }
-        .cart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; }
-        .cart-info { flex-grow: 1; font-size: 14px; }
-        .cart-price { font-weight: bold; }
+        .cart-item img { width: 45px; height: 45px; margin-right: 15px; }
+        .cart-info { flex-grow: 1; }
         .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
     </style>
 </head>
@@ -32,9 +30,9 @@
         <div class="product-grid">
             <div class="product-item">
                 <img src="ruchka.webp">
-                <b>Arm Handle</b>
+                <b>Ручка Arm</b>
                 <div class="price">$35.00</div>
-                <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35.00)">ADD</button>
+                <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35.00)">ДОБАВИТЬ</button>
                 <div id="ctrl-Handle" class="count-ctrl">
                     <button class="cnt-btn" onclick="changeCount('Handle', 35.00, -1)">-</button>
                     <span id="count-Handle">1</span>
@@ -43,9 +41,9 @@
             </div>
             <div class="product-item">
                 <img src="expander.webp">
-                <b>Expander</b>
+                <b>Эспандер</b>
                 <div class="price">$12.00</div>
-                <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12.00)">ADD</button>
+                <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12.00)">ДОБАВИТЬ</button>
                 <div id="ctrl-Expander" class="count-ctrl">
                     <button class="cnt-btn" onclick="changeCount('Expander', 12.00, -1)">-</button>
                     <span id="count-Expander">1</span>
@@ -56,14 +54,13 @@
     </div>
 
     <div id="cart-screen" style="display: none;">
-        <h3 style="padding: 15px;">Your Order</h3>
+        <h3 style="padding: 15px;">Ваша корзина</h3>
         <div id="cart-items-list"></div>
         <div class="cart-total">
-            <span>Total:</span>
+            <span>Итог:</span>
             <span id="cart-total-price">$0.00</span>
         </div>
     </div>
-
     <script src="js/script.js"></script>
 </body>
 </html>
