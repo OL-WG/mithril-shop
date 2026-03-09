@@ -8,27 +8,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>MITHRILARM 💪</h1>
+    <h1>MithrilARM</h1>
 
-    <div class="card">
-        <img src="ruchka.webp" alt="Ручка">
-        <h3>Ручка для армрестлинга</h3>
-        <div class="price">3 500 ₽</div>
-        <button class="btn" onclick="addToCart('Ручка', 3500)">Добавить в корзину</button>
-    </div>
+    <div class="product-grid">
+        <div class="product-item">
+            <img src="ruchka.webp" alt="Ручка">
+            <h4>Ручка Arm</h4>
+            <div class="price">3500 ₽</div>
+            <div class="count-control">
+                <button class="cnt-btn" onclick="changeCount('Ручка', 3500, -1)">-</button>
+                <span id="count-Ручка">0</span>
+                <button class="cnt-btn" onclick="changeCount('Ручка', 3500, 1)">+</button>
+            </div>
+        </div>
 
-    <div class="card">
-        <img src="expander.webp" alt="Эспандер">
-        <h3>Эспандер Mithril</h3>
-        <div class="price">1 200 ₽</div>
-        <button class="btn" onclick="addToCart('Эспандер', 1200)">Добавить в корзину</button>
-    </div>
-
-    <div id="cart-status">
-        <b id="cart-text">Выбрано товаров: 0</b>
-        <button class="btn" style="background: #28a745 !important; margin-top: 10px; border: none !important;" onclick="sendOrder()">
-            Оформить заказ на <span id="total-price">0</span> ₽
-        </button>
+        <div class="product-item">
+            <img src="expander.webp" alt="Эспандер">
+            <h4>Эспандер</h4>
+            <div class="price">1200 ₽</div>
+            <div class="count-control">
+                <button class="cnt-btn" onclick="changeCount('Эспандер', 1200, -1)">-</button>
+                <span id="count-Эспандер">0</span>
+                <button class="cnt-btn" onclick="changeCount('Эспандер', 1200, 1)">+</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/script.js"></script>
