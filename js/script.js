@@ -3,7 +3,6 @@ tg.expand();
 tg.setHeaderColor('#000000');
 tg.setBackgroundColor('#000000');
 
-// Состояние корзины
 let cart = {};
 
 function changeCount(name, price, delta) {
@@ -12,44 +11,43 @@ function changeCount(name, price, delta) {
     cart[name].count += delta;
     if (cart[name].count < 0) cart[name].count = 0;
     
-    // Обновляем текст счетчика на странице
-    const countElement = document.getElementById(`count-${name}`);
-    if (countElement) countElement.innerText = cart[name].count;
+    // Обновляем цифру в карточке
+    let element = document.getElementById(`count-${name}`);
+    if (element) element.innerText = cart[name].count;
     
     updateMainButton();
 }
 
 function updateMainButton() {
     let total = 0;
+    let itemsList = [];
+
     for (let key in cart) {
-        total += cart[key].count * cart[key].price;
+        if (cart[key].count > 0) {
+            total += cart[key].count * cart[key].price;
+            itemsList.push(`${key} x${cart[key].count}`);
+        }
     }
 
     if (total > 0) {
         tg.MainButton.text = `ПРОСМОТРЕТЬ ЗАКАЗ (${total} ₽)`;
         tg.MainButton.show();
-        tg.MainButton.setParams({
-            color: '#28a745', 
-            text_color: '#ffffff'
-        });
+        tg.MainButton.setParams({ color: '#28a745' });
     } else {
         tg.MainButton.hide();
     }
 }
 
-// При нажатии на зеленую кнопку "ПРОСМОТРЕТЬ ЗАКАЗ"
+// При нажатии отправляем данные боту
 tg.MainButton.onClick(() => {
-    let orderItems = [];
-    for (let name in cart) {
-        if (cart[name].count > 0) {
-            orderItems.push(`${name} x${cart[name].count}`);
+    let items = [];
+    let total = 0;
+    for (let key in cart) {
+        if (cart[key].count > 0) {
+            items.push(`${key} x${cart[key].count}`);
+            total += cart[key].count * cart[key].price;
         }
     }
-    
-    // Формируем строку заказа
-    let total = Object.values(cart).reduce((a, b) => a + (b.count * b.price), 0);
-    let resultString = `Заказ: ${orderItems.join(", ")}. Итого: ${total}₽`;
-
-    // ОТПРАВКА ДАННЫХ
-    tg.sendData(resultString); 
+    // Отправляем JSON строку
+    tg.sendData(JSON.stringify({ items: items.join(", "), total: total }));
 });
