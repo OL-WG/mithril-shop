@@ -4,13 +4,19 @@ tg.expand();
 let cart = {};
 
 function changeCount(name, price, delta) {
-    if (!cart[name]) cart[name] = { count: 0, price: price };
+    if (!cart[name]) {
+        cart[name] = { count: 0, price: price };
+    }
+    
     cart[name].count += delta;
+    
     if (cart[name].count < 0) cart[name].count = 0;
     
-    // Обновляем текст на экране товара
-    let el = document.getElementById(`count-${name}`);
-    if (el) el.innerText = cart[name].count;
+    // Обновляем число на главной странице
+    let countLabel = document.getElementById(`count-${name}`);
+    if (countLabel) {
+        countLabel.innerText = cart[name].count;
+    }
 
     updateMainButton();
 }
@@ -22,11 +28,9 @@ function updateMainButton() {
     }
 
     if (total > 0) {
-        // Прямо указываем название КОРЗИНА
         tg.MainButton.setParams({
-            text: "КОРЗИНА", 
+            text: `КОРЗИНА (${total} ₽)`,
             color: "#28a745",
-            is_active: true,
             is_visible: true
         });
     } else {
@@ -34,16 +38,17 @@ function updateMainButton() {
     }
 }
 
-// ГЛАВНЫЙ ОБРАБОТЧИК КЛИКА
-tg.MainButton.onClick(function() {
-    // Проверяем: если мы видим список товаров, то переходим в корзину
+// Клик по кнопке Telegram
+tg.MainButton.onClick(() => {
     if (document.getElementById('main-screen').style.display !== 'none') {
         showCart();
-    } 
+    } else {
+        // Если уже в корзине, отправляем данные боту
+        tg.sendData(JSON.stringify(cart));
+    }
 });
 
 function showCart() {
-    // Прячем витрину, показываем корзину
     document.getElementById('main-screen').style.display = 'none';
     document.getElementById('cart-screen').style.display = 'block';
     
@@ -56,7 +61,7 @@ function showCart() {
             let itemTotal = cart[key].count * cart[key].price;
             total += itemTotal;
             list.innerHTML += `
-                <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333;">
+                <div class="cart-item">
                     <span>${key} x${cart[key].count}</span>
                     <span>${itemTotal} ₽</span>
                 </div>`;
@@ -64,12 +69,11 @@ function showCart() {
     }
     document.getElementById('cart-total-price').innerText = total + " ₽";
     
-    // В корзине меняем текст на ОФОРМИТЬ
     tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
     tg.BackButton.show();
 }
 
-tg.BackButton.onClick(function() {
+tg.BackButton.onClick(() => {
     document.getElementById('main-screen').style.display = 'block';
     document.getElementById('cart-screen').style.display = 'none';
     tg.BackButton.hide();
