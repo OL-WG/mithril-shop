@@ -31,8 +31,8 @@ function updateMainButton() {
     if (total > 0) {
         tg.MainButton.setParams({
             text: `ПРОСМОТРЕТЬ КОРЗИНУ ($${total.toFixed(2)})`,
-            color: "#000000",
-            text_color: "#ffffff",
+            color: "#ffffff",
+            text_color: "#000000",
             is_visible: true
         });
     } else {
