@@ -1,10 +1,9 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
-
-// Настройка темы под твой "Total Black"
 tg.setHeaderColor('#000000');
 tg.setBackgroundColor('#000000');
 
+// Состояние корзины
 let cart = {};
 
 function changeCount(name, price, delta) {
@@ -27,10 +26,10 @@ function updateMainButton() {
     }
 
     if (total > 0) {
-        tg.MainButton.text = `ОФОРМИТЬ ЗАКАЗ (${total} ₽)`;
+        tg.MainButton.text = `ПРОСМОТРЕТЬ ЗАКАЗ (${total} ₽)`;
         tg.MainButton.show();
         tg.MainButton.setParams({
-            color: '#28a745', // Зеленая кнопка как в Durger King
+            color: '#28a745', 
             text_color: '#ffffff'
         });
     } else {
@@ -38,7 +37,7 @@ function updateMainButton() {
     }
 }
 
-// Слушаем нажатие на главную кнопку Telegram
+// При нажатии на зеленую кнопку "ПРОСМОТРЕТЬ ЗАКАЗ"
 tg.MainButton.onClick(() => {
     let orderItems = [];
     for (let name in cart) {
@@ -47,10 +46,10 @@ tg.MainButton.onClick(() => {
         }
     }
     
-    const data = JSON.stringify({
-        items: orderItems.join(", "),
-        total: Object.values(cart).reduce((a, b) => a + (b.count * b.price), 0)
-    });
+    // Формируем строку заказа
+    let total = Object.values(cart).reduce((a, b) => a + (b.count * b.price), 0);
+    let resultString = `Заказ: ${orderItems.join(", ")}. Итого: ${total}₽`;
 
-    tg.sendData(data); // Это отправит данные боту и закроет приложение
+    // ОТПРАВКА ДАННЫХ
+    tg.sendData(resultString); 
 });
