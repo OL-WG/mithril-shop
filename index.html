@@ -1,62 +1,69 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MithrilARM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
-        .product-grid { display: flex; gap: 15px; padding: 15px; overflow-x: auto; }
-        .product-item { background: #1c1c1c; border-radius: 12px; padding: 10px; min-width: 140px; text-align: center; }
-        .product-item img { width: 80px; height: 80px; object-fit: contain; }
-        .count-control { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; }
-        .cnt-btn { background: #333; color: #fff; border: none; width: 25px; height: 25px; border-radius: 5px; cursor: pointer; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        .product-item b { font-size: 16px; margin-bottom: 5px; display: block; }
+        .price { color: #aaa; margin-bottom: 10px; font-weight: bold; }
         
-        /* Стили корзины как в Durger King */
+        /* Кнопки */
+        .add-btn { background: #f39c12; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
+        .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
+        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; }
+        
+        /* Корзина (Durger King Style) */
         .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; }
-        .cart-item img { width: 40px; height: 40px; border-radius: 6px; margin-right: 15px; }
-        .cart-item-info { flex-grow: 1; }
-        .cart-item-info b { display: block; font-size: 14px; }
-        .cart-item-price { font-weight: bold; color: #aaa; }
+        .cart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; }
+        .cart-info { flex-grow: 1; font-size: 14px; }
+        .cart-price { font-weight: bold; }
         .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="main-screen">
-        <h2 style="text-align: center;">MITHRILARM</h2>
+        <h2 style="text-align: center; margin-top: 20px;">MITHRILARM</h2>
         <div class="product-grid">
             <div class="product-item">
-                <img src="ruchka.webp" id="img-Ruchka">
-                <b>Ручка Arm</b>
-                <div>$35.00</div>
-                <div class="count-control">
-                    <button class="cnt-btn" onclick="changeCount('Ручка Arm', 35.00, -1)">-</button>
-                    <span id="count-Ручка Arm">0</span>
-                    <button class="cnt-btn" onclick="changeCount('Ручка Arm', 35.00, 1)">+</button>
+                <img src="ruchka.webp">
+                <b>Arm Handle</b>
+                <div class="price">$35.00</div>
+                <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35.00)">ADD</button>
+                <div id="ctrl-Handle" class="count-ctrl">
+                    <button class="cnt-btn" onclick="changeCount('Handle', 35.00, -1)">-</button>
+                    <span id="count-Handle">1</span>
+                    <button class="cnt-btn" onclick="changeCount('Handle', 35.00, 1)">+</button>
                 </div>
             </div>
             <div class="product-item">
-                <img src="expander.webp" id="img-Expander">
-                <b>Эспандер</b>
-                <div>$12.00</div>
-                <div class="count-control">
-                    <button class="cnt-btn" onclick="changeCount('Эспандер', 12.00, -1)">-</button>
-                    <span id="count-Эспандер">0</span>
-                    <button class="cnt-btn" onclick="changeCount('Эспандер', 12.00, 1)">+</button>
+                <img src="expander.webp">
+                <b>Expander</b>
+                <div class="price">$12.00</div>
+                <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12.00)">ADD</button>
+                <div id="ctrl-Expander" class="count-ctrl">
+                    <button class="cnt-btn" onclick="changeCount('Expander', 12.00, -1)">-</button>
+                    <span id="count-Expander">1</span>
+                    <button class="cnt-btn" onclick="changeCount('Expander', 12.00, 1)">+</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="cart-screen" style="display: none;">
-        <h3 style="padding: 15px 15px 0;">Ваша корзина</h3>
+        <h3 style="padding: 15px;">Your Order</h3>
         <div id="cart-items-list"></div>
         <div class="cart-total">
-            <span>Итого:</span>
+            <span>Total:</span>
             <span id="cart-total-price">$0.00</span>
         </div>
     </div>
+
     <script src="js/script.js"></script>
 </body>
 </html>
