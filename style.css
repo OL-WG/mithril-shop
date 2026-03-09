@@ -1,59 +1,58 @@
-/* Полный сброс фона для Telegram */
 html, body {
     background-color: #000000 !important;
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', sans-serif;
     color: #ffffff;
+    overflow-x: hidden;
 }
 
-body { 
-    padding: 20px; 
-    text-align: center; 
-    padding-bottom: 140px; 
+body { padding: 15px; text-align: center; }
+
+h1 { text-transform: uppercase; letter-spacing: 2px; font-size: 24px; margin-bottom: 20px; }
+
+/* Сетка товаров */
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Две колонки как в Durger King */
+    gap: 15px;
 }
 
-h1 { text-transform: uppercase; letter-spacing: 3px; font-weight: 900; margin-bottom: 30px; }
-
-/* Карточка: темно-серый Ironclad Grey */
-.card { 
-    background-color: #333333 !important; 
-    border-radius: 15px; 
-    padding: 20px; 
-    margin-bottom: 25px; 
-    border: 1px solid #444;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-img { width: 100%; max-width: 200px; border-radius: 10px; }
-
-.price { font-size: 1.5em; font-weight: bold; margin: 15px 0; }
-
-/* Кнопка: Черная матовая */
-.btn { 
-    background-color: #000000 !important; 
-    color: #ffffff !important; 
-    padding: 15px; 
-    border-radius: 10px; 
-    border: 1px solid #555 !important; 
-    font-weight: bold; 
-    font-size: 16px;
-    width: 100%;
-    cursor: pointer;
-    text-transform: uppercase;
-}
-
-.btn:active { transform: scale(0.98); background-color: #222 !important; }
-
-/* Панель корзины */
-#cart-status { 
-    background-color: #1a1a1a; 
-    border-top: 1px solid #444;
-    padding: 20px; 
-    position: fixed; 
-    bottom: 0; left: 0; right: 0; 
-    display: none; 
-    flex-direction: column; 
+.product-item {
+    background: #333333 !important; /* Твой серый цвет */
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+    border: 1px solid #444;
 }
+
+.product-item img { width: 100%; max-width: 100px; height: auto; border-radius: 8px; }
+
+h4 { margin: 10px 0 5px; font-size: 16px; }
+
+.price { font-weight: bold; color: #fff; margin-bottom: 10px; }
+
+/* Кнопки управления количеством */
+.count-control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #000000;
+    border-radius: 8px;
+    width: 100%;
+    padding: 5px 0;
+}
+
+.cnt-btn {
+    background: none;
+    border: none;
+    color: #0088cc; /* Синий акцент */
+    font-size: 22px;
+    font-weight: bold;
+    width: 40px;
+    cursor: pointer;
+}
+
+#count-Ручка, #count-Эспандер { font-weight: bold; width: 20px; }
