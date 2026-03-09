@@ -1,32 +1,44 @@
 let tg = window.Telegram.WebApp;
+tg.expand();
+
 let cart = {};
 
+// Функция добавления товара
 function changeCount(name, price, delta) {
     if (!cart[name]) cart[name] = { count: 0, price: price };
     cart[name].count += delta;
     if (cart[name].count < 0) cart[name].count = 0;
+    
     updateMainButton();
 }
 
+// Обновление главной кнопки Telegram
 function updateMainButton() {
     let total = 0;
-    for (let key in cart) { total += cart[key].count * cart[key].price; }
+    for (let key in cart) {
+        total += cart[key].count * cart[key].price;
+    }
 
     if (total > 0) {
-        tg.MainButton.text = "ПРОСМОТРЕТЬ ЗАКАЗ";
-        tg.MainButton.show();
+        // Устанавливаем текст "Корзина"
+        tg.MainButton.setParams({
+            text: `КОРЗИНА (${total} ₽)`,
+            color: "#28a745",
+            is_visible: true
+        });
     } else {
         tg.MainButton.hide();
     }
 }
 
-// ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ НА КОРЗИНУ
+// ОБРАБОТЧИК КЛИКА ПО КНОПКЕ
 tg.MainButton.onClick(() => {
-    if (tg.MainButton.text.includes("ОПЛАТИТЬ")) {
-        // Если уже в корзине — отправляем данные боту
-        tg.sendData(JSON.stringify(cart));
-    } else {
+    // Если мы на главном экране — переходим в корзину
+    if (document.getElementById('main-screen').style.display !== 'none') {
         showCart();
+    } else {
+        // Если уже в корзине — можно отправлять заказ боту
+        tg.sendData(JSON.stringify(cart));
     }
 });
 
@@ -35,7 +47,7 @@ function showCart() {
     document.getElementById('cart-screen').style.display = 'block';
     
     let list = document.getElementById('cart-items-list');
-    list.innerHTML = ''; // Очистка
+    list.innerHTML = ''; 
     let total = 0;
 
     for (let key in cart) {
@@ -43,23 +55,23 @@ function showCart() {
             let itemTotal = cart[key].count * cart[key].price;
             total += itemTotal;
             list.innerHTML += `
-                <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333;">
-                    <span>${key} x${cart[key].count}</span>
+                <div style="display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #222;">
+                    <span>${key} (x${cart[key].count})</span>
                     <span>${itemTotal} ₽</span>
                 </div>`;
         }
     }
     document.getElementById('cart-total-price').innerText = `${total} ₽`;
     
-    tg.MainButton.text = `ОПЛАТИТЬ ${total} ₽`;
-    tg.BackButton.show(); // Показать кнопку "Назад" в интерфейсе TG
+    // Меняем текст кнопки на "ОФОРМИТЬ"
+    tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
+    tg.BackButton.show(); // Показываем стрелку "Назад"
 }
 
-tg.BackButton.onClick(() => showMain());
-
-function showMain() {
+// Возврат назад
+tg.BackButton.onClick(() => {
     document.getElementById('main-screen').style.display = 'block';
     document.getElementById('cart-screen').style.display = 'none';
     tg.BackButton.hide();
     updateMainButton();
-}
+});
