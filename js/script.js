@@ -3,22 +3,17 @@ tg.expand();
 
 let cart = {};
 
-// Первое нажатие на ADD
 function firstAdd(id, price) {
     document.getElementById(`add-${id}`).style.display = 'none';
     document.getElementById(`ctrl-${id}`).style.display = 'flex';
-    
     cart[id] = { count: 1, price: price };
     document.getElementById(`count-${id}`).innerText = "1";
     updateMainButton();
 }
 
-// Изменение количества (+ / -)
 function changeCount(id, price, delta) {
     if (!cart[id]) return;
-    
     cart[id].count += delta;
-    
     if (cart[id].count <= 0) {
         cart[id].count = 0;
         document.getElementById(`add-${id}`).style.display = 'block';
@@ -26,7 +21,6 @@ function changeCount(id, price, delta) {
     } else {
         document.getElementById(`count-${id}`).innerText = cart[id].count;
     }
-    
     updateMainButton();
 }
 
@@ -35,9 +29,11 @@ function updateMainButton() {
     for (let key in cart) total += cart[key].count * cart[key].price;
 
     if (total > 0) {
+        // Кнопка стала ЧЕРНОЙ (текст белый)
         tg.MainButton.setParams({
-            text: `VIEW ORDER ($${total.toFixed(2)})`,
-            color: "#2ecc71",
+            text: `ПРОСМОТРЕТЬ КОРЗИНУ ($${total.toFixed(2)})`,
+            color: "#000000",
+            text_color: "#ffffff",
             is_visible: true
         });
     } else {
@@ -66,19 +62,24 @@ function showCart() {
             let itemTotal = cart[key].count * cart[key].price;
             total += itemTotal;
             let img = key === 'Handle' ? 'ruchka.webp' : 'expander.webp';
+            let name = key === 'Handle' ? 'Ручка Arm' : 'Эспандер';
             
             list.innerHTML += `
                 <div class="cart-item">
                     <img src="${img}">
-                    <div class="cart-info">
-                        <b>${key === 'Handle' ? 'Arm Handle' : 'Expander'} x${cart[key].count}</b>
-                    </div>
+                    <div class="cart-info"><b>${name} x${cart[key].count}</b></div>
                     <div class="cart-price">$${itemTotal.toFixed(2)}</div>
                 </div>`;
         }
     }
     document.getElementById('cart-total-price').innerText = `$${total.toFixed(2)}`;
-    tg.MainButton.setText("PAY NOW");
+    
+    // Кнопка в корзине тоже ЧЕРНО-БЕЛАЯ
+    tg.MainButton.setParams({
+        text: "ОФОРМИТЬ ЗАКАЗ",
+        color: "#ffffff",
+        text_color: "#000000"
+    });
     tg.BackButton.show();
 }
 
