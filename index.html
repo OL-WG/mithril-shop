@@ -6,31 +6,51 @@
     <title>MithrilARM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; }
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; text-align: center; }
+        
+        .product-item { 
+            background: #1c1c1c; 
+            border-radius: 15px; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; /* Элементы строго в колонку */
+            align-items: center;    /* Центрируем все внутри */
+            justify-content: space-between;
+        }
+
         .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-        .price { color: #888; margin-bottom: 10px; }
         
-        /* Кнопки ЧЕРНО-БЕЛЫЕ (для 1 скрина) */
-        .add-btn { background: #fff; color: #000; border: none; padding: 8px; border-radius: 8px; font-weight: bold; width: 100%; }
+        /* Исправление надписи: ставим под картинку */
+        .product-name { 
+            display: block; 
+            font-weight: bold; 
+            font-size: 16px; 
+            margin-bottom: 5px; 
+            min-height: 40px; /* Чтобы кнопки были на одном уровне */
+        }
+
+        .price { color: #888; margin-bottom: 10px; font-weight: bold; }
+        
+        /* Черно-белые кнопки */
+        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
-        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; }
+        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
         
-        /* Корзина (для 3 скрина) */
-        .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; }
-        .cart-item img { width: 45px; height: 45px; margin-right: 15px; }
+        /* Корзина */
+        .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
+        .cart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; }
         .cart-info { flex-grow: 1; }
         .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="main-screen">
-        <h2 style="text-align: center; margin-top: 20px;">MITHRILARM</h2>
+        <h2 style="margin-top: 20px;">MITHRILARM</h2>
         <div class="product-grid">
             <div class="product-item">
                 <img src="ruchka.webp">
-                <b>Ручка Arm</b>
+                <span class="product-name">Ручка Arm</span>
                 <div class="price">$35.00</div>
                 <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35.00)">ДОБАВИТЬ</button>
                 <div id="ctrl-Handle" class="count-ctrl">
@@ -39,9 +59,10 @@
                     <button class="cnt-btn" onclick="changeCount('Handle', 35.00, 1)">+</button>
                 </div>
             </div>
+
             <div class="product-item">
                 <img src="expander.webp">
-                <b>Эспандер</b>
+                <span class="product-name">Эспандер</span>
                 <div class="price">$12.00</div>
                 <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12.00)">ДОБАВИТЬ</button>
                 <div id="ctrl-Expander" class="count-ctrl">
@@ -54,13 +75,14 @@
     </div>
 
     <div id="cart-screen" style="display: none;">
-        <h3 style="padding: 15px;">Ваша корзина</h3>
+        <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
         <div id="cart-items-list"></div>
         <div class="cart-total">
             <span>Итог:</span>
             <span id="cart-total-price">$0.00</span>
         </div>
     </div>
+
     <script src="js/script.js"></script>
 </body>
 </html>
