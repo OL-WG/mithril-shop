@@ -1,37 +1,49 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
-
-// Принудительная покраска интерфейса Telegram в черный
 tg.setHeaderColor('#000000');
 tg.setBackgroundColor('#000000');
 
-let cart = [];
+let cart = {};
 
-function addToCart(name, price) {
-    cart.push({name, price});
-    updateCartUI();
+function changeCount(name, price, delta) {
+    if (!cart[name]) cart[name] = { count: 0, price: price };
+    
+    cart[name].count += delta;
+    if (cart[name].count < 0) cart[name].count = 0;
+    
+    // Обновляем цифру в карточке
+    document.getElementById(`count-${name}`).innerText = cart[name].count;
+    
+    updateMainButton();
 }
 
-function updateCartUI() {
-    const cartStatus = document.getElementById('cart-status');
-    const cartText = document.getElementById('cart-text');
-    const totalPrice = document.getElementById('total-price');
-    
-    if (cart.length > 0) {
-        cartStatus.style.display = 'flex';
-        let total = cart.reduce((sum, item) => sum + item.price, 0);
-        cartText.innerText = `Выбрано товаров: ${cart.length}`;
-        totalPrice.innerText = total;
+function updateMainButton() {
+    let total = 0;
+    let itemsCount = 0;
+
+    for (let key in cart) {
+        total += cart[key].count * cart[key].price;
+        itemsCount += cart[key].count;
+    }
+
+    if (total > 0) {
+        tg.MainButton.text = `ПОСМОТРЕТЬ ЗАКАЗ (${total} ₽)`;
+        tg.MainButton.show();
+        tg.MainButton.setParams({ color: '#28a745' }); // Зеленая кнопка как в Durger King
+    } else {
+        tg.MainButton.hide();
     }
 }
 
-function sendOrder() {
-    if (cart.length === 0) return;
+// Отправка данных при клике на главную кнопку
+tg.MainButton.onClick(() => {
+    let orderData = Object.entries(cart)
+        .filter(([_, data]) => data.count > 0)
+        .map(([name, data]) => `${name} (x${data.count})`)
+        .join(", ");
     
-    let items = cart.map(item => item.name).join(", ");
-    let total = cart.reduce((sum, item) => sum + item.price, 0);
+    let total = Object.values(cart).reduce((sum, data) => sum + (data.count * data.price), 0);
     
-    // Отправляем данные в бота
-    tg.sendData(`🛒 Заказ: ${items} на сумму ${total}₽`);
+    tg.sendData(`🛒 Заказ: ${orderData} на сумму ${total}₽`);
     tg.close();
-}
+});
