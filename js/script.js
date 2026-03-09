@@ -15,12 +15,8 @@ function changeCount(name, price, delta) {
 
 function updateMainButton() {
     let total = 0;
-    let items = [];
     for (let key in cart) {
-        if (cart[key].count > 0) {
-            total += cart[key].count * cart[key].price;
-            items.push(`${key} (x${cart[key].count})`);
-        }
+        total += cart[key].count * cart[key].price;
     }
 
     if (total > 0) {
@@ -31,7 +27,7 @@ function updateMainButton() {
     }
 }
 
-// ФУНКЦИЯ ДЛЯ ВЫЗОВА CHECKOUT
+// Отправка данных боту для генерации чека
 tg.MainButton.onClick(() => {
     let items = [];
     let total = 0;
@@ -42,11 +38,12 @@ tg.MainButton.onClick(() => {
         }
     }
 
-    const order = {
-        title: "Ваш заказ в MithrilARM",
-        description: items.join(", "),
+    // Создаем объект заказа
+    let orderData = {
+        items: items.join(", "),
         total: total
     };
 
-    tg.sendData(JSON.stringify(order));
+    // Отправляем JSON-строку боту
+    tg.sendData(JSON.stringify(orderData));
 });
