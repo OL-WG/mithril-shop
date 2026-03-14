@@ -8,28 +8,25 @@
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; }
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
         .product-name { display: block; font-weight: bold; font-size: 16px; margin-bottom: 5px; min-height: 40px; }
         .price { color: #888; margin-bottom: 10px; font-weight: bold; }
+        
+        /* Кнопки */
         .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
-        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; }
         
-        /* Стили корзины и форм */
+        /* Корзина и Формы */
         .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
         .cart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; }
         .cart-info { flex-grow: 1; }
-        .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
-        
-        /* Поля ввода адреса */
+        .promo-section { padding: 15px; border-bottom: 1px solid #222; text-align: left; }
+        .promo-section input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 60%; }
         .address-form { padding: 20px; text-align: left; }
-        .address-form input { 
-            width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 20px; 
-            background: #1c1c1c; border: 1px solid #333; border-radius: 8px; 
-            color: #fff; box-sizing: border-box; 
-        }
-        .address-form label { font-size: 14px; color: #aaa; margin-left: 5px; }
+        .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
+        .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -64,23 +61,27 @@
     <div id="cart-screen" style="display: none;">
         <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
         <div id="cart-items-list"></div>
+        <div class="promo-section">
+            <label style="font-size: 12px; color: #aaa;">Промокод</label><br>
+            <input type="text" id="promo-input" placeholder="Введите код">
+            <button onclick="applyPromo()" style="background:#fff; color:#000; border:none; padding:10px; border-radius:8px; font-weight:bold;">OK</button>
+            <div id="promo-msg" style="font-size: 12px; margin-top: 5px;"></div>
+        </div>
         <div class="cart-total">
             <span>Итог:</span>
-            <span id="cart-total-price">$0.00</span>
+            <div>
+                <span id="old-price" style="text-decoration: line-through; color: #888; font-size: 14px; margin-right: 10px; display: none;"></span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
         </div>
     </div>
 
     <div id="address-screen" style="display: none;">
         <h3 style="padding: 15px; text-align: left;">Адрес доставки</h3>
         <div class="address-form">
-            <label>Страна</label>
-            <input type="text" id="country" placeholder="Напр. Казахстан">
-            
-            <label>Город</label>
-            <input type="text" id="city" placeholder="Напр. Алматы">
-            
-            <label>Улица, дом, квартира</label>
-            <input type="text" id="street" placeholder="Ул. Абая 15, кв 42">
+            <input type="text" id="country" placeholder="Страна">
+            <input type="text" id="city" placeholder="Город">
+            <input type="text" id="street" placeholder="Улица, дом, квартира">
         </div>
     </div>
 
