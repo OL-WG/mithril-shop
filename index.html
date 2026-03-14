@@ -8,40 +8,28 @@
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; }
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        
-        .product-item { 
-            background: #1c1c1c; 
-            border-radius: 15px; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; /* Элементы строго в колонку */
-            align-items: center;    /* Центрируем все внутри */
-            justify-content: space-between;
-        }
-
+        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
         .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-        
-        /* Исправление надписи: ставим под картинку */
-        .product-name { 
-            display: block; 
-            font-weight: bold; 
-            font-size: 16px; 
-            margin-bottom: 5px; 
-            min-height: 40px; /* Чтобы кнопки были на одном уровне */
-        }
-
+        .product-name { display: block; font-weight: bold; font-size: 16px; margin-bottom: 5px; min-height: 40px; }
         .price { color: #888; margin-bottom: 10px; font-weight: bold; }
-        
-        /* Черно-белые кнопки */
         .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
         .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
         
-        /* Корзина */
+        /* Стили корзины и форм */
         .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
         .cart-item img { width: 45px; height: 45px; border-radius: 8px; margin-right: 15px; }
         .cart-info { flex-grow: 1; }
         .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
+        
+        /* Поля ввода адреса */
+        .address-form { padding: 20px; text-align: left; }
+        .address-form input { 
+            width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 20px; 
+            background: #1c1c1c; border: 1px solid #333; border-radius: 8px; 
+            color: #fff; box-sizing: border-box; 
+        }
+        .address-form label { font-size: 14px; color: #aaa; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -59,7 +47,6 @@
                     <button class="cnt-btn" onclick="changeCount('Handle', 35.00, 1)">+</button>
                 </div>
             </div>
-
             <div class="product-item">
                 <img src="expander.webp">
                 <span class="product-name">Эспандер</span>
@@ -80,6 +67,20 @@
         <div class="cart-total">
             <span>Итог:</span>
             <span id="cart-total-price">$0.00</span>
+        </div>
+    </div>
+
+    <div id="address-screen" style="display: none;">
+        <h3 style="padding: 15px; text-align: left;">Адрес доставки</h3>
+        <div class="address-form">
+            <label>Страна</label>
+            <input type="text" id="country" placeholder="Напр. Казахстан">
+            
+            <label>Город</label>
+            <input type="text" id="city" placeholder="Напр. Алматы">
+            
+            <label>Улица, дом, квартира</label>
+            <input type="text" id="street" placeholder="Ул. Абая 15, кв 42">
         </div>
     </div>
 
