@@ -2,7 +2,9 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = {};
-let currentStep = 'main'; // main, cart, address
+let currentStep = 'main';
+let discount = 0;
+let appliedPromo = "";
 
 function firstAdd(id, price) {
     document.getElementById(`add-${id}`).style.display = 'none';
@@ -26,95 +28,94 @@ function changeCount(id, price, delta) {
 }
 
 function updateMainButton() {
-    let total = 0;
-    for (let key in cart) total += cart[key].count * cart[key].price;
+    let subtotal = 0;
+    for (let key in cart) subtotal += cart[key].count * cart[key].price;
+    let total = subtotal * (1 - discount);
 
     if (total > 0 && currentStep === 'main') {
         tg.MainButton.setParams({
-            text: `ПРОСМОТРЕТЬ КОРЗИНУ ($${total.toFixed(2)})`,
-            color: "#ffffff",
-            text_color: "#000000",
-            is_visible: true
+            text: `КОРЗИНА ($${total.toFixed(2)})`,
+            color: "#ffffff", text_color: "#000000", is_visible: true
         });
     } else if (total === 0) {
         tg.MainButton.hide();
     }
 }
 
-tg.MainButton.onClick(() => {
-    if (currentStep === 'main') {
-        showCart();
-    } else if (currentStep === 'cart') {
-        showAddress();
-    } else if (currentStep === 'address') {
-        sendFinalOrder();
+function applyPromo() {
+    const code = document.getElementById('promo-input').value.trim().toUpperCase();
+    const msg = document.getElementById('promo-msg');
+    if (code === "JARVIS") {
+        discount = 0.1;
+        appliedPromo = code;
+        msg.innerText = "Скидка 10% применена!";
+        msg.style.color = "#4CAF50";
+    } else {
+        discount = 0;
+        appliedPromo = "";
+        msg.innerText = "Неверный код";
+        msg.style.color = "#FF5252";
     }
-});
+    renderCart();
+}
 
-function showCart() {
-    currentStep = 'cart';
-    document.getElementById('main-screen').style.display = 'none';
-    document.getElementById('cart-screen').style.display = 'block';
-    document.getElementById('address-screen').style.display = 'none';
-
+function renderCart() {
     let list = document.getElementById('cart-items-list');
     list.innerHTML = ''; 
-    let total = 0;
-
+    let subtotal = 0;
     for (let key in cart) {
         if (cart[key].count > 0) {
             let itemTotal = cart[key].count * cart[key].price;
-            total += itemTotal;
+            subtotal += itemTotal;
             let img = key === 'Handle' ? 'ruchka.webp' : 'expander.webp';
             let name = key === 'Handle' ? 'Ручка Arm' : 'Эспандер';
-            list.innerHTML += `
-                <div class="cart-item">
-                    <img src="${img}">
-                    <div class="cart-info"><b>${name} x${cart[key].count}</b></div>
-                    <div class="cart-price">$${itemTotal.toFixed(2)}</div>
-                </div>`;
+            list.innerHTML += `<div class="cart-item"><img src="${img}"><div class="cart-info"><b>${name} x${cart[key].count}</b></div><div>$${itemTotal.toFixed(2)}</div></div>`;
         }
     }
+    let total = subtotal * (1 - discount);
     document.getElementById('cart-total-price').innerText = `$${total.toFixed(2)}`;
-    tg.MainButton.setParams({ text: "ПЕРЕЙТИ К ОПЛАТЕ", color: "#ffffff", text_color: "#000000" });
-    tg.BackButton.show();
-}
-
-function showAddress() {
-    currentStep = 'address';
-    document.getElementById('cart-screen').style.display = 'none';
-    document.getElementById('address-screen').style.display = 'block';
-    tg.MainButton.setParams({ text: "ОФОРМИТЬ ЗАКАЗ", color: "#ffffff", text_color: "#000000" });
-}
-
-function sendFinalOrder() {
-    const country = document.getElementById('country').value;
-    const city = document.getElementById('city').value;
-    const street = document.getElementById('street').value;
-
-    if (!country || !city || !street) {
-        tg.showAlert("Пожалуйста, заполните все поля адреса!");
-        return;
+    if (discount > 0) {
+        document.getElementById('old-price').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('old-price').style.display = 'inline';
+    } else {
+        document.getElementById('old-price').style.display = 'none';
     }
-
-    const finalData = {
-        cart: cart,
-        address: {
-            country: country,
-            city: city,
-            street: street
-        }
-    };
-    tg.sendData(JSON.stringify(finalData));
 }
+
+tg.MainButton.onClick(() => {
+    if (currentStep === 'main') {
+        currentStep = 'cart';
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('cart-screen').style.display = 'block';
+        renderCart();
+        tg.MainButton.setText("К ОПЛАТЕ");
+        tg.BackButton.show();
+    } else if (currentStep === 'cart') {
+        currentStep = 'address';
+        document.getElementById('cart-screen').style.display = 'none';
+        document.getElementById('address-screen').style.display = 'block';
+        tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
+    } else if (currentStep === 'address') {
+        const addr = {
+            country: document.getElementById('country').value,
+            city: document.getElementById('city').value,
+            street: document.getElementById('street').value
+        };
+        if (!addr.country || !addr.city || !addr.street) return tg.showAlert("Заполните адрес!");
+        tg.sendData(JSON.stringify({ cart, address: addr, promo: appliedPromo, total: document.getElementById('cart-total-price').innerText }));
+    }
+});
 
 tg.BackButton.onClick(() => {
     if (currentStep === 'address') {
-        showCart();
+        currentStep = 'cart';
+        document.getElementById('address-screen').style.display = 'none';
+        document.getElementById('cart-screen').style.display = 'block';
+        tg.MainButton.setText("К ОПЛАТЕ");
     } else if (currentStep === 'cart') {
         currentStep = 'main';
-        document.getElementById('main-screen').style.display = 'block';
         document.getElementById('cart-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
         tg.BackButton.hide();
         updateMainButton();
     }
