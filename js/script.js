@@ -2,6 +2,7 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = {};
+let currentStep = 'main'; // main, cart, address
 
 function firstAdd(id, price) {
     document.getElementById(`add-${id}`).style.display = 'none';
@@ -28,29 +29,34 @@ function updateMainButton() {
     let total = 0;
     for (let key in cart) total += cart[key].count * cart[key].price;
 
-    if (total > 0) {
+    if (total > 0 && currentStep === 'main') {
         tg.MainButton.setParams({
             text: `ПРОСМОТРЕТЬ КОРЗИНУ ($${total.toFixed(2)})`,
             color: "#ffffff",
             text_color: "#000000",
             is_visible: true
         });
-    } else {
+    } else if (total === 0) {
         tg.MainButton.hide();
     }
 }
 
 tg.MainButton.onClick(() => {
-    if (document.getElementById('main-screen').style.display !== 'none') {
+    if (currentStep === 'main') {
         showCart();
-    } else {
-        tg.sendData(JSON.stringify(cart));
+    } else if (currentStep === 'cart') {
+        showAddress();
+    } else if (currentStep === 'address') {
+        sendFinalOrder();
     }
 });
 
 function showCart() {
+    currentStep = 'cart';
     document.getElementById('main-screen').style.display = 'none';
     document.getElementById('cart-screen').style.display = 'block';
+    document.getElementById('address-screen').style.display = 'none';
+
     let list = document.getElementById('cart-items-list');
     list.innerHTML = ''; 
     let total = 0;
@@ -70,13 +76,46 @@ function showCart() {
         }
     }
     document.getElementById('cart-total-price').innerText = `$${total.toFixed(2)}`;
-    tg.MainButton.setParams({ text: "ОФОРМИТЬ ЗАКАЗ", color: "#ffffff", text_color: "#000000" });
+    tg.MainButton.setParams({ text: "ПЕРЕЙТИ К ОПЛАТЕ", color: "#ffffff", text_color: "#000000" });
     tg.BackButton.show();
 }
 
-tg.BackButton.onClick(() => {
-    document.getElementById('main-screen').style.display = 'block';
+function showAddress() {
+    currentStep = 'address';
     document.getElementById('cart-screen').style.display = 'none';
-    tg.BackButton.hide();
-    updateMainButton();
+    document.getElementById('address-screen').style.display = 'block';
+    tg.MainButton.setParams({ text: "ОФОРМИТЬ ЗАКАЗ", color: "#ffffff", text_color: "#000000" });
+}
+
+function sendFinalOrder() {
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const street = document.getElementById('street').value;
+
+    if (!country || !city || !street) {
+        tg.showAlert("Пожалуйста, заполните все поля адреса!");
+        return;
+    }
+
+    const finalData = {
+        cart: cart,
+        address: {
+            country: country,
+            city: city,
+            street: street
+        }
+    };
+    tg.sendData(JSON.stringify(finalData));
+}
+
+tg.BackButton.onClick(() => {
+    if (currentStep === 'address') {
+        showCart();
+    } else if (currentStep === 'cart') {
+        currentStep = 'main';
+        document.getElementById('main-screen').style.display = 'block';
+        document.getElementById('cart-screen').style.display = 'none';
+        tg.BackButton.hide();
+        updateMainButton();
+    }
 });
