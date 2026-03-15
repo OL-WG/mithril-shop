@@ -3,7 +3,7 @@ tg.expand();
 
 let cart = {};
 let currentStep = 'main'; // main, cart, address, checkout
-let discountPercent = 0; // Процент скидки (напр. 0.1 для 10%)
+let discountPercent = 0; // Процент скидки
 let appliedPromo = "";
 
 // Данные для отправки в группу
@@ -176,45 +176,7 @@ function showCheckout() {
     tg.MainButton.setParams({ text: "ПОДТВЕРДИТЬ И ОПЛАТИТЬ", color: "#000000", text_color: "#ffffff" });
 }
 
-// --- ФУНКЦИЯ ОТПРАВКИ В ГРУППУ ---
-function sendToTelegramGroup(data) {
-    let itemsText = "";
-    for (let key in data.cart) {
-        if (data.cart[key].count > 0) {
-            itemsText += `▫️ ${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'}: ${data.cart[key].count} шт.\n`;
-        }
-    }
-
-    const message = `
-🔥 **НОВЫЙ ЗАКАЗ** 🔥
-
-👤 **Клиент:** ${data.customer.fio}
-📞 **Телефон:** \`${data.customer.phone}\`
-📧 **Email:** ${data.customer.email}
-
-📦 **Доставка:**
-🌍 ${data.customer.country}, ${data.customer.city}
-🏢 ПВЗ СДЭК: ${data.customer.cdek}
-
-🛒 **Товары:**
-${itemsText}
-🎫 Промокод: ${data.promo || "Нет"}
-💵 Сумма: ${data.subtotal}
-✅ **ИТОГО: ${data.total}**
-    `;
-
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: CHAT_ID,
-            text: message,
-            parse_mode: 'Markdown'
-        })
-    });
-}
-
-// --- Навигация ---
+// --- Навигация и ФИНАЛЬНАЯ ОТПРАВКА ---
 tg.MainButton.onClick(() => {
     if (currentStep === 'main') {
         currentStep = 'cart';
@@ -235,31 +197,70 @@ tg.MainButton.onClick(() => {
         }
         showCheckout();
     } else if (currentStep === 'checkout') {
-        // Собираем данные
+        // Блокируем кнопку, чтобы не нажали дважды
+        tg.MainButton.showProgress();
+
+        // Собираем данные для сообщения
+        const fio = document.getElementById('fio').value;
+        const phone = document.getElementById('phone').value;
+        const country = document.getElementById('country').value;
+        const city = document.getElementById('city').value;
+        const cdek = document.getElementById('cdek-addr').value;
+        const email = document.getElementById('email').value;
         const subtotalVal = (cart['Handle'] ? cart['Handle'].count * cart['Handle'].price : 0) + 
                           (cart['Expander'] ? cart['Expander'].count * cart['Expander'].price : 0);
-        
-        const orderData = {
-            cart,
-            customer: {
-                fio: document.getElementById('fio').value,
-                phone: document.getElementById('phone').value,
-                country: document.getElementById('country').value,
-                city: document.getElementById('city').value,
-                cdek: document.getElementById('cdek-addr').value,
-                email: document.getElementById('email').value
-            },
-            promo: appliedPromo,
-            subtotal: `$${subtotalVal.toFixed(2)}`,
-            total: document.getElementById('check-total-price').innerText
-        };
+        const finalTotal = document.getElementById('check-total-price').innerText;
 
-        // 1. Отправляем в группу
-        sendToTelegramGroup(orderData);
-        
-        // 2. Отправляем боту и закрываем
-        tg.sendData(JSON.stringify(orderData));
-        tg.close();
+        let itemsText = "";
+        for (let key in cart) {
+            if (cart[key].count > 0) {
+                itemsText += `▫️ ${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'}: ${cart[key].count} шт.\n`;
+            }
+        }
+
+        const message = `
+🔥 **НОВЫЙ ЗАКАЗ** 🔥
+
+👤 **Клиент:** ${fio}
+📞 **Телефон:** ${phone}
+📧 **Email:** ${email}
+
+📦 **Доставка:**
+🌍 ${country}, ${city}
+🏢 ПВЗ СДЭК: ${cdek}
+
+🛒 **Товары:**
+${itemsText}
+🎫 Промокод: ${appliedPromo || "Нет"}
+💵 Сумма: $${subtotalVal.toFixed(2)}
+✅ **ИТОГО: ${finalTotal}**
+        `;
+
+        // ОТПРАВКА В ГРУППУ
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: message,
+                parse_mode: 'Markdown'
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Если в группу ушло, отправляем боту и закрываем
+                const orderData = { cart, customer: { fio, phone, country, city, cdek, email }, promo: appliedPromo, total: finalTotal };
+                tg.sendData(JSON.stringify(orderData));
+                setTimeout(() => tg.close(), 200);
+            } else {
+                tg.hideProgress();
+                tg.showAlert("Ошибка API Telegram. Проверьте бота в группе.");
+            }
+        })
+        .catch(err => {
+            tg.hideProgress();
+            tg.showAlert("Ошибка сети: " + err);
+        });
     }
 });
 
