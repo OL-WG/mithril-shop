@@ -51,8 +51,10 @@ function changeCount(id, price, delta) {
 }
 
 function applyPromo() {
-    const code = document.getElementById('promo-input').value.trim().toUpperCase();
+    const input = document.getElementById('promo-input');
     const msg = document.getElementById('promo-msg');
+    if (!input || !msg) return;
+    const code = input.value.trim().toUpperCase();
     if (code === "JARVIS") {
         discountPercent = 0.10;
         appliedPromo = code;
@@ -86,6 +88,7 @@ function updateMainButton() {
 
 function renderCart() {
     let list = document.getElementById('cart-items-list');
+    if (!list) return;
     list.innerHTML = ''; 
     let subtotal = 0;
     for (let key in cart) {
@@ -108,11 +111,11 @@ function showCheckout() {
     document.getElementById('checkout-screen').style.display = 'block';
     
     let itemsDiv = document.getElementById('check-items');
-    itemsDiv.innerHTML = '';
-    let subtotal = 0;
-    for (let key in cart) {
-        subtotal += cart[key].count * cart[key].price;
-        itemsDiv.innerHTML += `<div>${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'} — ${cart[key].count} шт.</div>`;
+    if (itemsDiv) {
+        itemsDiv.innerHTML = '';
+        for (let key in cart) {
+            itemsDiv.innerHTML += `<div>${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'} — ${cart[key].count} шт.</div>`;
+        }
     }
     
     document.getElementById('check-address').innerHTML = `
@@ -123,7 +126,7 @@ function showCheckout() {
     `;
     
     document.getElementById('check-total-price').innerText = document.getElementById('cart-total-price').innerText;
-    tg.MainButton.setParams({ text: "ПОДТВЕРДИТЬ И ОПЛАТИТЬ", color: "#ffffff", text_color: "#000000" });
+    tg.MainButton.setParams({ text: "ОПЛАТИТЬ И ОТПРАВИТЬ", color: "#ffffff", text_color: "#000000" });
 }
 
 tg.MainButton.onClick(() => {
@@ -141,21 +144,22 @@ tg.MainButton.onClick(() => {
         tg.MainButton.setText("К ПРОВЕРКЕ");
     } else if (currentStep === 'address') {
         if (!document.getElementById('fio').value || !document.getElementById('phone').value || !document.getElementById('city').value) {
-            return tg.showAlert("Сэр, заполните основные поля!");
+            return tg.showAlert("Заполните ФИО, Телефон и Город!");
         }
         showCheckout();
     } else if (currentStep === 'checkout') {
-        const data = {
+        // ФИНАЛЬНЫЙ ШАГ: ОТПРАВКА
+        const resultData = {
             cart: cart,
-            customer: {
-                fio: document.getElementById('fio').value,
-                phone: document.getElementById('phone').value,
-                city: document.getElementById('city').value,
-                cdek: document.getElementById('cdek-addr').value
-            },
+            fio: document.getElementById('fio').value,
+            phone: document.getElementById('phone').value,
+            city: document.getElementById('city').value,
+            cdek: document.getElementById('cdek-addr').value,
             total: document.getElementById('check-total-price').innerText
         };
-        tg.sendData(JSON.stringify(data));
+        
+        tg.sendData(JSON.stringify(resultData));
+        tg.close(); // Закрываем приложение после отправки
     }
 });
 
