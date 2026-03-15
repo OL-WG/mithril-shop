@@ -8,88 +8,69 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div id="app-container">
+    <div id="main-wrapper">
         <div id="screen-main" class="screen active">
-            <h2 class="title">MITHRILARM</h2>
+            <h2 class="shop-title">MITHRILARM</h2>
             <div class="product-grid">
-                <div class="product-item">
+                <div class="product-card">
                     <img src="ruchka.webp" alt="Ручка">
-                    <div class="p-info">
+                    <div class="card-body">
                         <b>Ручка Arm</b>
                         <p>$35.00</p>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn-white" onclick="addToCart('Ручка Arm', 35)">ДОБАВИТЬ</button>
-                        <button class="btn-white" onclick="openInfo('Ручка Arm', 35, 'ruchka.webp')">ИНФО</button>
+                        <button class="btn-add" onclick="addItem('Ручка Arm', 35)">ДОБАВИТЬ</button>
+                        <button class="btn-info" onclick="openInfo('Ручка Arm', '$35', 'ruchka.webp')">ИНФО</button>
                     </div>
                 </div>
-                <div class="product-item">
+                <div class="product-card">
                     <img src="expander.webp" alt="Эспандер">
-                    <div class="p-info">
+                    <div class="card-body">
                         <b>Эспандер</b>
                         <p>$12.00</p>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn-white" onclick="addToCart('Эспандер', 12)">ДОБАВИТЬ</button>
-                        <button class="btn-white" onclick="openInfo('Эспандер', 12, 'expander.webp')">ИНФО</button>
+                        <button class="btn-add" onclick="addItem('Эспандер', 12)">ДОБАВИТЬ</button>
+                        <button class="btn-info" onclick="openInfo('Эспандер', '$12', 'expander.webp')">ИНФО</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="screen-cart" class="screen">
-            <h3>Корзина</h3>
-            <div id="cart-items"></div>
-            <div class="promo-block">
-                <label>Промокод</label>
-                <div class="input-row">
-                    <input type="text" id="promo-input" placeholder="Введите код...">
-                    <button class="btn-white" onclick="applyPromo()">OK</button>
-                </div>
+            <h3>Ваша корзина</h3>
+            <div id="cart-content"></div>
+            <div class="promo-section">
+                <input type="text" id="promo-field" placeholder="Промокод">
+                <button onclick="applyPromo()">OK</button>
             </div>
-            <div class="total-bar">
-                Итого: <span id="total-val">$0</span>
-            </div>
+            <div class="total-line">Итого: <span id="total-price">$0</span></div>
         </div>
 
-        <div id="screen-address" class="screen">
-            <h3>Оформление заказа</h3>
-            <div class="form-group">
-                <label>ФИО</label>
-                <input type="text" id="fio" placeholder="Иванов Иван Иванович">
-            </div>
-            <div class="form-group">
-                <label>Телефон</label>
-                <input type="tel" id="phone" placeholder="+7...">
-            </div>
-            <div class="form-group">
+        <div id="screen-delivery" class="screen">
+            <h3>Адрес доставки</h3>
+            <div class="input-group">
+                <label>Фамилия Имя Отчество</label>
+                <input type="text" id="user-fio">
+                <label>Номер телефона</label>
+                <input type="tel" id="user-phone">
                 <label>Страна</label>
-                <input type="text" id="country">
-            </div>
-            <div class="form-group">
+                <input type="text" id="user-country">
                 <label>Город</label>
-                <input type="text" id="city">
-            </div>
-            <div class="form-group">
-                <label>Пункт СДЭК</label>
-                <input type="text" id="cdek">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="email">
+                <input type="text" id="user-city">
+                <label>Улица, дом, квартира</label>
+                <input type="text" id="user-address">
+                <label>Электронная почта</label>
+                <input type="email" id="user-email">
             </div>
         </div>
     </div>
 
-    <div id="info-panel">
-        <div class="info-content">
-            <h2 id="info-title"></h2>
-            <img id="info-img" src="" style="width:100%; height:180px; object-fit:contain;">
-            <p>Профессиональное оборудование для тренировок армрестлеров. Высокое качество MithrilARM.</p>
-            <button class="btn-white" onclick="closeInfo()">ЗАКРЫТЬ</button>
+    <div id="modal-info" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <img id="modal-img" src="" alt="">
+            <p>Профессиональное оборудование MithrilARM для армрестлинга.</p>
+            <button class="btn-add" onclick="closeInfo()">ПОНЯТНО</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
