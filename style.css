@@ -13,10 +13,8 @@ body { background-color: #000; color: #fff; margin: 0; padding: 0; font-family: 
     font-weight: bold; 
     width: 100%; 
     cursor: pointer;
-    margin-top: 5px;
+    text-transform: uppercase;
 }
-.black-btn.info { color: #666 !important; font-size: 10px; }
+.black-btn.info { color: #666 !important; font-size: 10px; margin-top: 8px; }
 
-input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-.dark-block { background: #1c1c1c; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-.promo-container { display: flex; gap: 10px; }
+input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-size: 16px; }
