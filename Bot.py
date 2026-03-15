@@ -3,40 +3,48 @@ import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 
-# Твои данные
+# ТВОИ ДАННЫЕ
 TOKEN = '8677453235:AAG3NhS-yeH6oHZ4VXsTWKygXO9DqVD4l-k'
-APP_URL = 'https://ol-wg.github.io/mithril-shop/'
+WEB_APP_URL = 'https://ol-wg.github.io/mithril-shop/'
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    markup = types.InlineKeyboardMarkup(inline_keyboard=[[
-        types.InlineKeyboardButton(text="Открыть Магазин 🛒", web_app=types.WebAppInfo(url=APP_URL))
-    ]])
-    await message.answer("Добро пожаловать в MithrilARM! Нажмите кнопку ниже для заказа:", reply_markup=markup)
+async def start_cmd(message: types.Message):
+    # Кнопка для открытия магазина
+    kb = [
+        [types.InlineKeyboardButton(text="Открыть MithrilARM 🛒", web_app=types.WebAppInfo(url=WEB_APP_URL))]
+    ]
+    await message.answer(
+        "Привет! Нажми на кнопку, чтобы зайти в магазин.",
+        reply_markup=types.InlineKeyboardMarkup(inline_keyboard=kb)
+    )
 
+# ЭТОТ ХЕНДЛЕР СЛУШАЕТ ДАННЫЕ ИЗ МИНИ-АППА
 @dp.message(F.web_app_data)
-async def handle_data(message: types.Message):
-    # Получаем и парсим JSON от Mini App
-    raw_data = json.loads(message.web_app_data.data)
-    user = raw_data['user']
+async def web_app_data_receive(message: types.Message):
+    # Парсим JSON, который пришел из tg.sendData()
+    data = json.loads(message.web_app_data.data)
+    user = data['user']
     
-    msg_text = (
-        f"🚨 **НОВЫЙ ЗАКАЗ**\n\n"
-        f"👤 **Покупатель:** {user['fio']}\n"
-        f"📞 **Телефон:** {user['phone']}\n"
-        f"📍 **Город:** {user['city']}\n"
-        f"🏢 **СДЭК:** {user['cdek']}\n"
-        f"📧 **Email:** {user['email']}\n\n"
-        f"💰 **Сумма к оплате: {raw_data['total']}**"
+    report = (
+        f"📦 **НОВЫЙ ЗАКАЗ**\n\n"
+        f"👤 Клиент: {user['fio']}\n"
+        f"📞 Телефон: {user['phone']}\n"
+        f"📍 Адрес: {user['city']}, {user['address']}\n"
+        f"📧 Email: {user['email']}\n"
+        f"--------------------------\n"
+        f"💰 **ИТОГО: {data['total']}**"
     )
     
-    await message.answer(msg_text, parse_mode="Markdown")
+    await message.answer(report, parse_mode="Markdown")
 
 async def main():
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Бот выключен")
