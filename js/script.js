@@ -1,23 +1,22 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
-tg.ready();
 
 let cart = {};
 let currentStep = 'main';
-let discountPercent = 0;
+let discount = 0;
 
 const descriptions = {
-    'ruchka': 'Высококачественная ручка Arm для тренировок силы хвата. Выполнена из стали.',
-    'expander': 'Кистевой эспандер с регулируемой нагрузкой. Отлично подходит для разминки.'
+    'ruchka': 'Ручка Arm — профессиональный тренажер для армрестлинга. Развивает силу хвата и кисти.',
+    'expander': 'Эспандер — компактный тренажер для укрепления мышц предплечья с нагрузкой 50кг.'
 };
 
-function showInfo(id) {
-    document.getElementById('info-text').innerText = descriptions[id];
-    document.getElementById('info-modal').style.display = 'block';
-}
-
-function closeInfo() {
-    document.getElementById('info-modal').style.display = 'none';
+// 1. ИНФО как на второй картинке (Системное окно Telegram)
+function showTgInfo(id) {
+    tg.showPopup({
+        title: 'О товаре',
+        message: descriptions[id],
+        buttons: [{type: 'close'}]
+    });
 }
 
 function addToCart(id, name, price) {
@@ -30,9 +29,9 @@ function renderControls(id) {
     const container = document.getElementById(`controls-${id}`);
     container.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; background:#000; border:1px solid #333; border-radius:10px; padding:4px;">
-            <button onclick="changeCount('${id}', -1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px; cursor:pointer;">-</button>
-            <span style="color:#fff;">${cart[id].count}</span>
-            <button onclick="changeCount('${id}', 1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px; cursor:pointer;">+</button>
+            <button onclick="changeCount('${id}', -1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px;">-</button>
+            <span>${cart[id].count}</span>
+            <button onclick="changeCount('${id}', 1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px;">+</button>
         </div>`;
 }
 
@@ -40,27 +39,26 @@ function changeCount(id, delta) {
     cart[id].count += delta;
     if (cart[id].count <= 0) {
         delete cart[id];
-        const name = id === 'ruchka' ? 'Ручка Arm' : 'Эспандер';
-        const price = id === 'ruchka' ? 35 : 12;
-        document.getElementById(`controls-${id}`).innerHTML = `<button class="black-btn" onclick="addToCart('${id}', '${name}', ${price})">ДОБАВИТЬ</button>`;
+        location.reload();
     } else {
         renderControls(id);
+        if (currentStep === 'cart') renderCart();
+        updateMainBtn();
     }
-    if (currentStep === 'cart') renderCart();
-    updateMainBtn();
 }
 
+// 2. СКИДКА как на третьей картинке
 function applyPromo() {
     const code = document.getElementById('promo-input').value.toLowerCase();
     if (code === 'morozov' || code === 'jarvis') {
-        discountPercent = 10;
-        document.getElementById('discount-row').style.display = 'flex';
+        discount = 10;
+        document.getElementById('discount-info').style.display = 'flex';
         document.getElementById('discount-val').innerText = '10%';
-        tg.showAlert("Скидка 10% применена!");
+        tg.showAlert("Промокод применен!");
     } else {
-        discountPercent = 0;
-        document.getElementById('discount-row').style.display = 'none';
-        tg.showAlert("Промокод не найден");
+        discount = 0;
+        document.getElementById('discount-info').style.display = 'none';
+        tg.showAlert("Неверный промокод");
     }
     renderCart();
 }
@@ -75,7 +73,8 @@ function renderCart() {
         container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
             <span>${cart[id].name} x${cart[id].count}</span><span>$${sum}</span></div>`;
     }
-    let total = subtotal - (subtotal * (discountPercent / 100));
+    
+    let total = subtotal - (subtotal * (discount / 100));
     document.getElementById('subtotal-price').innerText = `$${subtotal}`;
     document.getElementById('total-price').innerText = `$${total.toFixed(2)}`;
 }
@@ -102,39 +101,35 @@ tg.MainButton.onClick(() => {
         document.getElementById('address-screen').style.display = 'block';
         tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ");
     } else if (currentStep === 'address') {
-        // Проверка заполнения
         const fields = ['fio', 'phone', 'country', 'city', 'cdek-addr', 'email'];
         for (let f of fields) {
             if (document.getElementById(f).value.trim() === "") {
-                tg.showAlert("Пожалуйста, заполните ВСЕ поля!");
+                tg.showAlert("Заполните все поля!");
                 return;
             }
         }
-        
         currentStep = 'checkout';
         document.getElementById('address-screen').style.display = 'none';
         document.getElementById('checkout-screen').style.display = 'block';
-
-        // Вывод инфы на финальный экран
-        document.getElementById('check-address').innerHTML = `
-            <strong>Данные доставки:</strong><br>
-            ФИО: ${document.getElementById('fio').value}<br>
-            Тел: ${document.getElementById('phone').value}<br>
-            Адрес: ${document.getElementById('country').value}, ${document.getElementById('city').value}<br>
-            СДЭК: ${document.getElementById('cdek-addr').value}<br>
-            Email: ${document.getElementById('email').value}
-        `;
-
+        
+        // Финальный чек со всей инфой
         let subtotal = 0;
-        let itemsHtml = '<strong>Ваш заказ:</strong><br>';
+        let itemsHtml = '<strong>Заказ:</strong><br>';
         for (let id in cart) {
             let sum = cart[id].count * cart[id].price;
             subtotal += sum;
             itemsHtml += `${cart[id].name} x${cart[id].count} - $${sum}<br>`;
         }
-        let final = subtotal - (subtotal * (discountPercent / 100));
+        let total = subtotal - (subtotal * (discount / 100));
+
         document.getElementById('check-items').innerHTML = itemsHtml;
-        document.getElementById('final-price').innerText = `$${final.toFixed(2)}`;
+        document.getElementById('check-address').innerHTML = `
+            <strong>Доставка:</strong><br>
+            ${document.getElementById('fio').value}<br>${document.getElementById('phone').value}<br>
+            ${document.getElementById('country').value}, ${document.getElementById('city').value}<br>
+            ${document.getElementById('cdek-addr').value}
+        `;
+        document.getElementById('final-price').innerText = `$${total.toFixed(2)}`;
         tg.MainButton.setText("ОПЛАТИТЬ");
     }
 });
