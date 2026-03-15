@@ -2,138 +2,236 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = {};
-let currentStep = 'main';
-let discount = 0;
+let currentStep = 'main'; // main, cart, address, checkout
+let discountPercent = 0; // Процент скидки (напр. 0.1 для 10%)
+let appliedPromo = "";
 
-const descriptions = {
-    'ruchka': 'Ручка Arm — профессиональный тренажер для армрестлинга. Развивает силу хвата и кисти.',
-    'expander': 'Эспандер — компактный тренажер для укрепления мышц предплечья с нагрузкой 50кг.'
+// База данных описаний товаров
+const productDetails = {
+    'Handle': { title: 'JARVIS HANDLE', img: 'ruchka.webp', price: '$35.00', desc: 'Профессиональная ручка для армрестлинга. Изготовлена из авиационного алюминия.' },
+    'Expander': { title: 'EXPANDER MAX', img: 'expander.webp', price: '$12.00', desc: 'Высокотехнологичный кистевой эспандер с регулируемой нагрузкой.' }
 };
 
-// 1. ИНФО как на второй картинке (Системное окно Telegram)
-function showTgInfo(id) {
-    tg.showPopup({
-        title: 'О товаре',
-        message: descriptions[id],
-        buttons: [{type: 'close'}]
-    });
+// --- Логика Окна Инфо ---
+function showInfo(id) {
+    const data = productDetails[id];
+    if (!data) return;
+    document.getElementById('sheet-title').innerText = data.title;
+    document.getElementById('sheet-img').src = data.img;
+    document.getElementById('sheet-desc').innerText = data.desc;
+    document.getElementById('sheet-price').innerText = data.price;
+    document.getElementById('info-sheet').classList.add('open');
+    document.getElementById('main-container').classList.add('blur');
+    tg.MainButton.hide();
 }
 
-function addToCart(id, name, price) {
-    if (!cart[id]) cart[id] = { name, price, count: 1 };
-    renderControls(id);
-    updateMainBtn();
+function closeInfo() {
+    document.getElementById('info-sheet').classList.remove('open');
+    document.getElementById('main-container').classList.remove('blur');
+    if (currentStep !== 'main') { tg.MainButton.show(); } else { updateMainButton(); }
 }
 
-function renderControls(id) {
-    const container = document.getElementById(`controls-${id}`);
-    container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#000; border:1px solid #333; border-radius:10px; padding:4px;">
-            <button onclick="changeCount('${id}', -1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px;">-</button>
-            <span>${cart[id].count}</span>
-            <button onclick="changeCount('${id}', 1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px;">+</button>
-        </div>`;
+// Закрытие по свайпу
+let touchStartY = 0;
+const sheet = document.getElementById('info-sheet');
+sheet.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+sheet.addEventListener('touchend', e => {
+    if (e.changedTouches[0].clientY - touchStartY > 100) { closeInfo(); }
+});
+
+// --- Логика корзины ---
+function firstAdd(id, price) {
+    document.getElementById(`add-${id}`).style.display = 'none';
+    document.getElementById(`ctrl-${id}`).style.display = 'flex';
+    cart[id] = { count: 1, price: price };
+    document.getElementById(`count-${id}`).innerText = "1";
+    updateMainButton();
 }
 
-function changeCount(id, delta) {
+function changeCount(id, price, delta) {
+    if (!cart[id]) return;
     cart[id].count += delta;
     if (cart[id].count <= 0) {
-        delete cart[id];
-        location.reload();
+        cart[id].count = 0;
+        document.getElementById(`add-${id}`).style.display = 'block';
+        document.getElementById(`ctrl-${id}`).style.display = 'none';
     } else {
-        renderControls(id);
-        if (currentStep === 'cart') renderCart();
-        updateMainBtn();
+        document.getElementById(`count-${id}`).innerText = cart[id].count;
     }
+    updateMainButton();
 }
 
-// 2. СКИДКА как на третьей картинке
+// --- СИСТЕМА СКИДОК (НОВОЕ) ---
 function applyPromo() {
-    const code = document.getElementById('promo-input').value.toLowerCase();
-    if (code === 'morozov' || code === 'jarvis') {
-        discount = 10;
-        document.getElementById('discount-info').style.display = 'flex';
-        document.getElementById('discount-val').innerText = '10%';
-        tg.showAlert("Промокод применен!");
+    const code = document.getElementById('promo-input').value.trim().toUpperCase();
+    const msg = document.getElementById('promo-msg');
+    
+    // ПРИМЕР ПРОМОКОДА: JARVIS дает 10%
+    if (code === "JARVIS") {
+        discountPercent = 0.10; // 10% скидка
+        appliedPromo = code;
+        msg.innerText = "Промокод применен! Скидка 10%.";
+        msg.style.color = "#4CAF50"; // Зеленый
     } else {
-        discount = 0;
-        document.getElementById('discount-info').style.display = 'none';
-        tg.showAlert("Неверный промокод");
+        discountPercent = 0;
+        appliedPromo = "";
+        msg.innerText = "Неверный промокод.";
+        msg.style.color = "#f44336"; // Красный
     }
-    renderCart();
+    renderCart(); // Перерисовываем корзину с новыми ценами
+}
+
+function updateMainButton() {
+    let subtotal = 0;
+    for (let key in cart) subtotal += cart[key].count * cart[key].price;
+    
+    // ИТОГ С УЧЕТОМ СКИДКИ НА ГЛАВНОЙ КНОПКЕ
+    let total = subtotal * (1 - discountPercent);
+
+    if (total > 0 && currentStep === 'main') {
+        tg.MainButton.setParams({
+            text: `КОРЗИНА ($${total.toFixed(2)})`,
+            color: "#000000", // ЧЕРНАЯ КНОПКА
+            text_color: "#ffffff", // БЕЛЫЕ БУКВЫ
+            is_visible: true
+        });
+    } else if (total === 0) {
+        tg.MainButton.hide();
+    }
 }
 
 function renderCart() {
-    const container = document.getElementById('cart-items');
-    container.innerHTML = '';
+    let list = document.getElementById('cart-items-list');
+    list.innerHTML = ''; 
     let subtotal = 0;
-    for (let id in cart) {
-        let sum = cart[id].count * cart[id].price;
-        subtotal += sum;
-        container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <span>${cart[id].name} x${cart[id].count}</span><span>$${sum}</span></div>`;
+    for (let key in cart) {
+        if (cart[key].count > 0) {
+            let itemTotal = cart[key].count * cart[key].price;
+            subtotal += itemTotal;
+            let name = key === 'Handle' ? 'Ручка Arm' : 'Эспандер';
+            list.innerHTML += `<div class="cart-item"><span><b>${name}</b> x${cart[key].count}</span><span style="margin-left:auto">$${itemTotal.toFixed(2)}</span></div>`;
+        }
     }
     
-    let total = subtotal - (subtotal * (discount / 100));
-    document.getElementById('subtotal-price').innerText = `$${subtotal}`;
-    document.getElementById('total-price').innerText = `$${total.toFixed(2)}`;
+    // РАСЧЕТ И ОТОБРАЖЕНИЕ СКИДКИ В КОРЗИНЕ
+    let discountVal = subtotal * discountPercent;
+    let finalTotal = subtotal - discountVal;
+
+    document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+    
+    if (discountVal > 0) {
+        document.getElementById('cart-discount-row').style.display = 'flex';
+        document.getElementById('cart-discount-val').innerText = `-$${discountVal.toFixed(2)}`;
+    } else {
+        document.getElementById('cart-discount-row').style.display = 'none';
+    }
+    
+    document.getElementById('cart-total-price').innerText = `$${finalTotal.toFixed(2)}`;
 }
 
-function updateMainBtn() {
-    let total = 0;
-    for (let id in cart) total += cart[id].count * cart[id].price;
-    if (total > 0 && currentStep === 'main') {
-        tg.MainButton.setParams({ text: `КОРЗИНА ($${total})`, is_visible: true, color: "#000000", text_color: "#ffffff" });
-    } else if (total === 0) tg.MainButton.hide();
+// --- Логика Проверки ---
+function showCheckout() {
+    currentStep = 'checkout';
+    document.getElementById('address-screen').style.display = 'none';
+    document.getElementById('checkout-screen').style.display = 'block';
+    
+    let itemsDiv = document.getElementById('check-items');
+    itemsDiv.innerHTML = '';
+    let subtotal = 0;
+    for (let key in cart) {
+        if (cart[key].count > 0) {
+            subtotal += cart[key].count * cart[key].price;
+            itemsDiv.innerHTML += `<div>${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'} — ${cart[key].count} шт.</div>`;
+        }
+    }
+    
+    const fio = document.getElementById('fio').value;
+    const phone = document.getElementById('phone').value;
+    const country = document.getElementById('country').value;
+    const city = document.getElementById('city').value;
+    const cdek = document.getElementById('cdek-addr').value;
+    const email = document.getElementById('email').value;
+
+    document.getElementById('check-address').innerHTML = `
+        <b>ФИО:</b> ${fio}<br>
+        <b>Тел:</b> ${phone}<br>
+        <b>Страна:</b> ${country}<br>
+        <b>Город:</b> ${city}<br>
+        <b>Пункт СДЭК:</b> ${cdek}<br>
+        <b>Email:</b> ${email}
+    `;
+    
+    // ОТОБРАЖЕНИЕ СКИДКИ ПРИ ПРОВЕРКЕ
+    const finalTotalStr = document.getElementById('cart-total-price').innerText;
+    document.getElementById('check-total-price').innerText = finalTotalStr;
+    
+    if (discountPercent > 0) {
+        document.getElementById('check-old-price').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('check-old-price').style.display = 'block';
+    } else {
+        document.getElementById('check-old-price').style.display = 'none';
+    }
+    
+    tg.MainButton.setParams({ text: "ПОДТВЕРДИТЬ И ОПЛАТИТЬ", color: "#000000", text_color: "#ffffff" });
 }
 
+// --- Навигация ---
 tg.MainButton.onClick(() => {
     if (currentStep === 'main') {
         currentStep = 'cart';
         document.getElementById('main-screen').style.display = 'none';
         document.getElementById('cart-screen').style.display = 'block';
         renderCart();
-        tg.MainButton.setText("К ОФОРМЛЕНИЮ");
+        tg.MainButton.setParams({ text: "К ДАННЫМ ДОСТАВКИ", color: "#000000", text_color: "#ffffff" });
         tg.BackButton.show();
     } else if (currentStep === 'cart') {
         currentStep = 'address';
         document.getElementById('cart-screen').style.display = 'none';
         document.getElementById('address-screen').style.display = 'block';
-        tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ");
+        tg.MainButton.setParams({ text: "К ПРОВЕРКЕ", color: "#000000", text_color: "#ffffff" });
     } else if (currentStep === 'address') {
+        // Валидация полей
         const fields = ['fio', 'phone', 'country', 'city', 'cdek-addr', 'email'];
-        for (let f of fields) {
-            if (document.getElementById(f).value.trim() === "") {
-                tg.showAlert("Заполните все поля!");
-                return;
-            }
+        if (fields.some(id => !document.getElementById(id).value)) {
+            return tg.showAlert("Сэр, необходимо заполнить все поля получателя!");
         }
-        currentStep = 'checkout';
-        document.getElementById('address-screen').style.display = 'none';
-        document.getElementById('checkout-screen').style.display = 'block';
-        
-        // Финальный чек со всей инфой
-        let subtotal = 0;
-        let itemsHtml = '<strong>Заказ:</strong><br>';
-        for (let id in cart) {
-            let sum = cart[id].count * cart[id].price;
-            subtotal += sum;
-            itemsHtml += `${cart[id].name} x${cart[id].count} - $${sum}<br>`;
-        }
-        let total = subtotal - (subtotal * (discount / 100));
-
-        document.getElementById('check-items').innerHTML = itemsHtml;
-        document.getElementById('check-address').innerHTML = `
-            <strong>Доставка:</strong><br>
-            ${document.getElementById('fio').value}<br>${document.getElementById('phone').value}<br>
-            ${document.getElementById('country').value}, ${document.getElementById('city').value}<br>
-            ${document.getElementById('cdek-addr').value}
-        `;
-        document.getElementById('final-price').innerText = `$${total.toFixed(2)}`;
-        tg.MainButton.setText("ОПЛАТИТЬ");
+        showCheckout();
+    } else if (currentStep === 'checkout') {
+        // Отправка полных данных боту
+        const subtotal = cart['Handle'].count * cart['Handle'].price + cart['Expander'].count * cart['Expander'].price;
+        tg.sendData(JSON.stringify({
+            cart,
+            customer: {
+                fio: document.getElementById('fio').value,
+                phone: document.getElementById('phone').value,
+                country: document.getElementById('country').value,
+                city: document.getElementById('city').value,
+                cdek: document.getElementById('cdek-addr').value,
+                email: document.getElementById('email').value
+            },
+            promo: appliedPromo,
+            subtotal: `$${subtotal.toFixed(2)}`,
+            total: document.getElementById('check-total-price').innerText
+        }));
     }
 });
 
 tg.BackButton.onClick(() => {
-    location.reload();
+    if (currentStep === 'checkout') {
+        currentStep = 'address';
+        document.getElementById('checkout-screen').style.display = 'none';
+        document.getElementById('address-screen').style.display = 'block';
+        tg.MainButton.setText("К ПРОВЕРКЕ");
+    } else if (currentStep === 'address') {
+        currentStep = 'cart';
+        document.getElementById('address-screen').style.display = 'none';
+        document.getElementById('cart-screen').style.display = 'block';
+        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
+    } else if (currentStep === 'cart') {
+        currentStep = 'main';
+        document.getElementById('cart-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
+        tg.BackButton.hide();
+        updateMainButton();
+    }
 });
