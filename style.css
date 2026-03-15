@@ -1,58 +1,30 @@
-html, body {
-    background-color: #000000 !important;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', sans-serif;
-    color: #ffffff;
-    overflow-x: hidden;
-}
+body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+.screen { display: none; padding: 15px; }
+.screen.active { display: block; }
 
-body { padding: 15px; text-align: center; }
-
-h1 { text-transform: uppercase; letter-spacing: 2px; font-size: 24px; margin-bottom: 20px; }
+.title { text-align: center; letter-spacing: 2px; margin: 20px 0; }
 
 /* Сетка товаров */
-.product-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Две колонки как в Durger King */
-    gap: 15px;
-}
+.product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.product-item { background: #151515; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; }
+.product-item img { width: 100%; height: 100px; object-fit: contain; }
+.p-info { margin: 10px 0; text-align: center; }
+.p-info p { color: #888; margin: 5px 0; }
 
-.product-item {
-    background: #333333 !important; /* Твой серый цвет */
-    border-radius: 12px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid #444;
-}
+/* Кнопки */
+.btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+.btn-white { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
 
-.product-item img { width: 100%; max-width: 100px; height: auto; border-radius: 8px; }
+/* Формы */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 11px; color: #888; margin-left: 5px; margin-bottom: 4px; }
+.form-group input { width: 100%; padding: 12px; background: #151515; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
 
-h4 { margin: 10px 0 5px; font-size: 16px; }
+.input-row { display: flex; gap: 8px; }
+.total-bar { font-size: 18px; font-weight: bold; margin-top: 20px; text-align: right; }
 
-.price { font-weight: bold; color: #fff; margin-bottom: 10px; }
-
-/* Кнопки управления количеством */
-.count-control {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #000000;
-    border-radius: 8px;
-    width: 100%;
-    padding: 5px 0;
-}
-
-.cnt-btn {
-    background: none;
-    border: none;
-    color: #0088cc; /* Синий акцент */
-    font-size: 22px;
-    font-weight: bold;
-    width: 40px;
-    cursor: pointer;
-}
-
-#count-Ручка, #count-Эспандер { font-weight: bold; width: 20px; }
+/* Панель ИНФО */
+#info-panel { position: fixed; bottom: -100%; left: 0; width: 100%; height: 75%; background: #111; z-index: 9999; transition: 0.4s; border-top: 1px solid #333; border-radius: 20px 20px 0 0; }
+#info-panel.show { bottom: 0; }
+.info-content { padding: 25px; }
+.blur { filter: blur(8px); pointer-events: none; }
