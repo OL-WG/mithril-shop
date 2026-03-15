@@ -15,6 +15,6 @@ body { background-color: #000; color: #fff; margin: 0; padding: 0; font-family: 
     cursor: pointer;
     text-transform: uppercase;
 }
-.black-btn.info { color: #666 !important; font-size: 10px; margin-top: 8px; }
+.black-btn.info { color: #666 !important; font-size: 10px; margin-top: 8px; border: none !important; }
 
-input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-size: 16px; }
+input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
