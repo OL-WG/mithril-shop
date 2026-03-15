@@ -2,43 +2,42 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = [];
-let currentStep = 1; // 1: Витрина, 2: Корзина, 3: Адрес
+let step = 1;
 let discount = 0;
 
-// 1. Управление товарами
+// Управление кнопками
 function addToCart(name, price) {
     cart.push({name, price});
     updateMainButton();
 }
 
 function updateMainButton() {
-    let sum = cart.reduce((acc, i) => acc + i.price, 0);
-    if (sum > 0 && currentStep === 1) {
-        tg.MainButton.setText(`КОРЗИНА ($${sum})`);
+    let total = cart.reduce((sum, item) => sum + item.price, 0);
+    if (total > 0 && step === 1) {
+        tg.MainButton.setText(`КОРЗИНА ($${total})`);
         tg.MainButton.show();
     }
 }
 
-// 2. Окно ИНФО
+// Вкладка Инфо
 function openInfo(title, price, img) {
     document.getElementById('info-title').innerText = title;
-    document.getElementById('info-price').innerText = price;
     document.getElementById('info-img').src = img;
-    document.getElementById('info-sheet').classList.add('active');
-    document.getElementById('content-wrapper').classList.add('blur-bg');
+    document.getElementById('info-panel').classList.add('show');
+    document.getElementById('app-container').classList.add('blur');
 }
 
 function closeInfo() {
-    document.getElementById('info-sheet').classList.remove('active');
-    document.getElementById('content-wrapper').classList.remove('blur-bg');
+    document.getElementById('info-panel').classList.remove('show');
+    document.getElementById('app-container').classList.remove('blur');
 }
 
-// 3. Скидки
+// Скидки
 function applyPromo() {
-    let code = document.getElementById('promo-input').value.toUpperCase();
+    const code = document.getElementById('promo-input').value.toUpperCase();
     if (code === "JARVIS") {
-        discount = 0.1;
-        tg.showAlert("Скидка 10% применена!");
+        discount = 0.1; // 10%
+        tg.showAlert("Промокод JARVIS: Скидка 10%!");
     } else {
         discount = 0;
         tg.showAlert("Код не найден");
@@ -47,48 +46,44 @@ function applyPromo() {
 }
 
 function renderCart() {
-    let list = document.getElementById('cart-list');
-    let subtotal = cart.reduce((acc, i) => acc + i.price, 0);
-    list.innerHTML = cart.map(i => `<div class="cart-row"><span>${i.name}</span><span>$${i.price}</span></div>`).join('');
-    let total = subtotal * (1 - discount);
-    document.getElementById('total-price').innerText = `Итого: $${total.toFixed(2)}`;
-    return total;
+    let list = document.getElementById('cart-items');
+    let subtotal = cart.reduce((s, i) => s + i.price, 0);
+    list.innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222;"><span>${i.name}</span><span>$${i.price}</span></div>`).join('');
+    let final = subtotal * (1 - discount);
+    document.getElementById('total-val').innerText = `$${final.toFixed(2)}`;
 }
 
-// 4. ГЛАВНАЯ КНОПКА (ОБРАБОТКА ШАГОВ)
+// ЛОГИКА ПЕРЕХОДОВ (Main Button)
 tg.MainButton.onClick(() => {
-    if (currentStep === 1) {
-        // Переход в корзину
-        document.getElementById('main-screen').style.display = 'none';
-        document.getElementById('cart-screen').style.display = 'block';
+    if (step === 1) {
+        document.getElementById('screen-main').classList.remove('active');
+        document.getElementById('screen-cart').classList.add('active');
         renderCart();
-        tg.MainButton.setText("ОФОРМИТЬ ДОСТАВКУ");
+        tg.MainButton.setText("К ОФОРМЛЕНИЮ");
         tg.BackButton.show();
-        currentStep = 2;
+        step = 2;
     } 
-    else if (currentStep === 2) {
-        // Переход к адресу
-        document.getElementById('cart-screen').style.display = 'none';
-        document.getElementById('address-screen').style.display = 'block';
+    else if (step === 2) {
+        document.getElementById('screen-cart').classList.remove('active');
+        document.getElementById('screen-address').classList.add('active');
         tg.MainButton.setText("ОТПРАВИТЬ ЗАКАЗ");
-        currentStep = 3;
+        step = 3;
     } 
-    else if (currentStep === 3) {
-        // Финальная сборка данных
-        let orderData = {
-            products: cart,
-            total: document.getElementById('total-price').innerText,
-            customer: {
-                fio: document.getElementById('u_fio').value,
-                phone: document.getElementById('u_phone').value,
-                city: document.getElementById('u_city').value,
-                cdek: document.getElementById('u_cdek').value,
-                email: document.getElementById('u_email').value
+    else if (step === 3) {
+        const orderData = {
+            cart: cart,
+            total: document.getElementById('total-val').innerText,
+            user: {
+                fio: document.getElementById('fio').value,
+                phone: document.getElementById('phone').value,
+                city: document.getElementById('city').value,
+                cdek: document.getElementById('cdek').value,
+                email: document.getElementById('email').value
             }
         };
 
-        if (!orderData.customer.fio || !orderData.customer.phone) {
-            tg.showAlert("Сэр, заполните хотя бы ФИО и Телефон!");
+        if (!orderData.user.fio || !orderData.user.phone) {
+            tg.showAlert("Пожалуйста, заполните ФИО и Телефон");
             return;
         }
 
@@ -96,18 +91,17 @@ tg.MainButton.onClick(() => {
     }
 });
 
-// Кнопка Назад
 tg.BackButton.onClick(() => {
-    if (currentStep === 2) {
-        document.getElementById('cart-screen').style.display = 'none';
-        document.getElementById('main-screen').style.display = 'block';
+    if (step === 2) {
+        document.getElementById('screen-cart').classList.remove('active');
+        document.getElementById('screen-main').classList.add('active');
         tg.BackButton.hide();
         updateMainButton();
-        currentStep = 1;
-    } else if (currentStep === 3) {
-        document.getElementById('address-screen').style.display = 'none';
-        document.getElementById('cart-screen').style.display = 'block';
-        tg.MainButton.setText("ОФОРМИТЬ ДОСТАВКУ");
-        currentStep = 2;
+        step = 1;
+    } else if (step === 3) {
+        document.getElementById('screen-address').classList.remove('active');
+        document.getElementById('screen-cart').classList.add('active');
+        tg.MainButton.setText("К ОФОРМЛЕНИЮ");
+        step = 2;
     }
 });
