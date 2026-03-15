@@ -3,36 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MithrilARM</title>
+    <title>MithrilARM Shop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
-        #main-container { min-height: 100vh; padding-bottom: 20px; }
-        .screen { display: none; padding: 15px; }
-        #main-screen { display: block; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        .screen { display: none; padding: 15px; min-height: 100vh; box-sizing: border-box; }
+        #main-screen { display: block; } /* Показываем только первый экран */
 
-        /* Сетка товаров */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        /* Карточки товаров */
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .product-item img { width: 100%; max-width: 100px; height: auto; margin-bottom: 10px; }
         
-        /* Кнопки — теперь одинаково белые */
-        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-        .action-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
-        
-        /* Поля ввода и Форма */
+        /* Белые кнопки как ты просил */
+        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+        .white-btn { background: #fff; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; }
+
+        /* Окно ИНФО (Bottom Sheet) */
+        #info-sheet { 
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 80%; 
+            background: #111; border-top: 2px solid #333; border-radius: 20px 20px 0 0; 
+            z-index: 1000; transition: 0.3s; padding: 20px; box-sizing: border-box;
+        }
+        #info-sheet.active { bottom: 0; }
+        .blur-bg { filter: blur(5px); pointer-events: none; }
+
+        /* Форма и Корзина */
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 12px; color: #888; margin: 0 0 5px 5px; }
+        .form-group label { display: block; font-size: 11px; color: #888; margin: 0 0 5px 5px; }
         .form-group input { width: 100%; padding: 12px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-
-        /* Корзина и Скидки */
         .cart-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
-        .promo-row { display: flex; gap: 8px; margin-top: 10px; }
-        .promo-btn { background: #fff; color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="main-container">
+    <div id="content-wrapper">
         <div id="main-screen" class="screen">
             <h2 style="text-align: center;">MITHRILARM</h2>
             <div class="product-grid">
@@ -41,8 +45,8 @@
                     <b>Ручка Arm</b>
                     <div style="color:#888; margin: 5px 0 10px;">$35.00</div>
                     <div class="btn-group">
-                        <button class="action-btn" onclick="addToCart('Ручка Arm', 35)">ДОБАВИТЬ</button>
-                        <button class="action-btn" onclick="showInfo('Ручка Arm')">ИНФО</button>
+                        <button class="white-btn" onclick="addToCart('Ручка Arm', 35)">Добавить</button>
+                        <button class="white-btn" onclick="openInfo('Ручка Arm', '$35', 'ruchka.webp')">Инфо</button>
                     </div>
                 </div>
                 <div class="product-item">
@@ -50,55 +54,45 @@
                     <b>Эспандер</b>
                     <div style="color:#888; margin: 5px 0 10px;">$12.00</div>
                     <div class="btn-group">
-                        <button class="action-btn" onclick="addToCart('Эспандер', 12)">ДОБАВИТЬ</button>
-                        <button class="action-btn" onclick="showInfo('Эспандер')">ИНФО</button>
+                        <button class="white-btn" onclick="addToCart('Эспандер', 12)">Добавить</button>
+                        <button class="white-btn" onclick="openInfo('Эспандер', '$12', 'expander.webp')">Инфо</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="cart-screen" class="screen">
-            <h3>Ваша корзина</h3>
+            <h3>Корзина</h3>
             <div id="cart-list"></div>
-            <div class="form-group" style="margin-top: 20px;">
+            <div class="form-group" style="margin-top:20px;">
                 <label>Промокод</label>
-                <div class="promo-row">
-                    <input type="text" id="promo-input" placeholder="Введите код">
-                    <button class="promo-btn" onclick="applyPromo()">OK</button>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="promo-input" placeholder="Код...">
+                    <button class="white-btn" style="width:60px;" onclick="applyPromo()">OK</button>
                 </div>
-                <div id="promo-status" style="font-size: 12px; margin-top: 5px;"></div>
             </div>
-            <h3 id="total-display">Итого: $0.00</h3>
+            <h3 id="total-price">Итого: $0</h3>
         </div>
 
         <div id="address-screen" class="screen">
-            <h3>Данные получателя</h3>
-            <div class="form-group">
-                <label>Фамилия Имя Отчество</label>
-                <input type="text" id="fio" placeholder="Иванов Иван Иванович">
-            </div>
-            <div class="form-group">
-                <label>Номер телефона</label>
-                <input type="tel" id="phone" placeholder="+7 (___) ___-__-__">
-            </div>
-            <div class="form-group">
-                <label>Страна</label>
-                <input type="text" id="country" placeholder="Россия">
-            </div>
-            <div class="form-group">
-                <label>Город</label>
-                <input type="text" id="city" placeholder="Москва">
-            </div>
-            <div class="form-group">
-                <label>Адрес пункта СДЭК</label>
-                <input type="text" id="cdek" placeholder="ул. Ленина, д. 10">
-            </div>
-            <div class="form-group">
-                <label>Электронная почта (любая)</label>
-                <input type="email" id="email" placeholder="example@gmail.com">
-            </div>
+            <h3>Доставка</h3>
+            <div class="form-group"><label>ФИО</label><input type="text" id="u_fio"></div>
+            <div class="form-group"><label>Телефон</label><input type="tel" id="u_phone"></div>
+            <div class="form-group"><label>Страна</label><input type="text" id="u_country"></div>
+            <div class="form-group"><label>Город</label><input type="text" id="u_city"></div>
+            <div class="form-group"><label>Пункт СДЭК</label><input type="text" id="u_cdek"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="u_email"></div>
         </div>
     </div>
+
+    <div id="info-sheet">
+        <h2 id="info-title"></h2>
+        <img id="info-img" src="" style="width:100%; height:150px; object-fit:contain; background:#1c1c1c; border-radius:10px;">
+        <p style="color:#888;">Описание товара и его характеристики появятся здесь.</p>
+        <h3 id="info-price"></h3>
+        <button class="white-btn" onclick="closeInfo()">Закрыть</button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
