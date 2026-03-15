@@ -2,98 +2,112 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = [];
-let step = 1;
+let currentStep = 1; // 1: Витрина, 2: Корзина, 3: Адрес
 let discount = 0;
 
-// Функции магазина
+// 1. Управление товарами
 function addToCart(name, price) {
     cart.push({name, price});
     updateMainButton();
 }
 
 function updateMainButton() {
-    let sum = cart.reduce((acc, item) => acc + item.price, 0);
-    if (sum > 0 && step === 1) {
-        tg.MainButton.setText(`ПРОСМОТРЕТЬ КОРЗИНУ ($${sum})`);
+    let sum = cart.reduce((acc, i) => acc + i.price, 0);
+    if (sum > 0 && currentStep === 1) {
+        tg.MainButton.setText(`КОРЗИНА ($${sum})`);
         tg.MainButton.show();
     }
 }
 
-// Система скидок
+// 2. Окно ИНФО
+function openInfo(title, price, img) {
+    document.getElementById('info-title').innerText = title;
+    document.getElementById('info-price').innerText = price;
+    document.getElementById('info-img').src = img;
+    document.getElementById('info-sheet').classList.add('active');
+    document.getElementById('content-wrapper').classList.add('blur-bg');
+}
+
+function closeInfo() {
+    document.getElementById('info-sheet').classList.remove('active');
+    document.getElementById('content-wrapper').classList.remove('blur-bg');
+}
+
+// 3. Скидки
 function applyPromo() {
-    const code = document.getElementById('promo-input').value.trim().toUpperCase();
-    const status = document.getElementById('promo-status');
+    let code = document.getElementById('promo-input').value.toUpperCase();
     if (code === "JARVIS") {
-        discount = 0.1; // 10%
-        status.innerText = "Промокод применен: -10%";
-        status.style.color = "#4CAF50";
+        discount = 0.1;
+        tg.showAlert("Скидка 10% применена!");
     } else {
         discount = 0;
-        status.innerText = "Неверный код";
-        status.style.color = "#f44336";
+        tg.showAlert("Код не найден");
     }
     renderCart();
 }
 
 function renderCart() {
     let list = document.getElementById('cart-list');
-    let subtotal = cart.reduce((acc, item) => acc + item.price, 0);
+    let subtotal = cart.reduce((acc, i) => acc + i.price, 0);
     list.innerHTML = cart.map(i => `<div class="cart-row"><span>${i.name}</span><span>$${i.price}</span></div>`).join('');
-    
-    let finalTotal = subtotal * (1 - discount);
-    document.getElementById('total-display').innerText = `Итого: $${finalTotal.toFixed(2)}`;
-    return finalTotal;
+    let total = subtotal * (1 - discount);
+    document.getElementById('total-price').innerText = `Итого: $${total.toFixed(2)}`;
+    return total;
 }
 
-// ЛОГИКА ГЛАВНОЙ КНОПКИ (Исправлено)
+// 4. ГЛАВНАЯ КНОПКА (ОБРАБОТКА ШАГОВ)
 tg.MainButton.onClick(() => {
-    if (step === 1) {
+    if (currentStep === 1) {
+        // Переход в корзину
         document.getElementById('main-screen').style.display = 'none';
         document.getElementById('cart-screen').style.display = 'block';
         renderCart();
-        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
+        tg.MainButton.setText("ОФОРМИТЬ ДОСТАВКУ");
         tg.BackButton.show();
-        step = 2;
+        currentStep = 2;
     } 
-    else if (step === 2) {
+    else if (currentStep === 2) {
+        // Переход к адресу
         document.getElementById('cart-screen').style.display = 'none';
         document.getElementById('address-screen').style.display = 'block';
-        tg.MainButton.setText("К ПРОВЕРКЕ");
-        step = 3;
+        tg.MainButton.setText("ОТПРАВИТЬ ЗАКАЗ");
+        currentStep = 3;
     } 
-    else if (step === 3) {
-        // Сбор данных
-        const userData = {
-            fio: document.getElementById('fio').value,
-            phone: document.getElementById('phone').value,
-            country: document.getElementById('country').value,
-            city: document.getElementById('city').value,
-            cdek: document.getElementById('cdek').value,
-            email: document.getElementById('email').value,
-            total: document.getElementById('total-display').innerText
+    else if (currentStep === 3) {
+        // Финальная сборка данных
+        let orderData = {
+            products: cart,
+            total: document.getElementById('total-price').innerText,
+            customer: {
+                fio: document.getElementById('u_fio').value,
+                phone: document.getElementById('u_phone').value,
+                city: document.getElementById('u_city').value,
+                cdek: document.getElementById('u_cdek').value,
+                email: document.getElementById('u_email').value
+            }
         };
 
-        if (!userData.fio || !userData.phone || !userData.email) {
-            tg.showAlert("Сэр, заполните контактные данные!");
+        if (!orderData.customer.fio || !orderData.customer.phone) {
+            tg.showAlert("Сэр, заполните хотя бы ФИО и Телефон!");
             return;
         }
 
-        // Финальная отправка в бот
-        tg.sendData(JSON.stringify({order: cart, customer: userData}));
+        tg.sendData(JSON.stringify(orderData));
     }
 });
 
+// Кнопка Назад
 tg.BackButton.onClick(() => {
-    if (step === 3) {
-        document.getElementById('address-screen').style.display = 'none';
-        document.getElementById('cart-screen').style.display = 'block';
-        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
-        step = 2;
-    } else if (step === 2) {
+    if (currentStep === 2) {
         document.getElementById('cart-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'block';
         tg.BackButton.hide();
         updateMainButton();
-        step = 1;
+        currentStep = 1;
+    } else if (currentStep === 3) {
+        document.getElementById('address-screen').style.display = 'none';
+        document.getElementById('cart-screen').style.display = 'block';
+        tg.MainButton.setText("ОФОРМИТЬ ДОСТАВКУ");
+        currentStep = 2;
     }
 });
