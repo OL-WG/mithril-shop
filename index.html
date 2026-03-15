@@ -10,48 +10,51 @@
         #main-container { height: 100vh; overflow-y: auto; transition: filter 0.3s; }
         .blur { filter: blur(5px); }
 
-        /* Витрина */
+        /* Стили сетки товаров */
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; padding-bottom: 80px; }
         .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; cursor: pointer; }
         
-        /* Кнопки карточки — ТЕПЕРЬ ОДИНАКОВЫЕ */
+        /* Кнопки — теперь одинаково белые (как на 1 скрине) */
         .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
         .action-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
         
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
         .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; }
-        
-        /* Инфо-панель */
+
+        /* Вкладка ИНФО (как на 3 скрине) */
         #info-sheet { 
             position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; 
             background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; 
-            z-index: 1000; transition: bottom 0.3s ease-out;
+            z-index: 1000; transition: bottom 0.3s ease-out; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
         }
         #info-sheet.open { bottom: 0; }
-        .sheet-content { padding: 20px; text-align: left; }
+        .sheet-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .sheet-content { padding: 20px; text-align: left; overflow-y: auto; height: calc(100% - 60px); }
         #sheet-img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 20px; background: #1c1c1c; border-radius: 12px; }
 
-        /* Промокод (Экран 2) */
+        /* Корзина и Скидки (как на 2 скрине) */
+        .cart-item { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
         .promo-section { padding: 15px; border-top: 1px solid #222; text-align: left; }
         .promo-input-row { display: flex; gap: 10px; margin-top: 10px; }
         .promo-input-row input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; flex-grow: 1; }
+        .cart-total { display: flex; justify-content: space-between; padding: 20px 15px; font-size: 18px; font-weight: bold; }
 
-        /* Форма (Экран 3) */
+        /* Форма получателя */
         .address-form { padding: 20px; text-align: left; }
+        .address-form label { font-size: 12px; color: #888; margin-left: 5px; }
         .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        .address-form label { font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
     <div id="main-container">
         <div id="main-screen">
-            <h2 style="margin-top: 20px;">MITHRILARM</h2>
+            <h2 style="margin: 20px 0;">MITHRILARM</h2>
             <div class="product-grid">
                 <div class="product-item">
                     <img src="ruchka.webp" onclick="showInfo('Handle')">
-                    <span style="font-weight:bold; margin-bottom:5px;">Ручка Arm</span>
-                    <div style="color:#888; margin-bottom:10px;">$35.00</div>
+                    <span style="font-weight:bold;">Ручка Arm</span>
+                    <div style="color:#888; margin: 5px 0 10px;">$35.00</div>
                     <div class="btn-group">
                         <button id="add-Handle" class="action-btn" onclick="firstAdd('Handle', 35.00)">ДОБАВИТЬ</button>
                         <div id="ctrl-Handle" class="count-ctrl">
@@ -62,14 +65,28 @@
                         <button class="action-btn" onclick="showInfo('Handle')">ИНФО</button>
                     </div>
                 </div>
+                <div class="product-item">
+                    <img src="expander.webp" onclick="showInfo('Expander')">
+                    <span style="font-weight:bold;">Эспандер</span>
+                    <div style="color:#888; margin: 5px 0 10px;">$12.00</div>
+                    <div class="btn-group">
+                        <button id="add-Expander" class="action-btn" onclick="firstAdd('Expander', 12.00)">ДОБАВИТЬ</button>
+                        <div id="ctrl-Expander" class="count-ctrl">
+                            <button class="cnt-btn" onclick="changeCount('Expander', 12.00, -1)">-</button>
+                            <span id="count-Expander">1</span>
+                            <button class="cnt-btn" onclick="changeCount('Expander', 12.00, 1)">+</button>
+                        </div>
+                        <button class="action-btn" onclick="showInfo('Expander')">ИНФО</button>
+                    </div>
                 </div>
+            </div>
         </div>
 
         <div id="cart-screen" style="display: none;">
             <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
             <div id="cart-items-list"></div>
             <div class="promo-section">
-                <label style="font-size: 12px; color: #888;">У вас есть промокод?</label>
+                <label>Промокод на скидку</label>
                 <div class="promo-input-row">
                     <input type="text" id="promo-input" placeholder="Введите код">
                     <button class="action-btn" style="width: auto; padding: 10px 20px;" onclick="applyPromo()">OK</button>
@@ -77,7 +94,7 @@
                 <div id="promo-msg" style="font-size: 12px; margin-top: 5px;"></div>
             </div>
             <div class="cart-total">
-                <span>Итого:</span>
+                <span>Итог:</span>
                 <span id="cart-total-price">$0.00</span>
             </div>
         </div>
@@ -100,10 +117,28 @@
                 <label>Адрес пункта СДЭК</label>
                 <input type="text" id="cdek-addr" placeholder="ул. Ленина, д. 10">
                 
-                <label>Электронная почта (Любая)</label>
+                <label>Электронная почта (любая)</label>
                 <input type="email" id="email" placeholder="example@gmail.com">
             </div>
         </div>
     </div>
-    </body>
+
+    <div id="info-sheet">
+        <div class="sheet-header">
+            <h3 id="sheet-title" style="margin:0;">Инфо</h3>
+            <button onclick="closeInfo()" style="background:none; border:none; color:#888; font-size:24px;">&times;</button>
+        </div>
+        <div class="sheet-content">
+            <img src="" id="sheet-img">
+            <div id="sheet-desc" style="color:#ccc; margin-bottom:20px; line-height:1.4;"></div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:20px;">
+                <span>СТОИМОСТЬ</span>
+                <span id="sheet-price"></span>
+            </div>
+            <button class="action-btn" onclick="closeInfo()">ПОНЯТНО</button>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
 </html>
