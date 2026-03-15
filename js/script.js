@@ -1,118 +1,207 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-// Устанавливаем стиль ГЛАВНОЙ НИЖНЕЙ кнопки на черно-белый
-tg.MainButton.setParams({
-    color: "#ffffff",
-    text_color: "#000000"
+let cart = {};
+let currentStep = 'main'; // main, cart, address, checkout
+
+// База данных описаний товаров (для окна Инфо)
+const productDetails = {
+    'Handle': {
+        title: 'JARVIS HANDLE', // Сэр, стилизовал название под Ваш вкус
+        img: 'ruchka.webp',
+        price: '$35.00',
+        desc: 'Профессиональная ручка для армрестлинга. Уникальный хват, разработанный для максимальной изоляции мышц предплечья. Изготовлена из авиационного алюминия. Понимает контекст тренировки (шутка).'
+    },
+    'Expander': {
+        title: 'EXPANDER MAX',
+        img: 'expander.webp',
+        price: '$12.00',
+        desc: 'Высокотехнологичный кистевой эспандер с регулируемой нагрузкой. Идеален для разминки перед дуэлью или программированием. Работает как полноценный цифровой ассистент Вашей силы.'
+    }
+};
+
+// --- Логика Окна Инфо (как на 3 скрине) ---
+function showInfo(id) {
+    const data = productDetails[id];
+    if (!data) return;
+
+    // Заполняем панель данными
+    document.getElementById('sheet-title').innerText = data.title;
+    document.getElementById('sheet-img').src = data.img;
+    document.getElementById('sheet-desc').innerText = data.desc;
+    document.getElementById('sheet-price').innerText = data.price;
+
+    // Открываем панель и блюрим задний фон
+    document.getElementById('info-sheet').classList.add('open');
+    document.getElementById('main-container').classList.add('blur');
+    
+    // Скрываем главную кнопку TG, чтобы не мешала
+    tg.MainButton.hide();
+}
+
+function closeInfo() {
+    // Закрываем панель и убираем блюр
+    document.getElementById('info-sheet').classList.remove('open');
+    document.getElementById('main-container').classList.remove('blur');
+    
+    // Возвращаем главную кнопку, если мы не на главном экране
+    if (currentStep !== 'main') {
+        tg.MainButton.show();
+    } else {
+        updateMainButton(); // Показываем кнопку корзины, если есть товары
+    }
+}
+
+// Улучшение: закрытие панели по свайпу вниз
+let touchStartY = 0;
+const sheet = document.getElementById('info-sheet');
+sheet.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+sheet.addEventListener('touchend', e => {
+    const touchEndY = e.changedTouches[0].clientY;
+    if (touchEndY - touchStartY > 100) { // Если свайп вниз больше 100px
+        closeInfo();
+    }
 });
 
-let cart = [];
-let step = 1; // 1: Магазин, 2: Корзина, 3: Доставка
-let discount = 0;
 
-function addToCart(name, price) {
-    cart.push({name, price});
+// --- Старая логика корзины (без изменений) ---
+function firstAdd(id, price) {
+    document.getElementById(`add-${id}`).style.display = 'none';
+    document.getElementById(`ctrl-${id}`).style.display = 'flex';
+    cart[id] = { count: 1, price: price };
+    document.getElementById(`count-${id}`).innerText = "1";
+    updateMainButton();
+}
+
+function changeCount(id, price, delta) {
+    if (!cart[id]) return;
+    cart[id].count += delta;
+    if (cart[id].count <= 0) {
+        cart[id].count = 0;
+        document.getElementById(`add-${id}`).style.display = 'block';
+        document.getElementById(`ctrl-${id}`).style.display = 'none';
+    } else {
+        document.getElementById(`count-${id}`).innerText = cart[id].count;
+    }
     updateMainButton();
 }
 
 function updateMainButton() {
-    let total = cart.reduce((sum, item) => sum + item.price, 0);
-    if (total > 0 && step === 1) {
-        tg.MainButton.setText(`ПЕРЕЙТИ В КОРЗИНУ ($${total})`);
-        tg.MainButton.show();
-    }
-}
+    let subtotal = 0;
+    for (let key in cart) subtotal += cart[key].count * cart[key].price;
 
-function openInfo(title, price, img) {
-    document.getElementById('info-title').innerText = title;
-    document.getElementById('info-img').src = img;
-    document.getElementById('info-panel').classList.add('show');
-    document.getElementById('app-container').classList.add('blur');
-}
-
-function closeInfo() {
-    document.getElementById('info-panel').classList.remove('show');
-    document.getElementById('app-container').classList.remove('blur');
-}
-
-function applyPromo() {
-    const code = document.getElementById('promo-input').value.toUpperCase();
-    if (code === "JARVIS") {
-        discount = 0.1; // 10%
-        tg.showAlert("Скидка 10% применена!");
-    } else {
-        discount = 0;
-        tg.showAlert("Код не найден");
-    }
-    renderCart();
+    if (subtotal > 0 && currentStep === 'main') {
+        tg.MainButton.setParams({
+            text: `КОРЗИНА ($${subtotal.toFixed(2)})`,
+            color: "#ffffff", text_color: "#000000", is_visible: true
+        });
+    } else if (subtotal === 0) tg.MainButton.hide();
 }
 
 function renderCart() {
-    let list = document.getElementById('cart-items');
-    let subtotal = cart.reduce((s, i) => s + i.price, 0);
-    list.innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222;"><span>${i.name}</span><span>$${i.price}</span></div>`).join('');
-    let final = subtotal * (1 - discount);
-    document.getElementById('total-val').innerText = `$${final.toFixed(2)}`;
+    let list = document.getElementById('cart-items-list');
+    list.innerHTML = ''; let subtotal = 0;
+    for (let key in cart) {
+        if (cart[key].count > 0) {
+            let itemTotal = cart[key].count * cart[key].price;
+            subtotal += itemTotal;
+            let name = key === 'Handle' ? 'Ручка Arm' : 'Эспандер';
+            list.innerHTML += `<div class="cart-item"><b>${name} x${cart[key].count}</b><div style="margin-left:auto">$${itemTotal.toFixed(2)}</div></div>`;
+        }
+    }
+    document.getElementById('cart-total-price').innerText = `$${subtotal.toFixed(2)}`;
 }
 
-// ЛОГИКА ГЛАВНОЙ НИЖНЕЙ КНОПКИ
+// --- Обновленная логика Проверки (с новыми полями Старка) ---
+function showCheckout() {
+    currentStep = 'checkout';
+    document.getElementById('address-screen').style.display = 'none';
+    document.getElementById('checkout-screen').style.display = 'block';
+    
+    let itemsDiv = document.getElementById('check-items');
+    itemsDiv.innerHTML = '';
+    for (let key in cart) {
+        if (cart[key].count > 0) {
+            itemsDiv.innerHTML += `<div>${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'} — ${cart[key].count} шт.</div>`;
+        }
+    }
+    
+    // Собираем новые поля для отображения
+    document.getElementById('check-address').innerHTML = `
+        <b>ФИО:</b> ${document.getElementById('fio').value}<br>
+        <b>Страна:</b> ${document.getElementById('country').value}<br>
+        <b>Город:</b> ${document.getElementById('city').value}<br>
+        <b>Пункт СДЭК:</b> ${document.getElementById('cdek-addr').value}<br>
+        <b>Email:</b> ${document.getElementById('email').value}
+    `;
+    
+    document.getElementById('check-total-price').innerText = document.getElementById('cart-total-price').innerText;
+    tg.MainButton.setText("ПОДТВЕРДИТЬ И ОПЛАТИТЬ");
+}
+
+// --- Навигация (с валидацией новых полей) ---
 tg.MainButton.onClick(() => {
-    if (step === 1) {
-        // Переход в корзину
-        document.getElementById('screen-main').classList.remove('active');
-        document.getElementById('screen-cart').classList.add('active');
+    if (currentStep === 'main') {
+        currentStep = 'cart';
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('cart-screen').style.display = 'block';
         renderCart();
         tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
         tg.BackButton.show();
-        step = 2;
-    } 
-    else if (step === 2) {
-        // Переход к адресу
-        document.getElementById('screen-cart').classList.remove('active');
-        document.getElementById('screen-address').classList.add('active');
-        // Кнопка становится "К ПРОВЕРКЕ ДАННЫХ"
-        tg.MainButton.setText("ОТПРАВИТЬ ЗАКАЗ");
-        step = 3;
-    } 
-    else if (step === 3) {
-        // ФИНАЛЬНЫЙ ШАГ: Сбор данных и ОТПРАВКА В БОТ
-        const orderData = {
-            cart: cart,
-            total: document.getElementById('total-val').innerText,
-            user: {
-                fio: document.getElementById('user-fio').value,
-                phone: document.getElementById('user-phone').value,
-                country: document.getElementById('user-country').value,
-                city: document.getElementById('user-city').value,
-                address: document.getElementById('user-address').value,
-                email: document.getElementById('user-email').value
-            }
-        };
+    } else if (currentStep === 'cart') {
+        currentStep = 'address';
+        document.getElementById('cart-screen').style.display = 'none';
+        document.getElementById('address-screen').style.display = 'block';
+        tg.MainButton.setText("К ПРОВЕРКЕ");
+    } else if (currentStep === 'address') {
+        // Валидация новых полей (Старк, я проверяю все поля)
+        const fio = document.getElementById('fio').value;
+        const country = document.getElementById('country').value;
+        const city = document.getElementById('city').value;
+        const cdek = document.getElementById('cdek-addr').value;
+        const email = document.getElementById('email').value;
 
-        // Валидация: проверяем хотя бы ФИО и Телефон
-        if (!orderData.user.fio || !orderData.user.phone) {
-            tg.showAlert("Пожалуйста, заполните ФИО и Телефон!");
-            return;
+        if (!fio || !country || !city || !cdek || !email) {
+            return tg.showAlert("Сэр, необходимо заполнить все поля получателя!");
+        }
+        // Простая проверка email
+        if (!email.includes('@mail.ru')) {
+            return tg.showAlert("Пожалуйста, используйте почту @mail.ru, как договаривались.");
         }
 
-        // ОТПРАВЛЯЕМ ДАННЫЕ В БОТ
-        tg.sendData(JSON.stringify(orderData));
-        tg.close(); // Закрываем Mini App
+        showCheckout();
+    } else if (currentStep === 'checkout') {
+        // Отправка полных данных боту
+        tg.sendData(JSON.stringify({
+            cart,
+            customer: {
+                fio: document.getElementById('fio').value,
+                country: document.getElementById('country').value,
+                city: document.getElementById('city').value,
+                cdek: document.getElementById('cdek-addr').value,
+                email: document.getElementById('email').value
+            },
+            total: document.getElementById('check-total-price').innerText
+        }));
     }
 });
 
 tg.BackButton.onClick(() => {
-    if (step === 2) {
-        document.getElementById('screen-cart').classList.remove('active');
-        document.getElementById('screen-main').classList.add('active');
+    if (currentStep === 'checkout') {
+        currentStep = 'address';
+        document.getElementById('checkout-screen').style.display = 'none';
+        document.getElementById('address-screen').style.display = 'block';
+        tg.MainButton.setText("К ПРОВЕРКЕ");
+    } else if (currentStep === 'address') {
+        currentStep = 'cart';
+        document.getElementById('address-screen').style.display = 'none';
+        document.getElementById('cart-screen').style.display = 'block';
+        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
+    } else if (currentStep === 'cart') {
+        currentStep = 'main';
+        document.getElementById('cart-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
         tg.BackButton.hide();
         updateMainButton();
-        step = 1;
-    } else if (step === 3) {
-        document.getElementById('screen-address').classList.remove('active');
-        document.getElementById('screen-cart').classList.add('active');
-        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
-        step = 2;
     }
 });
