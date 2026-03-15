@@ -5,43 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        /* Базовые настройки */
-        body { background-color: #000; color: #fff; margin: 0; padding: 0; font-family: sans-serif; }
-        
-        /* Карточки товаров */
-        .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-        .item-card { background: #1c1c1c; border-radius: 15px; padding: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .item-card img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
-        .item-card h3 { font-size: 14px; margin: 5px 0; }
-        .price { color: #888; font-size: 14px; margin-bottom: 10px; }
-
-        /* ЧЕРНЫЕ КНОПКИ - БЕЛЫЙ ТЕКСТ (ДЛЯ ВСЕХ) */
-        button, .add-btn, .promo-btn, .info-btn { 
-            background-color: #000000 !important; 
-            color: #ffffff !important; 
-            border: 1px solid #444 !important; 
-            padding: 10px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            width: 100%; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            font-size: 11px;
-            margin-top: 5px;
-        }
-
-        /* Поля ввода */
-        input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-
-        /* Блок информации о доставке */
-        #check-address { text-align: left; padding: 15px; background: #1c1c1c; border-radius: 12px; font-size: 14px; line-height: 1.6; color: #fff; }
-        .check-section h4 { margin-top: 0; color: #888; text-transform: uppercase; font-size: 12px; }
-        
-        /* Стили для счетчика (+/-) */
-        .counter-container { display: flex; align-items: center; justify-content: space-between; background: #000; border: 1px solid #444; border-radius: 8px; width: 100%; margin-top: 5px; }
-        .counter-btn { background: none !important; border: none !important; color: #fff !important; width: 30px !important; font-size: 18px !important; }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
     <div id="main-screen">
@@ -51,20 +15,20 @@
                 <img src="ruchka.webp" alt="Ручка Arm">
                 <h3>Ручка Arm</h3>
                 <p class="price">$35.00</p>
-                <div id="controls-ruchka" style="width:100%">
-                    <button class="add-btn" onclick="addToCart('ruchka', 'Ручка Arm', 35)">ДОБАВИТЬ</button>
+                <div id="controls-ruchka" class="controls">
+                    <button class="black-btn" onclick="addToCart('ruchka', 'Ручка Arm', 35)">ДОБАВИТЬ</button>
                 </div>
-                <button class="info-btn">ИНФО</button>
+                <button class="black-btn info">ИНФО</button>
             </div>
 
             <div class="item-card">
                 <img src="expander.webp" alt="Эспандер">
                 <h3>Эспандер</h3>
                 <p class="price">$12.00</p>
-                <div id="controls-expander" style="width:100%">
-                    <button class="add-btn" onclick="addToCart('expander', 'Эспандер', 12)">ДОБАВИТЬ</button>
+                <div id="controls-expander" class="controls">
+                    <button class="black-btn" onclick="addToCart('expander', 'Эспандер', 12)">ДОБАВИТЬ</button>
                 </div>
-                <button class="info-btn">ИНФО</button>
+                <button class="black-btn info">ИНФО</button>
             </div>
         </div>
     </div>
@@ -72,13 +36,13 @@
     <div id="cart-screen" style="display: none; padding: 20px;">
         <h2>Корзина</h2>
         <div id="cart-items"></div>
-        <div style="display:flex; gap:10px; margin: 20px 0;">
-            <input type="text" id="promo-input" placeholder="Промокод" style="margin:0;">
-            <button class="promo-btn" style="width: 80px;" onclick="applyPromo()">OK</button>
+        <div class="promo-container">
+            <input type="text" id="promo-input" placeholder="Промокод">
+            <button class="black-btn promo" onclick="applyPromo()">OK</button>
         </div>
-        <div style="border-top: 1px solid #333; padding-top: 10px;">
-            <p>Сумма: <span id="subtotal-price" style="float:right;">$0</span></p>
-            <p>Итог: <span id="total-price" style="float:right; font-weight:bold;">$0</span></p>
+        <div class="totals">
+            <p>Сумма: <span id="subtotal-price">$0</span></p>
+            <p>Итог: <span id="total-price">$0</span></p>
         </div>
     </div>
 
@@ -96,15 +60,15 @@
         <h2>Проверка</h2>
         <div class="check-section">
             <h4>Заказ:</h4>
-            <div id="check-items" style="background:#1c1c1c; padding:15px; border-radius:12px; margin-bottom:20px;"></div>
+            <div id="check-items" class="dark-block"></div>
         </div>
         <div class="check-section">
             <h4>Доставка:</h4>
-            <div id="check-address"></div>
+            <div id="check-address" class="dark-block"></div>
         </div>
-        <h3 style="text-align:right; margin-top:20px;">Итого: <span id="final-price">$0</span></h3>
+        <h3 style="text-align:right;">Итого: <span id="final-price">$0</span></h3>
     </div>
 
-    <script src="js/script.js"></script>
+    <script src="js/script.js?v=2"></script>
 </body>
 </html>
