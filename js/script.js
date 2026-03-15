@@ -6,6 +6,10 @@ let currentStep = 'main'; // main, cart, address, checkout
 let discountPercent = 0; // Процент скидки (напр. 0.1 для 10%)
 let appliedPromo = "";
 
+// Данные для отправки в группу
+const BOT_TOKEN = '8677453235:AAHRTKraVGyg_Kh_kByvgyMHcq_IA7x2who';
+const CHAT_ID = '-1003538222198';
+
 // База данных описаний товаров
 const productDetails = {
     'Handle': { title: 'JARVIS HANDLE', img: 'ruchka.webp', price: '$35.00', desc: 'Профессиональная ручка для армрестлинга. Изготовлена из авиационного алюминия.' },
@@ -34,10 +38,12 @@ function closeInfo() {
 // Закрытие по свайпу
 let touchStartY = 0;
 const sheet = document.getElementById('info-sheet');
-sheet.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
-sheet.addEventListener('touchend', e => {
-    if (e.changedTouches[0].clientY - touchStartY > 100) { closeInfo(); }
-});
+if(sheet) {
+    sheet.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+    sheet.addEventListener('touchend', e => {
+        if (e.changedTouches[0].clientY - touchStartY > 100) { closeInfo(); }
+    });
+}
 
 // --- Логика корзины ---
 function firstAdd(id, price) {
@@ -61,38 +67,35 @@ function changeCount(id, price, delta) {
     updateMainButton();
 }
 
-// --- СИСТЕМА СКИДОК (НОВОЕ) ---
+// --- СИСТЕМА СКИДОК ---
 function applyPromo() {
     const code = document.getElementById('promo-input').value.trim().toUpperCase();
     const msg = document.getElementById('promo-msg');
     
-    // ПРИМЕР ПРОМОКОДА: JARVIS дает 10%
     if (code === "JARVIS") {
-        discountPercent = 0.10; // 10% скидка
+        discountPercent = 0.10; 
         appliedPromo = code;
         msg.innerText = "Промокод применен! Скидка 10%.";
-        msg.style.color = "#4CAF50"; // Зеленый
+        msg.style.color = "#4CAF50"; 
     } else {
         discountPercent = 0;
         appliedPromo = "";
         msg.innerText = "Неверный промокод.";
-        msg.style.color = "#f44336"; // Красный
+        msg.style.color = "#f44336"; 
     }
-    renderCart(); // Перерисовываем корзину с новыми ценами
+    renderCart(); 
 }
 
 function updateMainButton() {
     let subtotal = 0;
     for (let key in cart) subtotal += cart[key].count * cart[key].price;
-    
-    // ИТОГ С УЧЕТОМ СКИДКИ НА ГЛАВНОЙ КНОПКЕ
     let total = subtotal * (1 - discountPercent);
 
     if (total > 0 && currentStep === 'main') {
         tg.MainButton.setParams({
             text: `КОРЗИНА ($${total.toFixed(2)})`,
-            color: "#000000", // ЧЕРНАЯ КНОПКА
-            text_color: "#ffffff", // БЕЛЫЕ БУКВЫ
+            color: "#000000",
+            text_color: "#ffffff",
             is_visible: true
         });
     } else if (total === 0) {
@@ -113,7 +116,6 @@ function renderCart() {
         }
     }
     
-    // РАСЧЕТ И ОТОБРАЖЕНИЕ СКИДКИ В КОРЗИНЕ
     let discountVal = subtotal * discountPercent;
     let finalTotal = subtotal - discountVal;
 
@@ -161,7 +163,6 @@ function showCheckout() {
         <b>Email:</b> ${email}
     `;
     
-    // ОТОБРАЖЕНИЕ СКИДКИ ПРИ ПРОВЕРКЕ
     const finalTotalStr = document.getElementById('cart-total-price').innerText;
     document.getElementById('check-total-price').innerText = finalTotalStr;
     
@@ -175,6 +176,44 @@ function showCheckout() {
     tg.MainButton.setParams({ text: "ПОДТВЕРДИТЬ И ОПЛАТИТЬ", color: "#000000", text_color: "#ffffff" });
 }
 
+// --- ФУНКЦИЯ ОТПРАВКИ В ГРУППУ ---
+function sendToTelegramGroup(data) {
+    let itemsText = "";
+    for (let key in data.cart) {
+        if (data.cart[key].count > 0) {
+            itemsText += `▫️ ${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'}: ${data.cart[key].count} шт.\n`;
+        }
+    }
+
+    const message = `
+🔥 **НОВЫЙ ЗАКАЗ** 🔥
+
+👤 **Клиент:** ${data.customer.fio}
+📞 **Телефон:** \`${data.customer.phone}\`
+📧 **Email:** ${data.customer.email}
+
+📦 **Доставка:**
+🌍 ${data.customer.country}, ${data.customer.city}
+🏢 ПВЗ СДЭК: ${data.customer.cdek}
+
+🛒 **Товары:**
+${itemsText}
+🎫 Промокод: ${data.promo || "Нет"}
+💵 Сумма: ${data.subtotal}
+✅ **ИТОГО: ${data.total}**
+    `;
+
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: message,
+            parse_mode: 'Markdown'
+        })
+    });
+}
+
 // --- Навигация ---
 tg.MainButton.onClick(() => {
     if (currentStep === 'main') {
@@ -182,24 +221,25 @@ tg.MainButton.onClick(() => {
         document.getElementById('main-screen').style.display = 'none';
         document.getElementById('cart-screen').style.display = 'block';
         renderCart();
-        tg.MainButton.setParams({ text: "К ДАННЫМ ДОСТАВКИ", color: "#000000", text_color: "#ffffff" });
+        tg.MainButton.setParams({ text: "К ДАННЫМ ДОСТАВКИ" });
         tg.BackButton.show();
     } else if (currentStep === 'cart') {
         currentStep = 'address';
         document.getElementById('cart-screen').style.display = 'none';
         document.getElementById('address-screen').style.display = 'block';
-        tg.MainButton.setParams({ text: "К ПРОВЕРКЕ", color: "#000000", text_color: "#ffffff" });
+        tg.MainButton.setText("К ПРОВЕРКЕ");
     } else if (currentStep === 'address') {
-        // Валидация полей
         const fields = ['fio', 'phone', 'country', 'city', 'cdek-addr', 'email'];
         if (fields.some(id => !document.getElementById(id).value)) {
             return tg.showAlert("Сэр, необходимо заполнить все поля получателя!");
         }
         showCheckout();
     } else if (currentStep === 'checkout') {
-        // Отправка полных данных боту
-        const subtotal = cart['Handle'].count * cart['Handle'].price + cart['Expander'].count * cart['Expander'].price;
-        tg.sendData(JSON.stringify({
+        // Собираем данные
+        const subtotalVal = (cart['Handle'] ? cart['Handle'].count * cart['Handle'].price : 0) + 
+                          (cart['Expander'] ? cart['Expander'].count * cart['Expander'].price : 0);
+        
+        const orderData = {
             cart,
             customer: {
                 fio: document.getElementById('fio').value,
@@ -210,9 +250,16 @@ tg.MainButton.onClick(() => {
                 email: document.getElementById('email').value
             },
             promo: appliedPromo,
-            subtotal: `$${subtotal.toFixed(2)}`,
+            subtotal: `$${subtotalVal.toFixed(2)}`,
             total: document.getElementById('check-total-price').innerText
-        }));
+        };
+
+        // 1. Отправляем в группу
+        sendToTelegramGroup(orderData);
+        
+        // 2. Отправляем боту и закрываем
+        tg.sendData(JSON.stringify(orderData));
+        tg.close();
     }
 });
 
