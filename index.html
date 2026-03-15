@@ -3,74 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MithrilARM Shop</title>
-    <link rel="stylesheet" href="style.css">
+    <title>MithrilARM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; overflow: hidden; }
+        #main-container { height: 100vh; overflow-y: auto; transition: filter 0.3s; }
+        .blur { filter: blur(5px); }
+
+        /* Витрина */
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; padding-bottom: 80px; }
+        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; cursor: pointer; }
+        
+        /* Кнопки карточки — ТЕПЕРЬ ОДИНАКОВЫЕ */
+        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .action-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; }
+        
+        .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
+        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; }
+        
+        /* Инфо-панель */
+        #info-sheet { 
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; 
+            background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; 
+            z-index: 1000; transition: bottom 0.3s ease-out;
+        }
+        #info-sheet.open { bottom: 0; }
+        .sheet-content { padding: 20px; text-align: left; }
+        #sheet-img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 20px; background: #1c1c1c; border-radius: 12px; }
+
+        /* Промокод (Экран 2) */
+        .promo-section { padding: 15px; border-top: 1px solid #222; text-align: left; }
+        .promo-input-row { display: flex; gap: 10px; margin-top: 10px; }
+        .promo-input-row input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; flex-grow: 1; }
+
+        /* Форма (Экран 3) */
+        .address-form { padding: 20px; text-align: left; }
+        .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
+        .address-form label { font-size: 12px; color: #888; }
+    </style>
 </head>
 <body>
-    <div id="main-wrapper">
-        <div id="screen-main" class="screen active">
-            <h2 class="shop-title">MITHRILARM</h2>
+    <div id="main-container">
+        <div id="main-screen">
+            <h2 style="margin-top: 20px;">MITHRILARM</h2>
             <div class="product-grid">
-                <div class="product-card">
-                    <img src="ruchka.webp" alt="Ручка">
-                    <div class="card-body">
-                        <b>Ручка Arm</b>
-                        <p>$35.00</p>
-                        <button class="btn-add" onclick="addItem('Ручка Arm', 35)">ДОБАВИТЬ</button>
-                        <button class="btn-info" onclick="openInfo('Ручка Arm', '$35', 'ruchka.webp')">ИНФО</button>
+                <div class="product-item">
+                    <img src="ruchka.webp" onclick="showInfo('Handle')">
+                    <span style="font-weight:bold; margin-bottom:5px;">Ручка Arm</span>
+                    <div style="color:#888; margin-bottom:10px;">$35.00</div>
+                    <div class="btn-group">
+                        <button id="add-Handle" class="action-btn" onclick="firstAdd('Handle', 35.00)">ДОБАВИТЬ</button>
+                        <div id="ctrl-Handle" class="count-ctrl">
+                            <button class="cnt-btn" onclick="changeCount('Handle', 35.00, -1)">-</button>
+                            <span id="count-Handle">1</span>
+                            <button class="cnt-btn" onclick="changeCount('Handle', 35.00, 1)">+</button>
+                        </div>
+                        <button class="action-btn" onclick="showInfo('Handle')">ИНФО</button>
                     </div>
                 </div>
-                <div class="product-card">
-                    <img src="expander.webp" alt="Эспандер">
-                    <div class="card-body">
-                        <b>Эспандер</b>
-                        <p>$12.00</p>
-                        <button class="btn-add" onclick="addItem('Эспандер', 12)">ДОБАВИТЬ</button>
-                        <button class="btn-info" onclick="openInfo('Эспандер', '$12', 'expander.webp')">ИНФО</button>
-                    </div>
                 </div>
-            </div>
         </div>
 
-        <div id="screen-cart" class="screen">
-            <h3>Ваша корзина</h3>
-            <div id="cart-content"></div>
+        <div id="cart-screen" style="display: none;">
+            <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
+            <div id="cart-items-list"></div>
             <div class="promo-section">
-                <input type="text" id="promo-field" placeholder="Промокод">
-                <button onclick="applyPromo()">OK</button>
+                <label style="font-size: 12px; color: #888;">У вас есть промокод?</label>
+                <div class="promo-input-row">
+                    <input type="text" id="promo-input" placeholder="Введите код">
+                    <button class="action-btn" style="width: auto; padding: 10px 20px;" onclick="applyPromo()">OK</button>
+                </div>
+                <div id="promo-msg" style="font-size: 12px; margin-top: 5px;"></div>
             </div>
-            <div class="total-line">Итого: <span id="total-price">$0</span></div>
+            <div class="cart-total">
+                <span>Итого:</span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
         </div>
 
-        <div id="screen-delivery" class="screen">
-            <h3>Адрес доставки</h3>
-            <div class="input-group">
+        <div id="address-screen" style="display: none;">
+            <h3 style="padding: 15px; text-align: left;">Данные получателя</h3>
+            <div class="address-form">
                 <label>Фамилия Имя Отчество</label>
-                <input type="text" id="user-fio">
+                <input type="text" id="fio" placeholder="Иванов Иван Иванович">
+                
                 <label>Номер телефона</label>
-                <input type="tel" id="user-phone">
+                <input type="tel" id="phone" placeholder="+7 (___) ___-__-__">
+
                 <label>Страна</label>
-                <input type="text" id="user-country">
+                <input type="text" id="country" placeholder="Россия">
+                
                 <label>Город</label>
-                <input type="text" id="user-city">
-                <label>Улица, дом, квартира</label>
-                <input type="text" id="user-address">
-                <label>Электронная почта</label>
-                <input type="email" id="user-email">
+                <input type="text" id="city" placeholder="Москва">
+                
+                <label>Адрес пункта СДЭК</label>
+                <input type="text" id="cdek-addr" placeholder="ул. Ленина, д. 10">
+                
+                <label>Электронная почта (Любая)</label>
+                <input type="email" id="email" placeholder="example@gmail.com">
             </div>
         </div>
     </div>
-
-    <div id="modal-info" class="modal">
-        <div class="modal-content">
-            <h2 id="modal-title"></h2>
-            <img id="modal-img" src="" alt="">
-            <p>Профессиональное оборудование MithrilARM для армрестлинга.</p>
-            <button class="btn-add" onclick="closeInfo()">ПОНЯТНО</button>
-        </div>
-    </div>
-
-    <script src="js/script.js"></script>
-</body>
+    </body>
 </html>
