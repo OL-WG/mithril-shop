@@ -3,14 +3,14 @@ tg.expand();
 
 let cart = {};
 let currentStep = 'main'; // main, cart, address, checkout
-let discountPercent = 0; // Процент скидки
+let discountPercent = 0; // Процент скидки (напр. 0.1 для 10%)
 let appliedPromo = "";
 
-// Данные для отправки в группу
+// ТВОИ ДАННЫЕ ДЛЯ ОТПРАВКИ
 const BOT_TOKEN = '8677453235:AAHRTKraVGyg_Kh_kByvgyMHcq_IA7x2who';
 const CHAT_ID = '-1003538222198';
 
-// База данных описаний товаров
+// База данных описаний товаров (Строго с твоими $)
 const productDetails = {
     'Handle': { title: 'JARVIS HANDLE', img: 'ruchka.webp', price: '$35.00', desc: 'Профессиональная ручка для армрестлинга. Изготовлена из авиационного алюминия.' },
     'Expander': { title: 'EXPANDER MAX', img: 'expander.webp', price: '$12.00', desc: 'Высокотехнологичный кистевой эспандер с регулируемой нагрузкой.' }
@@ -38,7 +38,7 @@ function closeInfo() {
 // Закрытие по свайпу
 let touchStartY = 0;
 const sheet = document.getElementById('info-sheet');
-if(sheet) {
+if (sheet) {
     sheet.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
     sheet.addEventListener('touchend', e => {
         if (e.changedTouches[0].clientY - touchStartY > 100) { closeInfo(); }
@@ -49,7 +49,9 @@ if(sheet) {
 function firstAdd(id, price) {
     document.getElementById(`add-${id}`).style.display = 'none';
     document.getElementById(`ctrl-${id}`).style.display = 'flex';
-    cart[id] = { count: 1, price: price };
+    // Очищаем цену от $ для расчетов
+    let numPrice = typeof price === 'string' ? parseFloat(price.replace('$', '')) : price;
+    cart[id] = { count: 1, price: numPrice };
     document.getElementById(`count-${id}`).innerText = "1";
     updateMainButton();
 }
@@ -176,14 +178,14 @@ function showCheckout() {
     tg.MainButton.setParams({ text: "ПОДТВЕРДИТЬ И ОПЛАТИТЬ", color: "#000000", text_color: "#ffffff" });
 }
 
-// --- Навигация и ФИНАЛЬНАЯ ОТПРАВКА ---
+// --- Обработчик Главной кнопки ---
 tg.MainButton.onClick(() => {
     if (currentStep === 'main') {
         currentStep = 'cart';
         document.getElementById('main-screen').style.display = 'none';
         document.getElementById('cart-screen').style.display = 'block';
         renderCart();
-        tg.MainButton.setParams({ text: "К ДАННЫМ ДОСТАВКИ" });
+        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
         tg.BackButton.show();
     } else if (currentStep === 'cart') {
         currentStep = 'address';
@@ -197,73 +199,60 @@ tg.MainButton.onClick(() => {
         }
         showCheckout();
     } else if (currentStep === 'checkout') {
-        // Блокируем кнопку, чтобы не нажали дважды
         tg.MainButton.showProgress();
 
-        // Собираем данные для сообщения
         const fio = document.getElementById('fio').value;
         const phone = document.getElementById('phone').value;
         const country = document.getElementById('country').value;
         const city = document.getElementById('city').value;
         const cdek = document.getElementById('cdek-addr').value;
         const email = document.getElementById('email').value;
-        const subtotalVal = (cart['Handle'] ? cart['Handle'].count * cart['Handle'].price : 0) + 
-                          (cart['Expander'] ? cart['Expander'].count * cart['Expander'].price : 0);
         const finalTotal = document.getElementById('check-total-price').innerText;
 
         let itemsText = "";
         for (let key in cart) {
             if (cart[key].count > 0) {
-                itemsText += `▫️ ${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'}: ${cart[key].count} шт.\n`;
+                itemsText += `- ${key === 'Handle' ? 'Ручка Arm' : 'Эспандер'}: ${cart[key].count} шт.\n`;
             }
         }
 
-        const message = `
-🔥 **НОВЫЙ ЗАКАЗ** 🔥
+        const message = "🔥 НОВЫЙ ЗАКАЗ 🔥\n\n" +
+                        "👤 Клиент: " + fio + "\n" +
+                        "📞 Тел: " + phone + "\n" +
+                        "📧 Email: " + email + "\n\n" +
+                        "📦 Доставка:\n" + country + ", " + city + "\n" +
+                        "🏢 ПВЗ СДЭК: " + cdek + "\n\n" +
+                        "🛒 Товары:\n" + itemsText + "\n" +
+                        "🎫 Промо: " + (appliedPromo || "Нет") + "\n" +
+                        "✅ ИТОГО: " + finalTotal;
 
-👤 **Клиент:** ${fio}
-📞 **Телефон:** ${phone}
-📧 **Email:** ${email}
-
-📦 **Доставка:**
-🌍 ${country}, ${city}
-🏢 ПВЗ СДЭК: ${cdek}
-
-🛒 **Товары:**
-${itemsText}
-🎫 Промокод: ${appliedPromo || "Нет"}
-💵 Сумма: $${subtotalVal.toFixed(2)}
-✅ **ИТОГО: ${finalTotal}**
-        `;
-
-        // ОТПРАВКА В ГРУППУ
+        // Отправка запроса
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
+                text: message
             })
         })
         .then(response => {
             if (response.ok) {
-                // Если в группу ушло, отправляем боту и закрываем
                 const orderData = { cart, customer: { fio, phone, country, city, cdek, email }, promo: appliedPromo, total: finalTotal };
                 tg.sendData(JSON.stringify(orderData));
-                setTimeout(() => tg.close(), 200);
+                setTimeout(() => tg.close(), 150);
             } else {
                 tg.hideProgress();
-                tg.showAlert("Ошибка API Telegram. Проверьте бота в группе.");
+                tg.showAlert("Ошибка отправки. Проверьте, добавлен ли бот в группу.");
             }
         })
         .catch(err => {
             tg.hideProgress();
-            tg.showAlert("Ошибка сети: " + err);
+            tg.showAlert("Ошибка соединения.");
         });
     }
 });
 
+// Назад
 tg.BackButton.onClick(() => {
     if (currentStep === 'checkout') {
         currentStep = 'address';
