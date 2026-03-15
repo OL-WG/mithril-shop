@@ -1,103 +1,38 @@
-let tg = window.Telegram.WebApp;
-tg.expand();
-
-let cart = [];
-let step = 1;
 let discount = 0;
+let appliedPromo = "";
 
-// Добавление в корзину
-function addItem(name, price) {
-    cart.push({name, price});
-    updateMainBtn();
-}
-
-function updateMainBtn() {
-    let total = cart.reduce((sum, item) => sum + item.price, 0);
-    if (total > 0 && step === 1) {
-        tg.MainButton.setText(`ПЕРЕЙТИ В КОРЗИНУ ($${total})`);
-        tg.MainButton.show();
-    }
-}
-
-// Модалка ИНФО
-function openInfo(title, price, img) {
-    document.getElementById('modal-title').innerText = title;
-    document.getElementById('modal-img').src = img;
-    document.getElementById('modal-info').classList.add('active');
-}
-function closeInfo() {
-    document.getElementById('modal-info').classList.remove('active');
-}
-
-// Промокоды
 function applyPromo() {
-    let code = document.getElementById('promo-field').value.toUpperCase();
+    const code = document.getElementById('promo-input').value.trim().toUpperCase();
+    // Логика: JARVIS дает 10%
     if (code === "JARVIS") {
-        discount = 0.1; // 10%
-        tg.showAlert("Промокод применен!");
+        discount = 0.1;
+        appliedPromo = code;
+        document.getElementById('promo-msg').style.color = "#4CAF50";
+        document.getElementById('promo-msg').innerText = "Промокод применен: Скидка 10%";
+    } else {
+        discount = 0;
+        appliedPromo = "";
+        document.getElementById('promo-msg').style.color = "#f44336";
+        document.getElementById('promo-msg').innerText = "Неверный промокод";
     }
     renderCart();
 }
 
 function renderCart() {
-    let list = document.getElementById('cart-content');
-    let subtotal = cart.reduce((s, i) => s + i.price, 0);
-    list.innerHTML = cart.map(i => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222;"><span>${i.name}</span><span>$${i.price}</span></div>`).join('');
-    let final = subtotal * (1 - discount);
-    document.getElementById('total-price').innerText = `$${final.toFixed(2)}`;
+    let list = document.getElementById('cart-items-list');
+    list.innerHTML = ''; 
+    let subtotal = 0;
+    for (let key in cart) {
+        if (cart[key].count > 0) {
+            let itemTotal = cart[key].count * cart[key].price;
+            subtotal += itemTotal;
+            list.innerHTML += `<div class="cart-item"><b>${key} x${cart[key].count}</b><div style="margin-left:auto">$${itemTotal.toFixed(2)}</div></div>`;
+        }
+    }
+    // Применяем скидку к итогу
+    let finalTotal = subtotal * (1 - discount);
+    document.getElementById('cart-total-price').innerText = `$${finalTotal.toFixed(2)}`;
 }
 
-// ГЛАВНЫЙ ОБРАБОТЧИК КНОПКИ ТЕЛЕГРАМА
-tg.MainButton.onClick(function() {
-    if (step === 1) {
-        document.getElementById('screen-main').classList.remove('active');
-        document.getElementById('screen-cart').classList.add('active');
-        renderCart();
-        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
-        tg.BackButton.show();
-        step = 2;
-    } 
-    else if (step === 2) {
-        document.getElementById('screen-cart').classList.remove('active');
-        document.getElementById('screen-delivery').classList.add('active');
-        tg.MainButton.setText("К ПРОВЕРКЕ");
-        step = 3;
-    } 
-    else if (step === 3) {
-        // СБОР ДАННЫХ И ОТПРАВКА
-        let data = {
-            order: cart,
-            total: document.getElementById('total-price').innerText,
-            user: {
-                fio: document.getElementById('user-fio').value,
-                phone: document.getElementById('user-phone').value,
-                address: document.getElementById('user-address').value,
-                city: document.getElementById('user-city').value,
-                email: document.getElementById('user-email').value
-            }
-        };
-
-        if (!data.user.fio || !data.user.phone) {
-            tg.showAlert("Заполните имя и телефон!");
-            return;
-        }
-
-        // КРИТИЧЕСКИЙ МОМЕНТ: Отправляем JSON строку боту
-        tg.sendData(JSON.stringify(data));
-    }
-});
-
-tg.BackButton.onClick(function() {
-    if (step === 2) {
-        document.getElementById('screen-cart').classList.remove('active');
-        document.getElementById('screen-main').classList.add('active');
-        tg.BackButton.hide();
-        updateMainBtn();
-        step = 1;
-    } else if (step === 3) {
-        document.getElementById('screen-delivery').classList.remove('active');
-        document.getElementById('screen-cart').classList.add('active');
-        tg.MainButton.setText("К ДАННЫМ ДОСТАВКИ");
-        step = 2;
-    }
-});
+// В навигации убрана проверка на @mail.ru
+// Теперь проходят любые почты (Gmail, iCloud и т.д.)
