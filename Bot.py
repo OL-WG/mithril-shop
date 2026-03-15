@@ -1,51 +1,39 @@
-import asyncio
 import json
+import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
-TOKEN = '7548447935:AAEq66mRun9O9kxPwccXDv7lPYvs0bW-KmE'
+# Твои данные
+TOKEN = '8677453235:AAG3NhS-yeH6oHZ4VXsTWKygXO9DqVD4l-k'
+APP_URL = 'https://ol-wg.github.io/mithril-shop/'
+
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 @dp.message(Command("start"))
-async def start(message: types.Message):
-    web_app = WebAppInfo(url="https://ol-wg.github.io/mithril-shop/")
-    markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Открыть магазин", web_app=web_app)]
-    ])
-    await message.answer("Нажмите на кнопку для заказа:", reply_markup=markup)
+async def cmd_start(message: types.Message):
+    markup = types.InlineKeyboardMarkup(inline_keyboard=[[
+        types.InlineKeyboardButton(text="Открыть Магазин 🛒", web_app=types.WebAppInfo(url=APP_URL))
+    ]])
+    await message.answer("Добро пожаловать в MithrilARM! Нажмите кнопку ниже для заказа:", reply_markup=markup)
 
 @dp.message(F.web_app_data)
-async def web_app_data_handler(message: types.Message):
-    try:
-        data = json.loads(message.web_app_data.data)
-        cart = data.get('cart', {})
-        # Извлекаем расширенные данные получателя
-        customer = data.get('customer', {})
-        total = data.get('total', '$0.00')
-        
-        res = "✅ **Новый заказ подтвержден!**\n\n"
-        
-        # Структурируем данные о клиенте (ФИО, СДЭК, Email)
-        res += f"👤 **Получатель:** {customer.get('fio', 'Не указано')}\n"
-        res += f"📍 **Доставка (СДЭК):**\n"
-        res += f"   Страна: {customer.get('country', '-')}\n"
-        res += f"   Город: {customer.get('city', '-')}\n"
-        res += f"   Пункт: {customer.get('cdek', '-')}\n"
-        res += f"📧 **Email:** {customer.get('email', '-')}\n\n"
-        
-        res += "📦 **Товары:**\n"
-        
-        for name, info in cart.items():
-            if info['count'] > 0:
-                n = "Ручка Arm" if name == "Handle" else "Эспандер"
-                res += f"• {n} x{info['count']}\n"
-        
-        res += f"\n💰 **Итого к оплате: {total}**"
-        await message.answer(res, parse_mode="Markdown")
-    except Exception as e:
-        await message.answer(f"Ошибка протокола данных: {e}")
+async def handle_data(message: types.Message):
+    # Получаем и парсим JSON от Mini App
+    raw_data = json.loads(message.web_app_data.data)
+    user = raw_data['user']
+    
+    msg_text = (
+        f"🚨 **НОВЫЙ ЗАКАЗ**\n\n"
+        f"👤 **Покупатель:** {user['fio']}\n"
+        f"📞 **Телефон:** {user['phone']}\n"
+        f"📍 **Город:** {user['city']}\n"
+        f"🏢 **СДЭК:** {user['cdek']}\n"
+        f"📧 **Email:** {user['email']}\n\n"
+        f"💰 **Сумма к оплате: {raw_data['total']}**"
+    )
+    
+    await message.answer(msg_text, parse_mode="Markdown")
 
 async def main():
     await dp.start_polling(bot)
