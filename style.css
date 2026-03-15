@@ -1,31 +1,22 @@
 body { background-color: #000; color: #fff; margin: 0; padding: 0; font-family: sans-serif; }
-
 .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
-
-/* Вернул твой вид карточек */
 .item-card { background: #1c1c1c; border-radius: 15px; padding: 15px; text-align: center; }
 .item-card img { width: 100%; border-radius: 10px; }
 .price { color: #888; font-size: 14px; margin: 10px 0; }
 
-/* КНОПКИ: ВСЕГДА ЧЕРНЫЕ */
 .black-btn { 
     background-color: #000 !important; 
     color: #fff !important; 
-    border: 1px solid #444 !important; 
+    border: 1px solid #333 !important; 
     padding: 12px; 
-    border-radius: 8px; 
+    border-radius: 10px; 
     font-weight: bold; 
     width: 100%; 
-    text-transform: uppercase; 
     cursor: pointer;
+    margin-top: 5px;
 }
+.black-btn.info { color: #666 !important; font-size: 10px; }
 
-.black-btn.info { margin-top: 8px; font-size: 10px; color: #888 !important; }
-.black-btn.promo { width: auto; padding: 0 20px; }
-
-/* Поля */
 input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-
-.dark-block { background: #1c1c1c; padding: 15px; border-radius: 12px; margin-bottom: 15px; line-height: 1.5; }
-.totals p { display: flex; justify-content: space-between; border-top: 1px solid #333; padding: 10px 0; margin: 0; }
-.promo-container { display: flex; gap: 10px; margin-bottom: 20px; }
+.dark-block { background: #1c1c1c; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+.promo-container { display: flex; gap: 10px; }
