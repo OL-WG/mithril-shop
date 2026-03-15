@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
     <div id="main-screen">
@@ -15,7 +15,7 @@
                 <img src="ruchka.webp" alt="Ручка Arm">
                 <h3>Ручка Arm</h3>
                 <p class="price">$35.00</p>
-                <div id="controls-ruchka" class="controls">
+                <div id="controls-ruchka">
                     <button class="black-btn" onclick="addToCart('ruchka', 'Ручка Arm', 35)">ДОБАВИТЬ</button>
                 </div>
                 <button class="black-btn info">ИНФО</button>
@@ -25,7 +25,7 @@
                 <img src="expander.webp" alt="Эспандер">
                 <h3>Эспандер</h3>
                 <p class="price">$12.00</p>
-                <div id="controls-expander" class="controls">
+                <div id="controls-expander">
                     <button class="black-btn" onclick="addToCart('expander', 'Эспандер', 12)">ДОБАВИТЬ</button>
                 </div>
                 <button class="black-btn info">ИНФО</button>
@@ -38,7 +38,7 @@
         <div id="cart-items"></div>
         <div class="promo-container">
             <input type="text" id="promo-input" placeholder="Промокод">
-            <button class="black-btn promo" onclick="applyPromo()">OK</button>
+            <button class="black-btn" style="width: 60px;" onclick="applyPromo()">OK</button>
         </div>
         <div class="totals">
             <p>Сумма: <span id="subtotal-price">$0</span></p>
@@ -58,17 +58,11 @@
 
     <div id="checkout-screen" style="display: none; padding: 20px;">
         <h2>Проверка</h2>
-        <div class="check-section">
-            <h4>Заказ:</h4>
-            <div id="check-items" class="dark-block"></div>
-        </div>
-        <div class="check-section">
-            <h4>Доставка:</h4>
-            <div id="check-address" class="dark-block"></div>
-        </div>
+        <div class="dark-block" id="check-items"></div>
+        <div class="dark-block" id="check-address"></div>
         <h3 style="text-align:right;">Итого: <span id="final-price">$0</span></h3>
     </div>
 
-    <script src="js/script.js?v=2"></script>
+    <script src="js/script.js?v=5"></script>
 </body>
 </html>
