@@ -1,11 +1,24 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
+tg.ready();
 
 let cart = {};
 let currentStep = 'main';
+let discountPercent = 0;
 
-// Конфиг для всех состояний MainButton
-const BTN_STYLE = { color: "#000000", text_color: "#ffffff" };
+const descriptions = {
+    'ruchka': 'Высококачественная ручка Arm для тренировок силы хвата. Выполнена из стали.',
+    'expander': 'Кистевой эспандер с регулируемой нагрузкой. Отлично подходит для разминки.'
+};
+
+function showInfo(id) {
+    document.getElementById('info-text').innerText = descriptions[id];
+    document.getElementById('info-modal').style.display = 'block';
+}
+
+function closeInfo() {
+    document.getElementById('info-modal').style.display = 'none';
+}
 
 function addToCart(id, name, price) {
     if (!cart[id]) cart[id] = { name, price, count: 1 };
@@ -13,27 +26,14 @@ function addToCart(id, name, price) {
     updateMainBtn();
 }
 
-function updateMainBtn() {
-    let total = 0;
-    for (let id in cart) total += cart[id].count * cart[id].price;
-
-    if (total > 0 && currentStep === 'main') {
-        tg.MainButton.setParams({ text: `КОРЗИНА ($${total})`, is_visible: true, ...BTN_STYLE });
-    } else if (total === 0) {
-        tg.MainButton.hide();
-    }
-}
-
 function renderControls(id) {
     const container = document.getElementById(`controls-${id}`);
-    if (cart[id]) {
-        container.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#000; border:1px solid #444; border-radius:8px; padding:4px;">
-                <button onclick="changeCount('${id}', -1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px;">-</button>
-                <span>${cart[id].count}</span>
-                <button onclick="changeCount('${id}', 1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px;">+</button>
-            </div>`;
-    }
+    container.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#000; border:1px solid #333; border-radius:10px; padding:4px;">
+            <button onclick="changeCount('${id}', -1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px; cursor:pointer;">-</button>
+            <span style="color:#fff;">${cart[id].count}</span>
+            <button onclick="changeCount('${id}', 1)" style="background:none; border:none; color:#fff; font-size:20px; width:30px; cursor:pointer;">+</button>
+        </div>`;
 }
 
 function changeCount(id, delta) {
@@ -50,18 +50,42 @@ function changeCount(id, delta) {
     updateMainBtn();
 }
 
+function applyPromo() {
+    const code = document.getElementById('promo-input').value.toLowerCase();
+    if (code === 'morozov' || code === 'jarvis') {
+        discountPercent = 10;
+        document.getElementById('discount-row').style.display = 'flex';
+        document.getElementById('discount-val').innerText = '10%';
+        tg.showAlert("Скидка 10% применена!");
+    } else {
+        discountPercent = 0;
+        document.getElementById('discount-row').style.display = 'none';
+        tg.showAlert("Промокод не найден");
+    }
+    renderCart();
+}
+
 function renderCart() {
     const container = document.getElementById('cart-items');
     container.innerHTML = '';
-    let total = 0;
+    let subtotal = 0;
     for (let id in cart) {
         let sum = cart[id].count * cart[id].price;
-        total += sum;
+        subtotal += sum;
         container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
             <span>${cart[id].name} x${cart[id].count}</span><span>$${sum}</span></div>`;
     }
-    document.getElementById('subtotal-price').innerText = `$${total}`;
-    document.getElementById('total-price').innerText = `$${total}`;
+    let total = subtotal - (subtotal * (discountPercent / 100));
+    document.getElementById('subtotal-price').innerText = `$${subtotal}`;
+    document.getElementById('total-price').innerText = `$${total.toFixed(2)}`;
+}
+
+function updateMainBtn() {
+    let total = 0;
+    for (let id in cart) total += cart[id].count * cart[id].price;
+    if (total > 0 && currentStep === 'main') {
+        tg.MainButton.setParams({ text: `КОРЗИНА ($${total})`, is_visible: true, color: "#000000", text_color: "#ffffff" });
+    } else if (total === 0) tg.MainButton.hide();
 }
 
 tg.MainButton.onClick(() => {
@@ -78,32 +102,43 @@ tg.MainButton.onClick(() => {
         document.getElementById('address-screen').style.display = 'block';
         tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ");
     } else if (currentStep === 'address') {
+        // Проверка заполнения
+        const fields = ['fio', 'phone', 'country', 'city', 'cdek-addr', 'email'];
+        for (let f of fields) {
+            if (document.getElementById(f).value.trim() === "") {
+                tg.showAlert("Пожалуйста, заполните ВСЕ поля!");
+                return;
+            }
+        }
+        
         currentStep = 'checkout';
         document.getElementById('address-screen').style.display = 'none';
         document.getElementById('checkout-screen').style.display = 'block';
-        
-        // Вывод всей инфы (ФИО, Тел, Страна, Город, СДЭК, Email)
+
+        // Вывод инфы на финальный экран
         document.getElementById('check-address').innerHTML = `
-            ${document.getElementById('fio').value}<br>
-            ${document.getElementById('phone').value}<br>
-            ${document.getElementById('country').value}, ${document.getElementById('city').value}<br>
-            ${document.getElementById('cdek-addr').value}<br>
-            ${document.getElementById('email').value}
+            <strong>Данные доставки:</strong><br>
+            ФИО: ${document.getElementById('fio').value}<br>
+            Тел: ${document.getElementById('phone').value}<br>
+            Адрес: ${document.getElementById('country').value}, ${document.getElementById('city').value}<br>
+            СДЭК: ${document.getElementById('cdek-addr').value}<br>
+            Email: ${document.getElementById('email').value}
         `;
-        
-        let total = 0;
-        let itemsHtml = '';
+
+        let subtotal = 0;
+        let itemsHtml = '<strong>Ваш заказ:</strong><br>';
         for (let id in cart) {
             let sum = cart[id].count * cart[id].price;
-            total += sum;
-            itemsHtml += `<div>${cart[id].name} x${cart[id].count} - $${sum}</div>`;
+            subtotal += sum;
+            itemsHtml += `${cart[id].name} x${cart[id].count} - $${sum}<br>`;
         }
+        let final = subtotal - (subtotal * (discountPercent / 100));
         document.getElementById('check-items').innerHTML = itemsHtml;
-        document.getElementById('final-price').innerText = `$${total}`;
+        document.getElementById('final-price').innerText = `$${final.toFixed(2)}`;
         tg.MainButton.setText("ОПЛАТИТЬ");
     }
 });
 
 tg.BackButton.onClick(() => {
-    location.reload(); // Простой способ вернуться в начало
+    location.reload();
 });
