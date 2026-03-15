@@ -6,18 +6,16 @@
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; overflow: hidden; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; overflow-x: hidden; }
         #main-container { height: 100vh; overflow-y: auto; transition: filter 0.3s; padding-bottom: 100px; box-sizing: border-box; }
-        .blur { filter: blur(5px); }
+        .blur { filter: blur(5px); pointer-events: none; } /* Блокируем клики при блюре */
 
-        /* Витрина */
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; cursor: pointer; }
         .product-name { display: block; font-weight: bold; font-size: 16px; margin-bottom: 5px; min-height: 40px; }
         .price { color: #888; margin-bottom: 10px; font-weight: bold; }
         
-        /* Кнопки в карточке */
         .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
         .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 12px; }
         .info-btn { background: #333; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; text-transform: uppercase; }
@@ -25,63 +23,48 @@
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
         .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
         
-        /* Корзина (Экран 2) */
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
-        
-        /* СИСТЕМА СКИДОК (НОВОЕ) */
-        .promo-section { padding: 15px; text-align: left; border-bottom: 1px solid #222; margin-bottom: 10px; }
-        .promo-section label { font-size: 12px; color: #888; margin-bottom: 5px; display: block; }
-        .promo-input-group { display: flex; gap: 10px; }
+        .promo-section { padding: 15px; text-align: left; border-bottom: 1px solid #222; }
+        .promo-input-group { display: flex; gap: 10px; margin-top: 5px; }
         .promo-input { flex-grow: 1; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 12px; }
-        .promo-btn { background: #fff; color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-        #promo-msg { font-size: 12px; margin-top: 5px; font-weight: bold; }
-
-        .cart-total { display: flex; flex-direction: column; align-items: flex-end; padding: 20px 15px; font-size: 18px; font-weight: bold; gap: 5px; }
-        .price-line { display: flex; justify-content: space-between; width: 100%; }
+        
+        .cart-total { padding: 20px 15px; font-size: 18px; font-weight: bold; }
+        .price-line { display: flex; justify-content: space-between; width: 100%; margin-bottom: 5px; }
         .discount-line { color: #f44336; font-size: 14px; }
 
-        /* Формы (Экран 3) */
         .address-form { padding: 20px; text-align: left; }
         .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        .address-form label { font-size: 12px; color: #888; margin-left: 5px; }
 
-        /* Экран проверки (Экран 4) */
         .check-section { text-align: left; padding: 15px; background: #1c1c1c; border-radius: 12px; margin: 15px; font-size: 14px; }
-        .check-section h4 { margin: 0 0 10px 0; color: #888; text-transform: uppercase; font-size: 12px; }
-        .check-price-block { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; margin-top: 20px; padding: 0 15px; }
         .old-price-check { text-decoration: line-through; color: #888; font-size: 14px; }
 
-        /* Bottom Sheet ИНФО */
+        /* По умолчанию скрыт и не мешает кликам */
         #info-sheet { 
             position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; 
             background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; 
-            z-index: 1000; transition: bottom 0.3s ease-out; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
+            z-index: 1000; transition: bottom 0.3s ease-out; display: flex; flex-direction: column;
+            pointer-events: none; 
         }
-        #info-sheet.open { bottom: 0; }
-        .sheet-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .sheet-close { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
+        #info-sheet.open { bottom: 0; pointer-events: auto; }
         .sheet-content { padding: 20px; flex-grow: 1; overflow-y: auto; text-align: left; }
-        #sheet-img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 20px; background: #1c1c1c; border-radius: 12px; padding: 10px; box-sizing: border-box; }
-        .sheet-desc { color: #ccc; line-height: 1.5; font-size: 14px; margin-bottom: 20px; }
-        .sheet-cost-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: bold; }
+        #sheet-img { width: 100%; height: 200px; object-fit: contain; background: #1c1c1c; border-radius: 12px; }
     </style>
 </head>
 <body>
     <div id="main-container">
         <div id="main-screen">
-            <h2 style="margin-top: 20px; letter-spacing: 1px;">MorozovShop</h2>
+            <h2 style="margin-top: 20px;">MorozovShop</h2>
             <div class="product-grid">
                 <div class="product-item">
                     <img src="ruchka.webp" onclick="showInfo('Handle')">
                     <span class="product-name">Ручка Arm</span>
                     <div class="price">$35.00</div>
                     <div class="btn-group">
-                        <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35.00)">ДОБАВИТЬ</button>
+                        <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35)">ДОБАВИТЬ</button>
                         <div id="ctrl-Handle" class="count-ctrl">
-                            <button class="cnt-btn" onclick="changeCount('Handle', 35.00, -1)">-</button>
+                            <button class="cnt-btn" onclick="changeCount('Handle', 35, -1)">-</button>
                             <span id="count-Handle">1</span>
-                            <button class="cnt-btn" onclick="changeCount('Handle', 35.00, 1)">+</button>
+                            <button class="cnt-btn" onclick="changeCount('Handle', 35, 1)">+</button>
                         </div>
                         <button class="info-btn" onclick="showInfo('Handle')">ИНФО</button>
                     </div>
@@ -91,11 +74,11 @@
                     <span class="product-name">Эспандер</span>
                     <div class="price">$12.00</div>
                     <div class="btn-group">
-                        <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12.00)">ДОБАВИТЬ</button>
+                        <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12)">ДОБАВИТЬ</button>
                         <div id="ctrl-Expander" class="count-ctrl">
-                            <button class="cnt-btn" onclick="changeCount('Expander', 12.00, -1)">-</button>
+                            <button class="cnt-btn" onclick="changeCount('Expander', 12, -1)">-</button>
                             <span id="count-Expander">1</span>
-                            <button class="cnt-btn" onclick="changeCount('Expander', 12.00, 1)">+</button>
+                            <button class="cnt-btn" onclick="changeCount('Expander', 12, 1)">+</button>
                         </div>
                         <button class="info-btn" onclick="showInfo('Expander')">ИНФО</button>
                     </div>
@@ -104,94 +87,198 @@
         </div>
 
         <div id="cart-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
+            <h3 style="padding: 15px; text-align: left;">Корзина</h3>
             <div id="cart-items-list"></div>
-            
             <div class="promo-section">
-                <label>Промокод на скидку</label>
                 <div class="promo-input-group">
-                    <input type="text" id="promo-input" class="promo-input" placeholder="Введите код (напр. JARVIS)">
-                    <button class="promo-btn" onclick="applyPromo()">Применить</button>
+                    <input type="text" id="promo-input" class="promo-input" placeholder="Промокод">
+                    <button class="promo-btn" style="background:#fff; border-radius:8px; padding:0 10px;" onclick="applyPromo()">OK</button>
                 </div>
-                <div id="promo-msg"></div>
+                <div id="promo-msg" style="font-size:12px; margin-top:5px;"></div>
             </div>
-
             <div class="cart-total">
-                <div class="price-line">
-                    <span>Сумма:</span>
-                    <span id="cart-subtotal">$0.00</span>
-                </div>
+                <div class="price-line"><span>Сумма:</span><span id="cart-subtotal">$0.00</span></div>
                 <div class="price-line discount-line" id="cart-discount-row" style="display: none;">
-                    <span>Скидка:</span>
-                    <span id="cart-discount-val">-$0.00</span>
+                    <span>Скидка:</span><span id="cart-discount-val">-$0.00</span>
                 </div>
-                <div class="price-line" style="font-size: 20px; margin-top: 5px;">
-                    <span>Итог:</span>
-                    <span id="cart-total-price">$0.00</span>
-                </div>
+                <div class="price-line"><span>Итог:</span><span id="cart-total-price">$0.00</span></div>
             </div>
         </div>
 
         <div id="address-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Данные получателя</h3>
             <div class="address-form">
-                <label>Фамилия Имя Отчество</label>
-                <input type="text" id="fio" placeholder="Иванов Иван Иванович">
-                
-                <label>Номер телефона</label>
-                <input type="tel" id="phone" placeholder="+7 (999) 123-45-67">
-
-                <label>Страна</label>
-                <input type="text" id="country" placeholder="Россия">
-                
-                <label>Город</label>
-                <input type="text" id="city" placeholder="Москва">
-                
-                <label>Адрес пункта СДЭК</label>
-                <input type="text" id="cdek-addr" placeholder="ул. Ленина, д. 10">
-                
-                <label>Электронная почта</label>
-                <input type="email" id="email" placeholder="example@mail.ru или gmail.com">
+                <input type="text" id="fio" placeholder="ФИО">
+                <input type="tel" id="phone" placeholder="Телефон">
+                <input type="text" id="country" placeholder="Страна">
+                <input type="text" id="city" placeholder="Город">
+                <input type="text" id="cdek-addr" placeholder="Адрес СДЭК">
+                <input type="email" id="email" placeholder="Email">
             </div>
         </div>
 
         <div id="checkout-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Проверка данных</h3>
-            <div class="check-section">
-                <h4>Заказ</h4>
-                <div id="check-items"></div>
-            </div>
-            <div class="check-section">
-                <h4>Получатель и Доставка</h4>
-                <div id="check-address"></div>
-            </div>
-            
-            <div class="check-price-block">
-                <span class="old-price-check" id="check-old-price" style="display: none;">$0.00</span>
-                <div style="font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; width: 100%;">
-                    <span>К оплате:</span>
-                    <span id="check-total-price">$0.00</span>
-                </div>
+            <div class="check-section"><h4>Заказ:</h4><div id="check-items"></div></div>
+            <div class="check-section"><h4>Доставка:</h4><div id="check-address"></div></div>
+            <div style="padding: 15px; text-align: right;">
+                <span class="old-price-check" id="check-old-price" style="display:none;"></span>
+                <div style="font-size: 20px; font-weight: bold;">Итого: <span id="check-total-price"></span></div>
             </div>
         </div>
     </div>
 
     <div id="info-sheet">
-        <div class="sheet-header">
-            <h3 id="sheet-title" style="margin:0;">Название</h3>
-            <button class="sheet-close" onclick="closeInfo()">&times;</button>
+        <div style="padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222;">
+            <h3 id="sheet-title" style="margin:0;"></h3>
+            <button onclick="closeInfo()" style="background:none; border:none; color:#fff; font-size:24px;">&times;</button>
         </div>
         <div class="sheet-content">
             <img src="" id="sheet-img">
-            <div class="sheet-desc" id="sheet-desc">Описание...</div>
-            <div class="sheet-cost-row">
-                <span>СТОИМОСТЬ</span>
-                <span id="sheet-price" style="font-size: 18px;">$0.00</span>
+            <p id="sheet-desc" style="color:#ccc; line-height:1.5;"></p>
+            <div style="display:flex; justify-content:space-between; font-weight:bold; margin: 20px 0;">
+                <span>ЦЕНА</span><span id="sheet-price"></span>
             </div>
-            <button class="add-btn" style="background: #f0f0f0;" onclick="closeInfo()">ПОНЯТНО</button>
+            <button class="add-btn" onclick="closeInfo()">ЗАКРЫТЬ</button>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let cart = {};
+        let currentStep = 'main';
+        let discountPercent = 0;
+
+        const productDetails = {
+            'Handle': { title: 'JARVIS HANDLE', img: 'ruchka.webp', price: '$35.00', desc: 'Профессиональная ручка для армрестлинга.' },
+            'Expander': { title: 'EXPANDER MAX', img: 'expander.webp', price: '$12.00', desc: 'Высокотехнологичный эспандер.' }
+        };
+
+        function showInfo(id) {
+            const data = productDetails[id];
+            document.getElementById('sheet-title').innerText = data.title;
+            document.getElementById('sheet-img').src = data.img;
+            document.getElementById('sheet-desc').innerText = data.desc;
+            document.getElementById('sheet-price').innerText = data.price;
+            document.getElementById('info-sheet').classList.add('open');
+            document.getElementById('main-container').classList.add('blur');
+        }
+
+        function closeInfo() {
+            document.getElementById('info-sheet').classList.remove('open');
+            document.getElementById('main-container').classList.remove('blur');
+        }
+
+        function firstAdd(id, price) {
+            document.getElementById(`add-${id}`).style.display = 'none';
+            document.getElementById(`ctrl-${id}`).style.display = 'flex';
+            cart[id] = { count: 1, price: price };
+            updateMainButton();
+        }
+
+        function changeCount(id, price, delta) {
+            cart[id].count += delta;
+            if (cart[id].count <= 0) {
+                delete cart[id];
+                document.getElementById(`add-${id}`).style.display = 'block';
+                document.getElementById(`ctrl-${id}`).style.display = 'none';
+            } else {
+                document.getElementById(`count-${id}`).innerText = cart[id].count;
+            }
+            updateMainButton();
+        }
+
+        function updateMainButton() {
+            let total = 0;
+            for (let id in cart) total += cart[id].count * cart[id].price;
+            total = total * (1 - discountPercent);
+
+            if (total > 0 && currentStep === 'main') {
+                tg.MainButton.setParams({ text: `КОРЗИНА ($${total.toFixed(2)})`, is_visible: true, color: "#ffffff", text_color: "#000000" });
+            } else if (total === 0 && currentStep === 'main') {
+                tg.MainButton.hide();
+            }
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promo-input').value.toUpperCase();
+            if (code === "JARVIS") {
+                discountPercent = 0.1;
+                document.getElementById('promo-msg').innerText = "Скидка 10% применена";
+                document.getElementById('promo-msg').style.color = "#4CAF50";
+            } else {
+                discountPercent = 0;
+                document.getElementById('promo-msg').innerText = "Неверный код";
+                document.getElementById('promo-msg').style.color = "#f44336";
+            }
+            renderCart();
+        }
+
+        function renderCart() {
+            let list = document.getElementById('cart-items-list');
+            list.innerHTML = '';
+            let subtotal = 0;
+            for (let id in cart) {
+                let sum = cart[id].count * cart[id].price;
+                subtotal += sum;
+                list.innerHTML += `<div class="cart-item"><span>${id === 'Handle' ? 'Ручка' : 'Эспандер'} x${cart[id].count}</span><span>$${sum.toFixed(2)}</span></div>`;
+            }
+            let disc = subtotal * discountPercent;
+            document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cart-discount-val').innerText = `-$${disc.toFixed(2)}`;
+            document.getElementById('cart-discount-row').style.display = disc > 0 ? 'flex' : 'none';
+            document.getElementById('cart-total-price').innerText = `$${(subtotal - disc).toFixed(2)}`;
+        }
+
+        tg.MainButton.onClick(() => {
+            if (currentStep === 'main') {
+                currentStep = 'cart';
+                document.getElementById('main-screen').style.display = 'none';
+                document.getElementById('cart-screen').style.display = 'block';
+                renderCart();
+                tg.MainButton.setText("К ОФОРМЛЕНИЮ");
+                tg.BackButton.show();
+            } else if (currentStep === 'cart') {
+                currentStep = 'address';
+                document.getElementById('cart-screen').style.display = 'none';
+                document.getElementById('address-screen').style.display = 'block';
+                tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ");
+            } else if (currentStep === 'address') {
+                const fields = ['fio', 'phone', 'city'];
+                if (fields.some(f => !document.getElementById(f).value)) return tg.showAlert("Заполните поля!");
+                
+                currentStep = 'checkout';
+                document.getElementById('address-screen').style.display = 'none';
+                document.getElementById('checkout-screen').style.display = 'block';
+                
+                document.getElementById('check-items').innerHTML = document.getElementById('cart-items-list').innerHTML;
+                document.getElementById('check-address').innerText = `${document.getElementById('fio').value}, ${document.getElementById('city').value}`;
+                document.getElementById('check-total-price').innerText = document.getElementById('cart-total-price').innerText;
+                tg.MainButton.setText("ОПЛАТИТЬ");
+            } else if (currentStep === 'checkout') {
+                tg.sendData(JSON.stringify({ cart: cart, total: document.getElementById('check-total-price').innerText }));
+            }
+        });
+
+        tg.BackButton.onClick(() => {
+            if (currentStep === 'cart') {
+                currentStep = 'main';
+                document.getElementById('cart-screen').style.display = 'none';
+                document.getElementById('main-screen').style.display = 'block';
+                tg.BackButton.hide();
+                updateMainButton();
+            } else if (currentStep === 'address') {
+                currentStep = 'cart';
+                document.getElementById('address-screen').style.display = 'none';
+                document.getElementById('cart-screen').style.display = 'block';
+                tg.MainButton.setText("К ОФОРМЛЕНИЮ");
+            } else if (currentStep === 'checkout') {
+                currentStep = 'address';
+                document.getElementById('checkout-screen').style.display = 'none';
+                document.getElementById('address-screen').style.display = 'block';
+                tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ");
+            }
+        });
+    </script>
 </body>
 </html>
