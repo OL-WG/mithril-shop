@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=12">
+    <style>
+        /* Стили для модального окна ИНФО */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: #1c1c1c; margin: 20% auto; padding: 25px; border-radius: 15px; width: 80%; position: relative; border: 1px solid #333; color: #fff; text-align: center; }
+        .close { position: absolute; right: 15px; top: 10px; font-size: 28px; color: #666; cursor: pointer; }
+        #discount-row { display: none; color: #ff4444; justify-content: space-between; border-top: 1px solid #333; padding: 10px 0; }
+    </style>
 </head>
 <body>
     <div id="main-screen">
@@ -15,20 +22,20 @@
                 <img src="ruchka.webp" alt="Ручка Arm">
                 <h3>Ручка Arm</h3>
                 <p class="price">$35.00</p>
-                <div id="controls-ruchka">
+                <div id="controls-ruchka" class="controls">
                     <button class="black-btn" onclick="addToCart('ruchka', 'Ручка Arm', 35)">ДОБАВИТЬ</button>
                 </div>
-                <button class="black-btn info">ИНФО</button>
+                <button class="black-btn info" onclick="showInfo('ruchka')">ИНФО</button>
             </div>
 
             <div class="item-card">
                 <img src="expander.webp" alt="Эспандер">
                 <h3>Эспандер</h3>
                 <p class="price">$12.00</p>
-                <div id="controls-expander">
+                <div id="controls-expander" class="controls">
                     <button class="black-btn" onclick="addToCart('expander', 'Эспандер', 12)">ДОБАВИТЬ</button>
                 </div>
-                <button class="black-btn info">ИНФО</button>
+                <button class="black-btn info" onclick="showInfo('expander')">ИНФО</button>
             </div>
         </div>
     </div>
@@ -36,13 +43,17 @@
     <div id="cart-screen" style="display: none; padding: 20px;">
         <h2>Корзина</h2>
         <div id="cart-items"></div>
-        <div class="promo-container">
-            <input type="text" id="promo-input" placeholder="Промокод">
-            <button class="black-btn" style="width: 60px;" onclick="applyPromo()">OK</button>
+        <div class="promo-container" style="display:flex; gap:10px; margin-bottom:20px;">
+            <input type="text" id="promo-input" placeholder="Промокод" style="margin:0;">
+            <button class="black-btn" style="width: 80px;" onclick="applyPromo()">OK</button>
         </div>
         <div class="totals">
-            <p>Сумма: <span id="subtotal-price">$0</span></p>
-            <p>Итог: <span id="total-price">$0</span></p>
+            <p style="display:flex; justify-content:space-between; border-top: 1px solid #333; padding:10px 0;">Сумма: <span id="subtotal-price">$0</span></p>
+            <div id="discount-row">
+                <span>Скидка:</span>
+                <span id="discount-val">0%</span>
+            </div>
+            <p style="display:flex; justify-content:space-between; border-top: 1px solid #333; padding:10px 0; font-weight:bold;">Итог: <span id="total-price">$0</span></p>
         </div>
     </div>
 
@@ -58,11 +69,18 @@
 
     <div id="checkout-screen" style="display: none; padding: 20px;">
         <h2>Проверка</h2>
-        <div class="dark-block" id="check-items"></div>
-        <div class="dark-block" id="check-address"></div>
-        <h3 style="text-align:right;">Итого: <span id="final-price">$0</span></h3>
+        <div id="check-items" class="dark-block" style="background:#1c1c1c; padding:15px; border-radius:12px; margin-bottom:15px;"></div>
+        <div id="check-address" class="dark-block" style="background:#1c1c1c; padding:15px; border-radius:12px; margin-bottom:15px;"></div>
+        <h3 style="text-align:right;">Итого к оплате: <span id="final-price">$0</span></h3>
     </div>
 
-    <script src="js/script.js?v=5"></script>
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeInfo()">&times;</span>
+            <div id="info-text" style="line-height:1.5;"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js?v=12"></script>
 </body>
 </html>
