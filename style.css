@@ -10,13 +10,13 @@ body { background: #000; color: #fff; font-family: -apple-system, sans-serif; ma
 .card h3 { font-size: 16px; margin: 5px 0; }
 .price { color: #888; margin-bottom: 15px; font-size: 15px; }
 
-/* Кнопки */
-.btn-white { background: #fff; color: #000; border: none; border-radius: 12px; width: 100%; padding: 12px 0; font-weight: bold; font-size: 14px; cursor: pointer; }
-.btn-gray { background: #2c2c2c; color: #fff; border: none; border-radius: 10px; width: 100%; padding: 10px 0; margin-top: 8px; font-size: 13px; cursor: pointer; text-transform: uppercase; color: #aaa; }
+/* Кнопки и Счетчики */
+.btn-white { background: #fff; color: #000; border: none; border-radius: 12px; width: 100%; padding: 12px 0; font-weight: bold; font-size: 14px; }
+.btn-gray { background: #2c2c2c; color: #aaa; border: none; border-radius: 10px; width: 100%; padding: 10px 0; margin-top: 8px; font-size: 13px; text-transform: uppercase; }
 .counter { display: none; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px; }
 .counter button { background: #2c2c2c; color: #fff; border: none; border-radius: 10px; width: 40px; height: 40px; font-size: 18px; }
 
-/* Навигация */
+/* Навигация и заголовки */
 .header-nav { width: 100%; padding: 15px 20px; color: #248bf5; font-size: 17px; text-align: left; }
 .title-left { align-self: flex-start; padding-left: 20px; font-size: 28px; font-weight: bold; margin: 10px 0 20px 0; }
 
@@ -25,13 +25,16 @@ body { background: #000; color: #fff; font-family: -apple-system, sans-serif; ma
 input { background: #1c1c1c; border: none; color: #fff; padding: 18px; border-radius: 15px; width: 100%; margin-bottom: 12px; font-size: 16px; box-sizing: border-box; }
 input::placeholder { color: #555; }
 
-/* Промокод */
+/* Корзина */
+.cart-list { width: 100%; padding: 0 20px; box-sizing: border-box; }
+.cart-item { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 17px; }
 .promo-block { display: flex; gap: 10px; align-items: center; }
-.btn-ok-black { background: #000; color: #fff; border: 1px solid #333; border-radius: 12px; padding: 0 20px; height: 54px; font-weight: bold; cursor: pointer; }
+.btn-ok-black { background: #000; color: #fff; border: 1px solid #333; border-radius: 12px; padding: 0 20px; height: 54px; font-weight: bold; }
+.summary { width: 100%; padding: 0 20px; box-sizing: border-box; text-align: left; margin-top: 20px; }
 
 /* Проверка данных */
 .data-group { background: #1c1c1c; border-radius: 18px; width: 92%; padding: 20px; margin-bottom: 15px; box-sizing: border-box; }
-.group-label { color: #555; font-size: 12px; margin-bottom: 15px; font-weight: bold; }
+.group-label { color: #555; font-size: 12px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
 .group-content { line-height: 1.6; font-size: 15px; }
 .final-pay-row { width: 92%; display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; margin-top: 20px; }
 
@@ -40,6 +43,6 @@ input::placeholder { color: #555; }
 .modal-content { background: #000; width: 90%; border-radius: 30px; padding: 40px 25px; text-align: center; border: 1px solid #1c1c1c; }
 .btn-white-modal { background: #fff; color: #000; border: none; border-radius: 20px; width: 100%; padding: 18px 0; font-weight: bold; margin-top: 30px; font-size: 16px; }
 
-/* Футер */
+/* Нижняя кнопка */
 .footer-fixed { position: fixed; bottom: 25px; width: 100%; display: flex; justify-content: center; padding: 0 20px; box-sizing: border-box; }
 .btn-main { background: #fff; color: #000; border: none; border-radius: 15px; width: 100%; padding: 20px 0; font-weight: bold; font-size: 17px; display: none; text-transform: uppercase; }
