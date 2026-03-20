@@ -42,9 +42,11 @@
         <div class="header-nav"><span onclick="showShop()">✕ Назад</span></div>
         <h2 class="title-left">Корзина</h2>
         <div id="cart-items-list" class="cart-list"></div>
-        <div class="promo-block">
-            <input type="text" id="promo-input" placeholder="Jarvis">
-            <button class="btn-ok" onclick="applyPromo()">OK</button>
+        <div class="promo-container">
+            <div class="promo-block">
+                <input type="text" id="promo-input" placeholder="Jarvis">
+                <button class="btn-ok-black" onclick="applyPromo()">ОК</button>
+            </div>
         </div>
         <div class="summary">
             <div id="total-sum">Сумма: $0</div>
@@ -70,13 +72,13 @@
         <h2 class="title-left">Проверка данных</h2>
         <div class="data-group">
             <div class="group-label">ЗАКАЗ</div>
-            <div id="check-order"></div>
+            <div id="check-order" class="group-content"></div>
         </div>
         <div class="data-group">
             <div class="group-label">ПОЛУЧАТЕЛЬ И ДОСТАВКА</div>
             <div id="check-delivery" class="group-content"></div>
         </div>
-        <div class="final-row">
+        <div class="final-pay-row">
             <span>К оплате:</span>
             <span id="final-pay-amount"></span>
         </div>
@@ -86,12 +88,12 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">✕</span>
             <div id="modal-body"></div>
-            <button class="btn-white" onclick="closeModal()" style="margin-top:20px">ПОНЯТНО</button>
+            <button class="btn-white-modal" onclick="closeModal()">ПОНЯТНО</button>
         </div>
     </div>
 
     <div class="footer-fixed">
-        <button id="footer-btn" class="btn-white btn-main" onclick="handleFooterClick()"></button>
+        <button id="footer-btn" class="btn-main" onclick="handleFooterClick()"></button>
     </div>
 
     <script src="script.js"></script>
