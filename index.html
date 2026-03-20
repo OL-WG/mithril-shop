@@ -5,72 +5,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=10">
+    <style>
+        /* Твой фирменный черно-белый стиль */
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center; 
+        }
+        #main-container { padding-bottom: 100px; }
+        h2 { margin-top: 20px; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+        
+        /* Сетка товаров */
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            padding: 15px; 
+        }
+        .product-item { 
+            background: #151515; 
+            border-radius: 18px; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            border: 1px solid #222; 
+        }
+        .product-item img { 
+            width: 100%; 
+            height: 110px; 
+            object-fit: contain; 
+            margin-bottom: 10px; 
+        }
+        .product-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .price { color: #888; font-size: 16px; margin-bottom: 12px; }
+        
+        /* Кнопки */
+        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .add-btn { 
+            background: #fff; 
+            color: #000; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+        }
+        .info-btn { 
+            background: #222; 
+            color: #fff; 
+            border: 1px solid #333; 
+            padding: 8px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
+
+        /* Управление количеством (скрыто по умолчанию) */
+        .count-ctrl { 
+            display: none; 
+            align-items: center; 
+            justify-content: space-between; 
+            width: 100%; 
+        }
+        .cnt-btn { 
+            background: #333; 
+            color: #fff; 
+            border: none; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 10px; 
+            font-size: 20px; 
+        }
+    </style>
 </head>
 <body>
-    <div id="main-screen">
-        <h2 style="text-align:center;">MorozovShop</h2>
-        <div class="items-grid">
-            <div class="item-card">
-                <img src="ruchka.webp" alt="Ручка Arm">
-                <h3>Ручка Arm</h3>
-                <p class="price">$35.00</p>
-                <div id="controls-ruchka">
-                    <button class="black-btn" onclick="addToCart('ruchka', 'Ручка Arm', 35)">ДОБАВИТЬ</button>
+    <div id="main-container">
+        <h2>MorozovShop</h2>
+        
+        <div class="product-grid">
+            <div class="product-item">
+                <img src="ruchka.webp">
+                <div class="product-name">Ручка Арм</div>
+                <div class="price">$35</div>
+                <div class="btn-group">
+                    <button class="add-btn" onclick="addToCart(this)">ДОБАВИТЬ</button>
+                    <div class="count-ctrl">
+                        <button class="cnt-btn" onclick="changeQty(this, -1)">-</button>
+                        <span class="qty">1</span>
+                        <button class="cnt-btn" onclick="changeQty(this, 1)">+</button>
+                    </div>
+                    <button class="info-btn">ИНФО</button>
                 </div>
-                <button class="black-btn info" onclick="showInfo('ruchka')">ИНФО</button>
             </div>
 
-            <div class="item-card">
-                <img src="expander.webp" alt="Эспандер">
-                <h3>Эспандер</h3>
-                <p class="price">$12.00</p>
-                <div id="controls-expander">
-                    <button class="black-btn" onclick="addToCart('expander', 'Эспандер', 12)">ДОБАВИТЬ</button>
+            <div class="product-item">
+                <img src="expander.webp">
+                <div class="product-name">Эспандер</div>
+                <div class="price">$20</div>
+                <div class="btn-group">
+                    <button class="add-btn" onclick="addToCart(this)">ДОБАВИТЬ</button>
+                    <div class="count-ctrl">
+                        <button class="cnt-btn" onclick="changeQty(this, -1)">-</button>
+                        <span class="qty">1</span>
+                        <button class="cnt-btn" onclick="changeQty(this, 1)">+</button>
+                    </div>
+                    <button class="info-btn">ИНФО</button>
                 </div>
-                <button class="black-btn info" onclick="showInfo('expander')">ИНФО</button>
             </div>
         </div>
     </div>
 
-    <div id="cart-screen" style="display: none; padding: 20px;">
-        <h2>Корзина</h2>
-        <div id="cart-items"></div>
-        <div class="promo-container">
-            <input type="text" id="promo-input" placeholder="Промокод">
-            <button class="black-btn" style="width: 60px; margin: 0;" onclick="applyPromo()">OK</button>
-        </div>
-        <div class="totals">
-            <p>Сумма: <span id="subtotal-price">$0</span></p>
-            <p id="discount-row" style="display:none; color: #ff4444;">Скидка: <span id="discount-val">0%</span></p>
-            <p>Итог: <span id="total-price">$0</span></p>
-        </div>
-    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
 
-    <div id="address-screen" style="display: none; padding: 20px;">
-        <h2>Доставка</h2>
-        <input type="text" id="fio" placeholder="ФИО">
-        <input type="text" id="phone" placeholder="Телефон">
-        <input type="text" id="country" placeholder="Страна">
-        <input type="text" id="city" placeholder="Город">
-        <input type="text" id="cdek-addr" placeholder="Адрес СДЭК">
-        <input type="email" id="email" placeholder="Email">
-    </div>
+        function addToCart(btn) {
+            const parent = btn.parentElement;
+            btn.style.display = 'none';
+            parent.querySelector('.count-ctrl').style.display = 'flex';
+            tg.MainButton.setText("КОРЗИНА");
+            tg.MainButton.show();
+        }
 
-    <div id="checkout-screen" style="display: none; padding: 20px;">
-        <h2>Проверка</h2>
-        <div class="dark-block" id="check-items"></div>
-        <div class="dark-block" id="check-address"></div>
-        <h3 style="text-align:right;">Итого со скидкой: <span id="final-price">$0</span></h3>
-    </div>
-
-    <div id="info-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeInfo()">&times;</span>
-            <div id="info-text"></div>
-        </div>
-    </div>
-
-    <script src="js/script.js?v=10"></script>
+        function changeQty(btn, delta) {
+            const span = btn.parentElement.querySelector('.qty');
+            let val = parseInt(span.innerText) + delta;
+            if (val <= 0) {
+                btn.parentElement.style.display = 'none';
+                btn.parentElement.parentElement.querySelector('.add-btn').style.display = 'block';
+                val = 1;
+            }
+            span.innerText = val;
+        }
+    </script>
 </body>
 </html>
