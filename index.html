@@ -6,10 +6,7 @@
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; text-align: center; }
-        #main-container { height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
-        .screen { display: none; padding: 15px; }
-        .screen.active { display: block; }
+        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 0; text-align: center; }
         h2 { margin-top: 20px; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
         .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
         .product-item { background: #151515; border-radius: 18px; padding: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #222; }
@@ -21,53 +18,13 @@
         .info-btn { background: #222; color: #fff; border: 1px solid #333; padding: 8px; border-radius: 10px; font-size: 10px; cursor: pointer; text-transform: uppercase; }
         .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
         .cnt-btn { background: #333; color: #fff; border: none; width: 40px; height: 40px; border-radius: 10px; font-size: 20px; }
-        .promo-section { margin: 20px 15px; text-align: left; border: 1px solid #fff; border-radius: 12px; padding: 10px; }
-        .promo-section label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .promo-input-group { display: flex; gap: 5px; }
-        .promo-input { flex-grow: 1; background: transparent; border: none; color: #fff; padding: 10px; outline: none; font-size: 16px; }
-        .promo-btn { background: #fff; color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; text-transform: uppercase; font-size: 11px; }
-        .address-form { padding: 15px; text-align: left; }
-        .address-form label { font-size: 11px; color: #888; margin-left: 5px; }
-        .address-form input { width: 100%; padding: 14px; margin: 8px 0 18px; background: #111; border: 1px solid #333; border-radius: 12px; color: #fff; box-sizing: border-box; font-size: 16px; }
-        .cart-total { padding: 15px; border-top: 1px solid #222; }
-        .price-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 16px; }
-        .discount-line { color: #ff4d4d; }
-        .check-section { text-align: left; padding: 15px; background: #111; border: 1px solid #222; border-radius: 15px; margin: 10px 15px; }
-        .check-section h4 { color: #888; font-size: 11px; margin-top: 0; text-transform: uppercase; }
-        .old-price-check { text-decoration: line-through; color: #555; font-size: 14px; display: block; text-align: right; margin-right: 15px; }
     </style>
 </head>
 <body>
     <div id="main-container">
-        <div id="screen-main" class="screen active">
-            <h2>MorozovShop</h2>
-            <div class="product-grid" id="product-grid">
-                </div>
-        </div>
-
-        <div id="screen-cart" class="screen">
-            <h3>Корзина</h3>
-            <div id="cart-items"></div>
-            <div class="promo-section">
-                <label>Промокод</label>
-                <div class="promo-input-group">
-                    <input type="text" class="promo-input" placeholder="Введите код...">
-                    <button class="promo-btn">Применить</button>
-                </div>
+        <h2>MorozovShop</h2>
+        <div class="product-grid" id="product-grid">
             </div>
-            <div class="cart-total">
-                <div class="price-line"><span>Сумма:</span> <span id="total-sum">$0</span></div>
-            </div>
-        </div>
-
-        <div id="screen-address" class="screen">
-            <h3>Оформление</h3>
-            <div class="address-form">
-                <label>ФИО</label><input type="text" id="fio">
-                <label>Телефон</label><input type="tel" id="phone">
-                <label>Город и пункт СДЭК</label><input type="text" id="address">
-            </div>
-        </div>
     </div>
     <script src="js/script.js"></script>
 </body>
