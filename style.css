@@ -1,34 +1,45 @@
-body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; }
-.screen { display: none; flex-direction: column; align-items: center; padding-bottom: 120px; }
+body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+.screen { display: none; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 120px; }
 .active { display: flex; }
-.main-title { margin-top: 30px; letter-spacing: 2px; }
+.main-title { margin: 30px 0; font-size: 24px; letter-spacing: 1px; font-weight: bold; }
 
 /* Витрина */
-.container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; }
-.card { background: #1c1c1c; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.card img { width: 90px; height: 90px; margin-bottom: 10px; }
-.btn-white { background: #fff; color: #000; border: none; border-radius: 12px; width: 100%; padding: 14px 0; font-weight: bold; }
-.btn-gray { background: #333; color: #fff; border: none; border-radius: 12px; width: 100%; padding: 12px 0; margin-top: 8px; }
+.container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; width: 100%; box-sizing: border-box; }
+.card { background: #1c1c1c; border-radius: 20px; padding: 15px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.card img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; }
+.card h3 { font-size: 16px; margin: 5px 0; }
+.price { color: #888; margin-bottom: 15px; font-size: 15px; }
 
+/* Кнопки */
+.btn-white { background: #fff; color: #000; border: none; border-radius: 12px; width: 100%; padding: 12px 0; font-weight: bold; font-size: 14px; cursor: pointer; }
+.btn-gray { background: #2c2c2c; color: #fff; border: none; border-radius: 10px; width: 100%; padding: 10px 0; margin-top: 8px; font-size: 13px; cursor: pointer; text-transform: uppercase; color: #aaa; }
 .counter { display: none; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px; }
-.counter button { background: #333; color: #fff; border: none; border-radius: 10px; width: 45px; height: 45px; font-size: 20px; }
+.counter button { background: #2c2c2c; color: #fff; border: none; border-radius: 10px; width: 40px; height: 40px; font-size: 18px; }
 
-/* Формы и Корзина */
-.header-nav { width: 100%; padding: 20px; color: #248bf5; text-align: left; }
-.title-left { align-self: flex-start; padding-left: 20px; font-size: 24px; }
-.cart-list { width: 100%; padding: 0 20px; box-sizing: border-box; }
-.promo-block { display: flex; gap: 10px; width: 90%; margin: 20px 0; }
-.promo-input, .form-container input { background: #1c1c1c; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; flex-grow: 1; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-.btn-ok { background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 0 20px; }
+/* Навигация */
+.header-nav { width: 100%; padding: 15px 20px; color: #248bf5; font-size: 17px; text-align: left; }
+.title-left { align-self: flex-start; padding-left: 20px; font-size: 28px; font-weight: bold; margin: 10px 0 20px 0; }
 
-.data-group { background: #1c1c1c; border-radius: 15px; width: 90%; padding: 15px; margin-bottom: 15px; text-align: left; box-sizing: border-box; }
-.group-label { color: #888; font-size: 11px; margin-bottom: 10px; text-transform: uppercase; }
-.final-row { width: 90%; display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-top: 10px; }
+/* Инпуты (Тёмные как на скрине) */
+.form-container, .promo-container { width: 100%; padding: 0 20px; box-sizing: border-box; }
+input { background: #1c1c1c; border: none; color: #fff; padding: 18px; border-radius: 15px; width: 100%; margin-bottom: 12px; font-size: 16px; box-sizing: border-box; }
+input::placeholder { color: #555; }
 
-/* Модалка (Картинка 5) */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-.modal-content { background: #000; width: 85%; border-radius: 20px; padding: 30px; position: relative; border: 1px solid #333; }
-.close-modal { position: absolute; top: 15px; right: 20px; font-size: 20px; color: #888; }
+/* Промокод */
+.promo-block { display: flex; gap: 10px; align-items: center; }
+.btn-ok-black { background: #000; color: #fff; border: 1px solid #333; border-radius: 12px; padding: 0 20px; height: 54px; font-weight: bold; cursor: pointer; }
 
-.footer-fixed { position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: center; z-index: 99; }
-.btn-main { width: 90%; display: none; }
+/* Проверка данных */
+.data-group { background: #1c1c1c; border-radius: 18px; width: 92%; padding: 20px; margin-bottom: 15px; box-sizing: border-box; }
+.group-label { color: #555; font-size: 12px; margin-bottom: 15px; font-weight: bold; }
+.group-content { line-height: 1.6; font-size: 15px; }
+.final-pay-row { width: 92%; display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; margin-top: 20px; }
+
+/* Модалка */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
+.modal-content { background: #000; width: 90%; border-radius: 30px; padding: 40px 25px; text-align: center; border: 1px solid #1c1c1c; }
+.btn-white-modal { background: #fff; color: #000; border: none; border-radius: 20px; width: 100%; padding: 18px 0; font-weight: bold; margin-top: 30px; font-size: 16px; }
+
+/* Футер */
+.footer-fixed { position: fixed; bottom: 25px; width: 100%; display: flex; justify-content: center; padding: 0 20px; box-sizing: border-box; }
+.btn-main { background: #fff; color: #000; border: none; border-radius: 15px; width: 100%; padding: 20px 0; font-weight: bold; font-size: 17px; display: none; text-transform: uppercase; }
