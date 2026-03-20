@@ -4,220 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MorozovShop</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h2 {
-            margin-top: 30px;
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 15px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .card {
-            background-color: #1c1c1c;
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .card img {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            margin-bottom: 15px;
-        }
-
-        .card h3 {
-            font-size: 16px;
-            margin: 0 0 10px 0;
-        }
-
-        .card .price {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-
-        .btn-add {
-            background-color: #fff;
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            width: 100%;
-            padding: 10px 0;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin-bottom: 8px;
-        }
-
-        .btn-info {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            width: 100%;
-            padding: 10px 0;
-            font-size: 14px;
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-
-        /* Кнопки +/- */
-        .counter {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-
-        .counter button {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-        }
-
-        /* Нижняя кнопка корзины */
-        .cart-footer {
-            position: fixed;
-            bottom: 20px;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .btn-cart {
-            background-color: #fff;
-            color: #000;
-            border: none;
-            border-radius: 15px;
-            width: 100%;
-            padding: 15px 0;
-            font-weight: bold;
-            font-size: 16px;
-            text-transform: uppercase;
-            display: none; /* Появится при добавлении */
-        }
-    </style>
 </head>
 <body>
-
-    <h2>MITHRILARM</h2>
-
-    <div class="container">
-        <div class="card" id="item1">
-            <img src="ruchka.webp" alt="Ручка Arm">
-            <h3>Ручка Arm</h3>
-            <div class="price">$35.00</div>
-            
-            <button class="btn-add" onclick="toggleCart('item1')">добавить</button>
-            
-            <div class="counter">
-                <button onclick="changeQty('qty1', -1, 'item1')">-</button>
-                <span id="qty1">1</span>
-                <button onclick="changeQty('qty1', 1, 'item1')">+</button>
+    <div id="shop-screen" class="screen active">
+        <h2>MITHRILARM</h2>
+        <div class="container">
+            <div class="card" id="item1">
+                <img src="ruchka.webp" alt="Ручка Arm">
+                <h3>Ручка Arm</h3>
+                <div class="price">$35.00</div>
+                <button class="btn-white add-trigger" onclick="addToCart('item1')">добавить</button>
+                <div class="counter">
+                    <button onclick="changeQty('item1', -1)">-</button>
+                    <span class="qty">1</span>
+                    <button onclick="changeQty('item1', 1)">+</button>
+                </div>
+                <button class="btn-gray">инфо</button>
             </div>
-            
-            <button class="btn-info">инфо</button>
-        </div>
 
-        <div class="card" id="item2">
-            <img src="expander.webp" alt="Эспандер">
-            <h3>Эспандер</h3>
-            <div class="price">$12.00</div>
-            
-            <button class="btn-add" onclick="toggleCart('item2')">добавить</button>
-            
-            <div class="counter">
-                <button onclick="changeQty('qty2', -1, 'item2')">-</button>
-                <span id="qty2">1</span>
-                <button onclick="changeQty('qty2', 1, 'item2')">+</button>
+            <div class="card" id="item2">
+                <img src="expander.webp" alt="Эспандер">
+                <h3>Эспандер</h3>
+                <div class="price">$12.00</div>
+                <button class="btn-white add-trigger" onclick="addToCart('item2')">добавить</button>
+                <div class="counter">
+                    <button onclick="changeQty('item2', -1)">-</button>
+                    <span class="qty">1</span>
+                    <button onclick="changeQty('item2', 1)">+</button>
+                </div>
+                <button class="btn-gray">инфо</button>
             </div>
-            
-            <button class="btn-info">инфо</button>
         </div>
     </div>
 
-    <div class="cart-footer">
-        <button class="btn-cart" id="main-cart-btn">Корзина ($0.00)</button>
+    <div id="cart-screen" class="screen">
+        <div class="cart-header">
+            <span onclick="showShop()" class="back-link">✕ Назад</span>
+        </div>
+        <h2 class="cart-title">Корзина</h2>
+        <div id="cart-items-list" class="cart-list"></div>
+        <div class="promo-block">
+            <input type="text" class="promo-input" placeholder="Jarvis">
+            <button class="btn-ok">OK</button>
+        </div>
+        <div class="cart-summary">
+            <div id="total-sum">Сумма: $0</div>
+            <div id="total-final">Итог: $0</div>
+        </div>
     </div>
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+    <div class="footer-fixed">
+        <button id="footer-btn" class="btn-white btn-main" onclick="handleFooterClick()"></button>
+    </div>
 
-        let cart = {
-            item1: { qty: 0, price: 35 },
-            item2: { qty: 0, price: 12 }
-        };
-
-        function toggleCart(id) {
-            const card = document.getElementById(id);
-            card.querySelector('.btn-add').style.display = 'none';
-            card.querySelector('.counter').style.display = 'flex';
-            
-            const qtyId = id === 'item1' ? 'qty1' : 'qty2';
-            cart[id].qty = 1;
-            updateTotal();
-        }
-
-        function changeQty(qtyId, delta, id) {
-            const span = document.getElementById(qtyId);
-            let current = parseInt(span.innerText);
-            current += delta;
-
-            if (current <= 0) {
-                const card = document.getElementById(id);
-                card.querySelector('.btn-add').style.display = 'block';
-                card.querySelector('.counter').style.display = 'none';
-                cart[id].qty = 0;
-                span.innerText = 1;
-            } else {
-                span.innerText = current;
-                cart[id].qty = current;
-            }
-            updateTotal();
-        }
-
-        function updateTotal() {
-            let total = (cart.item1.qty * cart.item1.price) + (cart.item2.qty * cart.item2.price);
-            const cartBtn = document.getElementById('main-cart-btn');
-            
-            if (total > 0) {
-                cartBtn.style.display = 'block';
-                cartBtn.innerText = `Корзина ($${total.toFixed(2)})`;
-            } else {
-                cartBtn.style.display = 'none';
-            }
-        }
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
