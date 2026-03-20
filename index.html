@@ -13,32 +13,26 @@
         /* Витрина */
         .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .product-card { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .product-card img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; cursor: pointer; }
-        .product-card h3 { font-size: 16px; margin: 5px 0; min-height: 40px; }
+        .product-card img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+        .product-card h3 { font-size: 14px; margin: 5px 0; min-height: 35px; text-transform: uppercase; }
         .price { color: #888; margin-bottom: 10px; font-weight: bold; }
         
         /* Кнопки */
-        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 12px; margin-bottom: 5px; }
-        .info-btn { background: #333; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; text-transform: uppercase; }
+        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 12px; }
+        .info-btn { background: #333; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 11px; width: 100%; cursor: pointer; text-transform: uppercase; }
         
-        /* Управление количеством */
-        .counter-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 5px; }
+        /* Счётчик */
+        .counter-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
         .count-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
-        .count-num { font-weight: bold; font-size: 16px; }
-        
-        /* Корзина */
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
-        .promo-section { padding: 15px; text-align: left; border-bottom: 1px solid #222; }
-        .promo-input-group { display: flex; gap: 10px; margin-top: 5px; }
-        .promo-input { flex-grow: 1; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 12px; }
-        .promo-btn { background: #fff; color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* Формы */
+        /* Корзина и формы */
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
         .address-form { padding: 20px; text-align: left; }
         .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
         .address-form label { font-size: 12px; color: #888; }
 
-        /* Окно ИНФО */
+        /* Bottom Sheet */
         #info-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000; transition: bottom 0.3s ease; }
         #info-sheet.open { bottom: 0; }
         .sheet-content { padding: 20px; text-align: left; }
@@ -48,25 +42,16 @@
 <body>
     <div id="main-container">
         <div id="main-screen">
-            <h2 style="margin-top: 20px;">MorozovShop</h2>
-            <div class="products-grid" id="products-grid"></div>
+            <h2 style="margin-top: 20px; letter-spacing: 1px;">MorozovShop</h2>
+            <div class="products-grid" id="products-grid">
+                </div>
         </div>
 
         <div id="cart-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
+            <h3 style="padding: 15px; text-align: left;">Корзина</h3>
             <div id="cart-items-list"></div>
-            <div class="promo-section">
-                <label>Промокод</label>
-                <div class="promo-input-group">
-                    <input type="text" id="promo-input" class="promo-input" placeholder="Введите код">
-                    <button class="promo-btn" onclick="applyPromo()">OK</button>
-                </div>
-                <div id="promo-msg"></div>
-            </div>
             <div style="padding: 20px; text-align: right;">
-                <div>Сумма: <span id="cart-subtotal">$0.00</span></div>
-                <div id="cart-discount-row" style="display:none; color: red;">Скидка: <span id="cart-discount-val"></span></div>
-                <div style="font-size: 20px; font-weight: bold; margin-top: 10px;">Итог: <span id="cart-total-price">$0.00</span></div>
+                <div style="font-size: 20px; font-weight: bold;">Итого: <span id="cart-total-price">$0.00</span></div>
             </div>
         </div>
 
@@ -76,34 +61,34 @@
                 <label>Телефон</label><input type="tel" id="phone">
                 <label>Страна</label><input type="text" id="country">
                 <label>Город</label><input type="text" id="city">
-                <label>СДЭК</label><input type="text" id="cdek-addr">
+                <label>Пункт СДЭК</label><input type="text" id="cdek-addr">
                 <label>Email</label><input type="email" id="email">
             </div>
         </div>
 
         <div id="checkout-screen" style="display: none;">
             <div style="padding: 20px; text-align: left;">
-                <h3>Проверка</h3>
+                <h3>Проверка заказа</h3>
                 <div id="check-items" style="background: #1c1c1c; padding: 15px; border-radius: 10px;"></div>
-                <div id="check-address" style="margin-top: 15px;"></div>
-                <h2 id="check-total-price" style="text-align: right;"></h2>
+                <div id="check-address" style="margin-top: 15px; font-size: 14px; color: #ccc;"></div>
+                <h2 id="check-total-price" style="text-align: right; margin-top: 20px;"></h2>
             </div>
         </div>
     </div>
 
     <div id="info-sheet">
-        <div style="padding: 15px; display: flex; justify-content: space-between;">
-            <h3 id="sheet-title"></h3>
-            <button onclick="closeInfo()" style="background:none; color:white; border:none; font-size: 24px;">&times;</button>
+        <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="sheet-title" style="margin:0"></h3>
+            <button onclick="closeInfo()" style="background:none; color:#888; border:none; font-size: 30px;">&times;</button>
         </div>
         <div class="sheet-content">
             <img src="" id="sheet-img">
-            <p id="sheet-desc" style="color: #888; margin: 20px 0;"></p>
-            <div style="display: flex; justify-content: space-between; font-weight: bold;">
+            <p id="sheet-desc" style="color: #ccc; margin: 20px 0; line-height: 1.5;"></p>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #222; padding-top: 15px;">
                 <span>ЦЕНА</span>
                 <span id="sheet-price"></span>
             </div>
-            <button class="add-btn" style="margin-top: 20px;" onclick="closeInfo()">ЗАКРЫТЬ</button>
+            <button class="add-btn" style="margin-top: 25px; background: #333; color: #fff;" onclick="closeInfo()">ПОНЯТНО</button>
         </div>
     </div>
 
