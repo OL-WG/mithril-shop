@@ -2,11 +2,11 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let products = {
-    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для армрестлинга. Идеально для тренировки хвата." },
-    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Мощный эспандер для развития силы кисти. Регулируемая нагрузка." }
+    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для армрестлинга. Разработана для эффективной тренировки хвата и кисти." },
+    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер с регулируемой нагрузкой. Компактный тренажер для силы твоих рук." }
 };
 
-let discount = 1; // 1 = 100%, 0.85 = скидка 15%
+let isJarvis = false;
 
 window.addToCart = (id) => { products[id].qty = 1; updateUI(id); updateTotal(); };
 window.changeQty = (id, delta) => { 
@@ -29,21 +29,22 @@ function resetUI(id) {
 }
 
 function applyPromo() {
-    const val = document.getElementById('promo-input').value.toLowerCase();
-    if (val === 'jarvis') {
-        discount = 0.85;
-        alert("Промокод применен! Скидка 15%");
-        showCart(); // Перерисовать корзину
+    const input = document.getElementById('promo-input').value;
+    if (input.toLowerCase() === 'jarvis') {
+        isJarvis = true;
+        tg.showAlert("Промокод JARVIS применен! Скидка 15%");
+        showCart(); 
     }
 }
 
 function updateTotal() {
-    let total = 0;
-    for (let id in products) total += products[id].price * products[id].qty;
+    let subtotal = 0;
+    for (let id in products) subtotal += products[id].price * products[id].qty;
+    
     const btn = document.getElementById('footer-btn');
-    if (total > 0) {
+    if (subtotal > 0) {
         btn.style.display = 'block';
-        if (isActive('shop-screen')) btn.innerText = `КОРЗИНА ($${total})`;
+        if (isActive('shop-screen')) btn.innerText = `КОРЗИНА ($${subtotal.toFixed(2)})`;
         else if (isActive('cart-screen')) btn.innerText = `К ОФОРМЛЕНИЮ`;
         else if (isActive('delivery-screen')) btn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
         else btn.innerText = `ПОДТВЕРДИТЬ И ОПЛАТИТЬ`;
@@ -66,50 +67,57 @@ function showCart() {
         if (products[id].qty > 0) {
             let sum = products[id].qty * products[id].price;
             subtotal += sum;
-            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:17px;">
+                <span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
         }
     }
+    const final = isJarvis ? subtotal * 0.85 : subtotal;
     document.getElementById('total-sum').innerText = `Сумма: $${subtotal}`;
-    document.getElementById('total-final').innerText = `Итог: $${(subtotal * discount).toFixed(2)}`;
+    document.getElementById('total-final').innerText = `Итог: $${final.toFixed(2)}`;
     updateTotal();
 }
 
 function showCheckout() {
     switchScreen('checkout-screen');
     let orderHtml = '';
-    let total = 0;
+    let subtotal = 0;
     for (let id in products) {
         if (products[id].qty > 0) {
-            total += products[id].qty * products[id].price;
+            subtotal += products[id].qty * products[id].price;
             orderHtml += `<div>${products[id].name} — ${products[id].qty} шт.</div>`;
         }
     }
+    const final = isJarvis ? subtotal * 0.85 : subtotal;
     document.getElementById('check-order').innerHTML = orderHtml;
-    document.getElementById('check-delivery').innerHTML = `ФИО: ${v('fio')}<br>Тел: ${v('phone')}<br>Страна: ${v('country')}<br>Город: ${v('city')}<br>Пункт СДЭК: ${v('address')}<br>Email: ${v('email')}`;
-    document.getElementById('final-pay-amount').innerText = `$${(total * discount).toFixed(2)}`;
+    document.getElementById('check-delivery').innerHTML = `<b>ФИО:</b> ${v('fio')}<br><b>Тел:</b> ${v('phone')}<br><b>Страна:</b> ${v('country')}<br><b>Город:</b> ${v('city')}<br><b>Пункт СДЭК:</b> ${v('address')}<br><b>Email:</b> ${v('email')}`;
+    document.getElementById('final-pay-amount').innerText = `$${final.toFixed(2)}`;
     updateTotal();
 }
 
-// Модальное окно (Картинка 5)
 window.showInfo = (id) => {
-    const p = products[id];
-    document.getElementById('modal-body').innerHTML = `<h2>${p.name}</h2><p>${p.desc}</p><p><b>Стоимость: $${p.price}</b></p>`;
+    document.getElementById('modal-body').innerHTML = `<h1 style="font-size:32px; margin-bottom:20px;">ИНФОРМАЦИЯ</h1><h2 style="font-size:24px;">${products[id].name.toUpperCase()}</h2><p style="color:#888; line-height:1.5;">${products[id].desc}</p><div style="margin-top:20px; font-size:20px;">СТОИМОСТЬ: ${products[id].price} $</div>`;
     document.getElementById('info-modal').style.display = 'flex';
 };
 window.closeModal = () => { document.getElementById('info-modal').style.display = 'none'; };
 
 function sendOrder() {
-    let orderText = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n📧 Email: ${v('email')}\n\n📦 Доставка:\n${v('country')}, ${v('city')}\n🏢 ПВЗ СДЭК: ${v('address')}\n\n🛒 Товары:`;
-    for (let id in products) { if(products[id].qty > 0) orderText += `\n- ${products[id].name}: ${products[id].qty} шт.`; }
-    if(discount < 1) orderText += `\n\n🎫 Промо: JARVIS`;
-    orderText += `\n✅ ИТОГО: $${document.getElementById('final-pay-amount').innerText}`;
+    let subtotal = 0;
+    let itemsText = "";
+    for (let id in products) { 
+        if(products[id].qty > 0) {
+            subtotal += products[id].qty * products[id].price;
+            itemsText += `\n- ${products[id].name}: ${products[id].qty} шт.`;
+        }
+    }
+    const final = isJarvis ? subtotal * 0.85 : subtotal;
     
-    tg.sendData(orderText); // Это отправит данные боту, а бот перешлет в группу
+    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n📧 Email: ${v('email')}\n\n📦 Доставка: ${v('country')}, ${v('city')}\n🏢 ПВЗ СДЭК: ${v('address')}\n\n🛒 Товары:${itemsText}\n\n${isJarvis ? '🎫 Промо: JARVIS (Скидка 15%)\n' : ''}✅ ИТОГО: $${final.toFixed(2)}`;
+    
+    tg.sendData(message);
 }
 
-// Хелперы
 const isActive = (id) => document.getElementById(id).classList.contains('active');
-const v = (id) => document.getElementById(id).value;
+const v = (id) => document.getElementById(id).value || "—";
 function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
