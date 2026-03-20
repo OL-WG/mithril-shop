@@ -11,187 +11,102 @@
         .blur { filter: blur(5px); }
 
         /* Витрина */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .product-item { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .product-item img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-        .product-name { display: block; font-weight: bold; font-size: 16px; margin-bottom: 5px; min-height: 40px; }
+        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .product-card { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .product-card img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; cursor: pointer; }
+        .product-card h3 { font-size: 16px; margin: 5px 0; min-height: 40px; }
         .price { color: #888; margin-bottom: 10px; font-weight: bold; }
         
-        /* Кнопки в карточке */
-        .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 12px; }
+        /* Кнопки */
+        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 12px; margin-bottom: 5px; }
         .info-btn { background: #333; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; text-transform: uppercase; }
         
-        .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
-        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        /* Управление количеством */
+        .counter-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 5px; }
+        .count-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .count-num { font-weight: bold; font-size: 16px; }
         
-        /* Корзина (Экран 2) */
+        /* Корзина */
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
-        
-        /* СИСТЕМА СКИДОК (НОВОЕ) */
-        .promo-section { padding: 15px; text-align: left; border-bottom: 1px solid #222; margin-bottom: 10px; }
-        .promo-section label { font-size: 12px; color: #888; margin-bottom: 5px; display: block; }
-        .promo-input-group { display: flex; gap: 10px; }
+        .promo-section { padding: 15px; text-align: left; border-bottom: 1px solid #222; }
+        .promo-input-group { display: flex; gap: 10px; margin-top: 5px; }
         .promo-input { flex-grow: 1; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 12px; }
-        .promo-btn { background: #fff; color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-        #promo-msg { font-size: 12px; margin-top: 5px; font-weight: bold; }
+        .promo-btn { background: #fff; color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        .cart-total { display: flex; flex-direction: column; align-items: flex-end; padding: 20px 15px; font-size: 18px; font-weight: bold; gap: 5px; }
-        .price-line { display: flex; justify-content: space-between; width: 100%; }
-        .discount-line { color: #f44336; font-size: 14px; }
-
-        /* Формы (Экран 3) */
+        /* Формы */
         .address-form { padding: 20px; text-align: left; }
         .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        .address-form label { font-size: 12px; color: #888; margin-left: 5px; }
+        .address-form label { font-size: 12px; color: #888; }
 
-        /* Экран проверки (Экран 4) */
-        .check-section { text-align: left; padding: 15px; background: #1c1c1c; border-radius: 12px; margin: 15px; font-size: 14px; }
-        .check-section h4 { margin: 0 0 10px 0; color: #888; text-transform: uppercase; font-size: 12px; }
-        .check-price-block { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; margin-top: 20px; padding: 0 15px; }
-        .old-price-check { text-decoration: line-through; color: #888; font-size: 14px; }
-
-        /* Bottom Sheet ИНФО */
-        #info-sheet { 
-            position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; 
-            background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; 
-            z-index: 1000; transition: bottom 0.3s ease-out; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-        }
+        /* Окно ИНФО */
+        #info-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000; transition: bottom 0.3s ease; }
         #info-sheet.open { bottom: 0; }
-        .sheet-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .sheet-close { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
-        .sheet-content { padding: 20px; flex-grow: 1; overflow-y: auto; text-align: left; }
-        #sheet-img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 20px; background: #1c1c1c; border-radius: 12px; padding: 10px; box-sizing: border-box; }
-        .sheet-desc { color: #ccc; line-height: 1.5; font-size: 14px; margin-bottom: 20px; }
-        .sheet-cost-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: bold; }
+        .sheet-content { padding: 20px; text-align: left; }
+        #sheet-img { width: 100%; height: 200px; object-fit: contain; background: #1c1c1c; border-radius: 12px; }
     </style>
 </head>
 <body>
     <div id="main-container">
         <div id="main-screen">
-            <h2 style="margin-top: 20px; letter-spacing: 1px;">MorozovShop</h2>
-            <div class="product-grid">
-                <div class="product-item">
-                    <img src="ruchka.webp" onclick="showInfo('Handle')">
-                    <span class="product-name">Ручка Arm</span>
-                    <div class="price">$35.00</div>
-                    <div class="btn-group">
-                        <button id="add-Handle" class="add-btn" onclick="firstAdd('Handle', 35.00)">ДОБАВИТЬ</button>
-                        <div id="ctrl-Handle" class="count-ctrl">
-                            <button class="cnt-btn" onclick="changeCount('Handle', 35.00, -1)">-</button>
-                            <span id="count-Handle">1</span>
-                            <button class="cnt-btn" onclick="changeCount('Handle', 35.00, 1)">+</button>
-                        </div>
-                        <button class="info-btn" onclick="showInfo('Handle')">ИНФО</button>
-                    </div>
-                </div>
-                <div class="product-item">
-                    <img src="expander.webp" onclick="showInfo('Expander')">
-                    <span class="product-name">Эспандер</span>
-                    <div class="price">$12.00</div>
-                    <div class="btn-group">
-                        <button id="add-Expander" class="add-btn" onclick="firstAdd('Expander', 12.00)">ДОБАВИТЬ</button>
-                        <div id="ctrl-Expander" class="count-ctrl">
-                            <button class="cnt-btn" onclick="changeCount('Expander', 12.00, -1)">-</button>
-                            <span id="count-Expander">1</span>
-                            <button class="cnt-btn" onclick="changeCount('Expander', 12.00, 1)">+</button>
-                        </div>
-                        <button class="info-btn" onclick="showInfo('Expander')">ИНФО</button>
-                    </div>
-                </div>
-            </div>
+            <h2 style="margin-top: 20px;">MorozovShop</h2>
+            <div class="products-grid" id="products-grid"></div>
         </div>
 
         <div id="cart-screen" style="display: none;">
             <h3 style="padding: 15px; text-align: left;">Ваша корзина</h3>
             <div id="cart-items-list"></div>
-            
             <div class="promo-section">
-                <label>Промокод на скидку</label>
+                <label>Промокод</label>
                 <div class="promo-input-group">
-                    <input type="text" id="promo-input" class="promo-input" placeholder="Введите код (напр. JARVIS)">
-                    <button class="promo-btn" onclick="applyPromo()">Применить</button>
+                    <input type="text" id="promo-input" class="promo-input" placeholder="Введите код">
+                    <button class="promo-btn" onclick="applyPromo()">OK</button>
                 </div>
                 <div id="promo-msg"></div>
             </div>
-
-            <div class="cart-total">
-                <div class="price-line">
-                    <span>Сумма:</span>
-                    <span id="cart-subtotal">$0.00</span>
-                </div>
-                <div class="price-line discount-line" id="cart-discount-row" style="display: none;">
-                    <span>Скидка:</span>
-                    <span id="cart-discount-val">-$0.00</span>
-                </div>
-                <div class="price-line" style="font-size: 20px; margin-top: 5px;">
-                    <span>Итог:</span>
-                    <span id="cart-total-price">$0.00</span>
-                </div>
+            <div style="padding: 20px; text-align: right;">
+                <div>Сумма: <span id="cart-subtotal">$0.00</span></div>
+                <div id="cart-discount-row" style="display:none; color: red;">Скидка: <span id="cart-discount-val"></span></div>
+                <div style="font-size: 20px; font-weight: bold; margin-top: 10px;">Итог: <span id="cart-total-price">$0.00</span></div>
             </div>
         </div>
 
         <div id="address-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Данные получателя</h3>
             <div class="address-form">
-                <label>Фамилия Имя Отчество</label>
-                <input type="text" id="fio" placeholder="Иванов Иван Иванович">
-                
-                <label>Номер телефона</label>
-                <input type="tel" id="phone" placeholder="+7 (999) 123-45-67">
-
-                <label>Страна</label>
-                <input type="text" id="country" placeholder="Россия">
-                
-                <label>Город</label>
-                <input type="text" id="city" placeholder="Москва">
-                
-                <label>Адрес пункта СДЭК</label>
-                <input type="text" id="cdek-addr" placeholder="ул. Ленина, д. 10">
-                
-                <label>Электронная почта</label>
-                <input type="email" id="email" placeholder="example@mail.ru или gmail.com">
+                <label>ФИО</label><input type="text" id="fio">
+                <label>Телефон</label><input type="tel" id="phone">
+                <label>Страна</label><input type="text" id="country">
+                <label>Город</label><input type="text" id="city">
+                <label>СДЭК</label><input type="text" id="cdek-addr">
+                <label>Email</label><input type="email" id="email">
             </div>
         </div>
 
         <div id="checkout-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Проверка данных</h3>
-            <div class="check-section">
-                <h4>Заказ</h4>
-                <div id="check-items"></div>
-            </div>
-            <div class="check-section">
-                <h4>Получатель и Доставка</h4>
-                <div id="check-address"></div>
-            </div>
-            
-            <div class="check-price-block">
-                <span class="old-price-check" id="check-old-price" style="display: none;">$0.00</span>
-                <div style="font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; width: 100%;">
-                    <span>К оплате:</span>
-                    <span id="check-total-price">$0.00</span>
-                </div>
+            <div style="padding: 20px; text-align: left;">
+                <h3>Проверка</h3>
+                <div id="check-items" style="background: #1c1c1c; padding: 15px; border-radius: 10px;"></div>
+                <div id="check-address" style="margin-top: 15px;"></div>
+                <h2 id="check-total-price" style="text-align: right;"></h2>
             </div>
         </div>
     </div>
 
     <div id="info-sheet">
-        <div class="sheet-header">
-            <h3 id="sheet-title" style="margin:0;">Название</h3>
-            <button class="sheet-close" onclick="closeInfo()">&times;</button>
+        <div style="padding: 15px; display: flex; justify-content: space-between;">
+            <h3 id="sheet-title"></h3>
+            <button onclick="closeInfo()" style="background:none; color:white; border:none; font-size: 24px;">&times;</button>
         </div>
         <div class="sheet-content">
             <img src="" id="sheet-img">
-            <div class="sheet-desc" id="sheet-desc">Описание...</div>
-            <div class="sheet-cost-row">
-                <span>СТОИМОСТЬ</span>
-                <span id="sheet-price" style="font-size: 18px;">$0.00</span>
+            <p id="sheet-desc" style="color: #888; margin: 20px 0;"></p>
+            <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                <span>ЦЕНА</span>
+                <span id="sheet-price"></span>
             </div>
-            <button class="add-btn" style="background: #f0f0f0;" onclick="closeInfo()">ПОНЯТНО</button>
+            <button class="add-btn" style="margin-top: 20px;" onclick="closeInfo()">ЗАКРЫТЬ</button>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
