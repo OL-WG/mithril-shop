@@ -1,69 +1,59 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-// --- НАСТРОЙКИ SUPABASE ---
 const SUPABASE_URL = 'https://jzlrxsfbfhgfmrwrtwv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_DXHDERQmtCOylso58j4AWg_sM4ymrD0'; //
+const SUPABASE_KEY = 'sb_publishable_DXHDERQmtCOylso58j4AWg_sM4ymrD0'; 
 
 let cart = {};
 let currentStep = 'main';
-let discountPercent = 0;
-let appliedPromo = "";
-let allProducts = []; 
+let allProducts = [];
 
 const BOT_TOKEN = '8677453235:AAHRTKraVGyg_Kh_kByvgyMHcq_IA7x2who';
 const CHAT_ID = '-1003538222198';
 
-// --- ЗАГРУЗКА ИЗ БАЗЫ ---
+// 1. Загрузка товаров
 async function loadProducts() {
     try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
         allProducts = await response.json();
-        renderMainPage(allProducts);
-    } catch (err) {
-        console.error("Ошибка загрузки:", err);
-    }
+        renderProducts(allProducts);
+    } catch (e) { console.error("Ошибка:", e); }
 }
 
-// Рендер карточек (восстанавливаем кнопки ИНФО и логику счетчиков)
-function renderMainPage(products) {
-    const container = document.querySelector('.products-grid') || document.getElementById('products-grid'); 
-    if (!container) return;
-    
-    container.innerHTML = '';
+// 2. Отрисовка витрины
+function renderProducts(products) {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = '';
     products.forEach(p => {
-        container.innerHTML += `
+        grid.innerHTML += `
             <div class="product-card">
-                <img src="${p.image_url}" alt="${p.title}">
+                <img src="${p.image_url}" onclick="showInfo(${p.id})">
                 <h3>${p.title}</h3>
-                <p class="price">$${p.price}</p>
-                
-                <div id="ctrl-${p.id}" class="counter-ctrl" style="display:none">
-                    <button class="count-btn" onclick="changeCount(${p.id}, ${p.price}, -1)">-</button>
-                    <span id="count-${p.id}" class="count-num">0</span>
-                    <button class="count-btn" onclick="changeCount(${p.id}, ${p.price}, 1)">+</button>
+                <div class="price">$${p.price}</div>
+                <div class="btn-group">
+                    <button id="add-${p.id}" class="add-btn" onclick="firstAdd(${p.id}, ${p.price})">ДОБАВИТЬ</button>
+                    <div id="ctrl-${p.id}" class="counter-ctrl">
+                        <button class="count-btn" onclick="changeCount(${p.id}, ${p.price}, -1)">-</button>
+                        <span id="count-${p.id}">1</span>
+                        <button class="count-btn" onclick="changeCount(${p.id}, ${p.price}, 1)">+</button>
+                    </div>
+                    <button class="info-btn" onclick="showInfo(${p.id})">ИНФО</button>
                 </div>
-                
-                <button id="add-${p.id}" class="add-btn" onclick="firstAdd(${p.id}, ${p.price})">ДОБАВИТЬ</button>
-                <button class="info-btn" onclick="showInfo(${p.id})">ИНФО</button>
             </div>
         `;
     });
 }
 
-// --- Логика Инфо ---
+// 3. Логика Info Sheet
 function showInfo(id) {
-    const data = allProducts.find(p => p.id === id);
-    if (!data) return;
-    document.getElementById('sheet-title').innerText = data.title;
-    document.getElementById('sheet-img').src = data.image_url;
-    document.getElementById('sheet-desc').innerText = data.description;
-    document.getElementById('sheet-price').innerText = `$${data.price}`;
+    const p = allProducts.find(item => item.id === id);
+    if (!p) return;
+    document.getElementById('sheet-title').innerText = p.title;
+    document.getElementById('sheet-img').src = p.image_url;
+    document.getElementById('sheet-desc').innerText = p.description;
+    document.getElementById('sheet-price').innerText = `$${p.price}`;
     document.getElementById('info-sheet').classList.add('open');
     document.getElementById('main-container').classList.add('blur');
 }
@@ -71,20 +61,17 @@ function showInfo(id) {
 function closeInfo() {
     document.getElementById('info-sheet').classList.remove('open');
     document.getElementById('main-container').classList.remove('blur');
-    updateMainButton();
 }
 
-// --- Логика Корзины ---
+// 4. Корзина
 function firstAdd(id, price) {
     document.getElementById(`add-${id}`).style.display = 'none';
     document.getElementById(`ctrl-${id}`).style.display = 'flex';
     cart[id] = { count: 1, price: parseFloat(price) };
-    document.getElementById(`count-${id}`).innerText = "1";
     updateMainButton();
 }
 
 function changeCount(id, price, delta) {
-    if (!cart[id]) return;
     cart[id].count += delta;
     if (cart[id].count <= 0) {
         delete cart[id];
@@ -97,44 +84,13 @@ function changeCount(id, price, delta) {
 }
 
 function updateMainButton() {
-    let subtotal = 0;
-    for (let id in cart) subtotal += cart[id].count * cart[id].price;
-    let total = subtotal * (1 - discountPercent);
-
-    if (total > 0 && currentStep === 'main') {
-        tg.MainButton.setParams({
-            text: `КОРЗИНА ($${total.toFixed(2)})`,
-            color: "#000000",
-            is_visible: true
-        });
-    } else if (total === 0) {
-        tg.MainButton.hide();
-    }
+    let total = 0;
+    for (let id in cart) total += cart[id].count * cart[id].price;
+    if (total > 0) {
+        tg.MainButton.setText(`КОРЗИНА ($${total.toFixed(2)})`);
+        tg.MainButton.show();
+    } else { tg.MainButton.hide(); }
 }
 
-// Рендер предметов в корзине (исправлено под базу)
-function renderCart() {
-    let list = document.getElementById('cart-items-list');
-    list.innerHTML = ''; 
-    let subtotal = 0;
-    for (let id in cart) {
-        const product = allProducts.find(p => p.id == id);
-        if (cart[id].count > 0 && product) {
-            let itemTotal = cart[id].count * cart[id].price;
-            subtotal += itemTotal;
-            list.innerHTML += `
-                <div class="cart-item">
-                    <span><b>${product.title}</b> x${cart[id].count}</span>
-                    <span style="margin-left:auto">$${itemTotal.toFixed(2)}</span>
-                </div>`;
-        }
-    }
-    
-    let discountVal = subtotal * discountPercent;
-    let finalTotal = subtotal - discountVal;
-    document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-    document.getElementById('cart-total-price').innerText = `$${finalTotal.toFixed(2)}`;
-}
-
-// Запуск
+// Запуск приложения
 loadProducts();
