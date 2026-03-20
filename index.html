@@ -6,92 +6,69 @@
     <title>MorozovShop</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; text-align: center; overflow: hidden; }
-        #main-container { height: 100vh; overflow-y: auto; transition: filter 0.3s; padding-bottom: 100px; box-sizing: border-box; }
-        .blur { filter: blur(5px); }
-
-        /* Витрина */
-        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .product-card { background: #1c1c1c; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .product-card img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
-        .product-card h3 { font-size: 14px; margin: 5px 0; min-height: 35px; text-transform: uppercase; }
-        .price { color: #888; margin-bottom: 10px; font-weight: bold; }
-        
-        /* Кнопки */
+        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; text-align: center; }
+        #main-container { height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
+        .screen { display: none; padding: 15px; }
+        .screen.active { display: block; }
+        h2 { margin-top: 20px; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .product-item { background: #151515; border-radius: 18px; padding: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #222; }
+        .product-item img { width: 100%; height: 110px; object-fit: contain; margin-bottom: 10px; }
+        .product-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .price { color: #888; font-size: 16px; margin-bottom: 12px; }
         .btn-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 12px; }
-        .info-btn { background: #333; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 11px; width: 100%; cursor: pointer; text-transform: uppercase; }
-        
-        /* Счётчик */
-        .counter-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
-        .count-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; cursor: pointer; }
-
-        /* Корзина и формы */
-        .cart-item { display: flex; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #222; text-align: left; }
-        .address-form { padding: 20px; text-align: left; }
-        .address-form input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #1c1c1c; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        .address-form label { font-size: 12px; color: #888; }
-
-        /* Bottom Sheet */
-        #info-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%; background: #111; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000; transition: bottom 0.3s ease; }
-        #info-sheet.open { bottom: 0; }
-        .sheet-content { padding: 20px; text-align: left; }
-        #sheet-img { width: 100%; height: 200px; object-fit: contain; background: #1c1c1c; border-radius: 12px; }
+        .add-btn { background: #fff; color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        .info-btn { background: #222; color: #fff; border: 1px solid #333; padding: 8px; border-radius: 10px; font-size: 10px; cursor: pointer; text-transform: uppercase; }
+        .count-ctrl { display: none; align-items: center; justify-content: space-between; width: 100%; }
+        .cnt-btn { background: #333; color: #fff; border: none; width: 40px; height: 40px; border-radius: 10px; font-size: 20px; }
+        .promo-section { margin: 20px 15px; text-align: left; border: 1px solid #fff; border-radius: 12px; padding: 10px; }
+        .promo-section label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .promo-input-group { display: flex; gap: 5px; }
+        .promo-input { flex-grow: 1; background: transparent; border: none; color: #fff; padding: 10px; outline: none; font-size: 16px; }
+        .promo-btn { background: #fff; color: #000; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .address-form { padding: 15px; text-align: left; }
+        .address-form label { font-size: 11px; color: #888; margin-left: 5px; }
+        .address-form input { width: 100%; padding: 14px; margin: 8px 0 18px; background: #111; border: 1px solid #333; border-radius: 12px; color: #fff; box-sizing: border-box; font-size: 16px; }
+        .cart-total { padding: 15px; border-top: 1px solid #222; }
+        .price-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 16px; }
+        .discount-line { color: #ff4d4d; }
+        .check-section { text-align: left; padding: 15px; background: #111; border: 1px solid #222; border-radius: 15px; margin: 10px 15px; }
+        .check-section h4 { color: #888; font-size: 11px; margin-top: 0; text-transform: uppercase; }
+        .old-price-check { text-decoration: line-through; color: #555; font-size: 14px; display: block; text-align: right; margin-right: 15px; }
     </style>
 </head>
 <body>
     <div id="main-container">
-        <div id="main-screen">
-            <h2 style="margin-top: 20px; letter-spacing: 1px;">MorozovShop</h2>
-            <div class="products-grid" id="products-grid">
+        <div id="screen-main" class="screen active">
+            <h2>MorozovShop</h2>
+            <div class="product-grid" id="product-grid">
                 </div>
         </div>
 
-        <div id="cart-screen" style="display: none;">
-            <h3 style="padding: 15px; text-align: left;">Корзина</h3>
-            <div id="cart-items-list"></div>
-            <div style="padding: 20px; text-align: right;">
-                <div style="font-size: 20px; font-weight: bold;">Итого: <span id="cart-total-price">$0.00</span></div>
+        <div id="screen-cart" class="screen">
+            <h3>Корзина</h3>
+            <div id="cart-items"></div>
+            <div class="promo-section">
+                <label>Промокод</label>
+                <div class="promo-input-group">
+                    <input type="text" class="promo-input" placeholder="Введите код...">
+                    <button class="promo-btn">Применить</button>
+                </div>
+            </div>
+            <div class="cart-total">
+                <div class="price-line"><span>Сумма:</span> <span id="total-sum">$0</span></div>
             </div>
         </div>
 
-        <div id="address-screen" style="display: none;">
+        <div id="screen-address" class="screen">
+            <h3>Оформление</h3>
             <div class="address-form">
                 <label>ФИО</label><input type="text" id="fio">
                 <label>Телефон</label><input type="tel" id="phone">
-                <label>Страна</label><input type="text" id="country">
-                <label>Город</label><input type="text" id="city">
-                <label>Пункт СДЭК</label><input type="text" id="cdek-addr">
-                <label>Email</label><input type="email" id="email">
-            </div>
-        </div>
-
-        <div id="checkout-screen" style="display: none;">
-            <div style="padding: 20px; text-align: left;">
-                <h3>Проверка заказа</h3>
-                <div id="check-items" style="background: #1c1c1c; padding: 15px; border-radius: 10px;"></div>
-                <div id="check-address" style="margin-top: 15px; font-size: 14px; color: #ccc;"></div>
-                <h2 id="check-total-price" style="text-align: right; margin-top: 20px;"></h2>
+                <label>Город и пункт СДЭК</label><input type="text" id="address">
             </div>
         </div>
     </div>
-
-    <div id="info-sheet">
-        <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 id="sheet-title" style="margin:0"></h3>
-            <button onclick="closeInfo()" style="background:none; color:#888; border:none; font-size: 30px;">&times;</button>
-        </div>
-        <div class="sheet-content">
-            <img src="" id="sheet-img">
-            <p id="sheet-desc" style="color: #ccc; margin: 20px 0; line-height: 1.5;"></p>
-            <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #222; padding-top: 15px;">
-                <span>ЦЕНА</span>
-                <span id="sheet-price"></span>
-            </div>
-            <button class="add-btn" style="margin-top: 25px; background: #333; color: #fff;" onclick="closeInfo()">ПОНЯТНО</button>
-        </div>
-    </div>
-
     <script src="script.js"></script>
 </body>
 </html>
