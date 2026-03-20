@@ -1,96 +1,89 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
+tg.MainButton.setParams({ color: '#ffffff', text_color: '#000000' }); // Черно-белая кнопка
 
 const SUPABASE_URL = 'https://jzlrxsfbfhgfmrwrtwv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_DXHDERQmtCOylso58j4AWg_sM4ymrD0'; 
+const SUPABASE_KEY = 'sb_publishable_DXHDERQmtCOylso58j4AWg_sM4ymrD0';
 
-let cart = {};
-let currentStep = 'main';
 let allProducts = [];
+let cart = {};
+let currentScreen = 'main';
 
-const BOT_TOKEN = '8677453235:AAHRTKraVGyg_Kh_kByvgyMHcq_IA7x2who';
-const CHAT_ID = '-1003538222198';
-
-// 1. Загрузка товаров
+// Загрузка товаров
 async function loadProducts() {
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
-        allProducts = await response.json();
-        renderProducts(allProducts);
-    } catch (e) { console.error("Ошибка:", e); }
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    allProducts = await response.json();
+    renderProducts();
 }
 
-// 2. Отрисовка витрины
-function renderProducts(products) {
-    const grid = document.getElementById('products-grid');
+function renderProducts() {
+    const grid = document.getElementById('product-grid');
     grid.innerHTML = '';
-    products.forEach(p => {
+    allProducts.forEach(p => {
         grid.innerHTML += `
-            <div class="product-card">
-                <img src="${p.image_url}" onclick="showInfo(${p.id})">
-                <h3>${p.title}</h3>
+            <div class="product-item">
+                <img src="${p.image_url}">
+                <div class="product-name">${p.title}</div>
                 <div class="price">$${p.price}</div>
                 <div class="btn-group">
-                    <button id="add-${p.id}" class="add-btn" onclick="firstAdd(${p.id}, ${p.price})">ДОБАВИТЬ</button>
-                    <div id="ctrl-${p.id}" class="counter-ctrl">
-                        <button class="count-btn" onclick="changeCount(${p.id}, ${p.price}, -1)">-</button>
-                        <span id="count-${p.id}">1</span>
-                        <button class="count-btn" onclick="changeCount(${p.id}, ${p.price}, 1)">+</button>
+                    <button id="add-${p.id}" class="add-btn" onclick="addToCart(${p.id}, ${p.price})">ДОБАВИТЬ</button>
+                    <div id="ctrl-${p.id}" class="count-ctrl">
+                        <button class="cnt-btn" onclick="updateCount(${p.id}, -1)">-</button>
+                        <span id="cnt-${p.id}">1</span>
+                        <button class="cnt-btn" onclick="updateCount(${p.id}, 1)">+</button>
                     </div>
-                    <button class="info-btn" onclick="showInfo(${p.id})">ИНФО</button>
+                    <button class="info-btn">ИНФО</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     });
 }
 
-// 3. Логика Info Sheet
-function showInfo(id) {
-    const p = allProducts.find(item => item.id === id);
-    if (!p) return;
-    document.getElementById('sheet-title').innerText = p.title;
-    document.getElementById('sheet-img').src = p.image_url;
-    document.getElementById('sheet-desc').innerText = p.description;
-    document.getElementById('sheet-price').innerText = `$${p.price}`;
-    document.getElementById('info-sheet').classList.add('open');
-    document.getElementById('main-container').classList.add('blur');
-}
-
-function closeInfo() {
-    document.getElementById('info-sheet').classList.remove('open');
-    document.getElementById('main-container').classList.remove('blur');
-}
-
-// 4. Корзина
-function firstAdd(id, price) {
+function addToCart(id, price) {
+    cart[id] = { count: 1, price: price };
     document.getElementById(`add-${id}`).style.display = 'none';
     document.getElementById(`ctrl-${id}`).style.display = 'flex';
-    cart[id] = { count: 1, price: parseFloat(price) };
     updateMainButton();
 }
 
-function changeCount(id, price, delta) {
+function updateCount(id, delta) {
     cart[id].count += delta;
     if (cart[id].count <= 0) {
         delete cart[id];
         document.getElementById(`add-${id}`).style.display = 'block';
         document.getElementById(`ctrl-${id}`).style.display = 'none';
     } else {
-        document.getElementById(`count-${id}`).innerText = cart[id].count;
+        document.getElementById(`cnt-${id}`).innerText = cart[id].count;
     }
     updateMainButton();
 }
 
 function updateMainButton() {
-    let total = 0;
-    for (let id in cart) total += cart[id].count * cart[id].price;
+    let total = Object.values(cart).reduce((sum, item) => sum + (item.count * item.price), 0);
     if (total > 0) {
-        tg.MainButton.setText(`КОРЗИНА ($${total.toFixed(2)})`);
+        tg.MainButton.setText(`КОРЗИНА ($${total})`);
         tg.MainButton.show();
-    } else { tg.MainButton.hide(); }
+    } else {
+        tg.MainButton.hide();
+    }
 }
 
-// Запуск приложения
+// Переключение экранов
+tg.onEvent('mainButtonClicked', () => {
+    if (currentScreen === 'main') {
+        showScreen('cart');
+        tg.MainButton.setText('ОФОРМИТЬ ЗАКАЗ');
+    } else if (currentScreen === 'cart') {
+        showScreen('address');
+        tg.MainButton.setText('ПОДТВЕРДИТЬ');
+    }
+});
+
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screenId).classList.add('active');
+    currentScreen = screenId;
+}
+
 loadProducts();
