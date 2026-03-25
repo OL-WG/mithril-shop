@@ -8,15 +8,18 @@ let products = {
 
 let isJarvis = false;
 
-// Работа с главной кнопкой через один надежный Listener
-const footerBtn = document.getElementById('footer-btn');
-footerBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    if (isActive('shop-screen')) showCart();
-    else if (isActive('cart-screen')) showDelivery();
-    else if (isActive('delivery-screen')) showCheckout();
-    else sendOrder();
-});
+// ГЛАВНАЯ ФУНКЦИЯ КЛИКА
+window.handleFooterClick = function() {
+    if (isActive('shop-screen')) {
+        showCart();
+    } else if (isActive('cart-screen')) {
+        showDelivery();
+    } else if (isActive('delivery-screen')) {
+        showCheckout();
+    } else {
+        sendOrder();
+    }
+};
 
 window.addToCart = (id) => { 
     products[id].qty = 1; 
@@ -37,9 +40,9 @@ window.changeQty = (id, delta) => {
     updateTotal(); 
 };
 
-// Промокод
-document.getElementById('apply-promo-btn').onclick = () => {
-    if (document.getElementById('promo-input').value.toLowerCase() === 'jarvis') {
+window.applyPromo = () => {
+    const val = document.getElementById('promo-input').value.toLowerCase();
+    if (val === 'jarvis') {
         isJarvis = true;
         tg.showAlert("Промокод JARVIS применен!");
         showCart(); 
@@ -47,15 +50,22 @@ document.getElementById('apply-promo-btn').onclick = () => {
 };
 
 function updateTotal() {
+    const footerBtn = document.getElementById('footer-btn');
     let subtotal = 0;
     for (let id in products) subtotal += products[id].price * products[id].qty;
     
     if (subtotal > 0) {
         footerBtn.style.display = 'block';
-        if (isActive('shop-screen')) footerBtn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
-        else if (isActive('cart-screen')) footerBtn.innerText = `К ОФОРМЛЕНИЮ`;
-        else if (isActive('delivery-screen')) footerBtn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
-        else footerBtn.innerText = `ОПЛАТИТЬ $${(isJarvis ? subtotal * 0.85 : subtotal).toFixed(2)}`;
+        if (isActive('shop-screen')) {
+            footerBtn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
+        } else if (isActive('cart-screen')) {
+            footerBtn.innerText = `К ОФОРМЛЕНИЮ`;
+        } else if (isActive('delivery-screen')) {
+            footerBtn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
+        } else {
+            const final = isJarvis ? subtotal * 0.85 : subtotal;
+            footerBtn.innerText = `ОПЛАТИТЬ $${final.toFixed(2)}`;
+        }
     } else {
         footerBtn.style.display = 'none';
     }
@@ -110,6 +120,7 @@ function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     window.scrollTo(0,0);
+    updateTotal();
 }
 
 function isActive(id) { return document.getElementById(id).classList.contains('active'); }
@@ -125,5 +136,5 @@ window.showInfo = (id) => {
 };
 
 function sendOrder() {
-    tg.sendData("Оформление заказа");
+    tg.sendData("Заказ оформлен");
 }
