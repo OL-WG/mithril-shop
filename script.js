@@ -1,68 +1,71 @@
-const tg = window.Telegram.WebApp
+let tg = window.Telegram.WebApp;
 
-tg.expand()
+tg.expand();
 
-const products = {
-
-arm:{name:"Ручка Arm",price:35,qty:0},
-
-expander:{name:"Эспандер",price:12,qty:0}
-
-}
-
-let isJarvis=false
+tg.ready();
 
 
+tg.MainButton.setParams({
 
-function switchScreen(id){
+color:'#000000',
 
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"))
+text_color:'#ffffff'
 
-document.getElementById(id).classList.add("active")
-
-}
-
+});
 
 
-function showCatalog(){
+let products={
 
-switchScreen("catalog-screen")
+item1:{name:"Ручка Arm",price:35,qty:0,desc:"Профессиональная ручка для тренировок."},
 
-}
+item2:{name:"Эспандер",price:12,qty:0,desc:"Кистевой эспандер для силы хвата."}
+
+};
 
 
+let isJarvis=false;
 
-function showCart(){
 
-switchScreen("cart-screen")
+tg.onEvent('mainButtonClicked',function(){
 
-renderCart()
+if(isActive('shop-screen')){
+
+showCart()
 
 }
 
+else if(isActive('cart-screen')){
 
-
-function showDelivery(){
-
-if(getTotalQty()==0){
-
-tg.showAlert("Корзина пустая")
-
-return
+showDelivery()
 
 }
 
-switchScreen("delivery-screen")
+else if(isActive('delivery-screen')){
+
+showCheckout()
 
 }
 
+else{
+
+sendOrder()
+
+}
+
+})
 
 
-function changeQty(id,val){
+function addToCart(id){
 
-products[id].qty=Math.max(0,products[id].qty+val)
+let card=document.getElementById(id)
 
-document.getElementById("qty-"+id).innerText=products[id].qty
+products[id].qty=1
+
+card.querySelector('.add-trigger').style.display='none'
+
+card.querySelector('.counter').style.display='flex'
+
+card.querySelector('.qty').innerText=1
 
 updateTotal()
 
@@ -70,59 +73,29 @@ updateTotal()
 
 
 
-function getTotalQty(){
+function changeQty(id,delta){
 
-let t=0
+let card=document.getElementById(id)
 
-for(let p in products){
+products[id].qty+=delta
 
-t+=products[p].qty
+if(products[id].qty<=0){
 
-}
+products[id].qty=0
 
-return t
+card.querySelector('.add-trigger').style.display='block'
 
-}
-
-
-
-function updateTotal(){
-
-document.getElementById("cart-count").innerText=getTotalQty()
+card.querySelector('.counter').style.display='none'
 
 }
 
+else{
 
-
-function renderCart(){
-
-let html=""
-
-let total=0
-
-
-
-for(let id in products){
-
-let p=products[id]
-
-if(p.qty>0){
-
-let sum=p.qty*p.price
-
-total+=sum
-
-html+=`<div class="check-row"><span>${p.name} x${p.qty}</span><span>$${sum}</span></div>`
+card.querySelector('.qty').innerText=products[id].qty
 
 }
 
-}
-
-
-
-document.getElementById("cart-items").innerHTML=html
-
-document.getElementById("cart-total").innerText="Сумма: $"+total
+updateTotal()
 
 }
 
@@ -130,17 +103,15 @@ document.getElementById("cart-total").innerText="Сумма: $"+total
 
 function applyPromo(){
 
-let code=document.getElementById("promo-input").value
+let val=document.getElementById('promo-input').value.toLowerCase()
 
-if(code==="JARVIS"){
+if(val==="jarvis"){
 
 isJarvis=true
 
 tg.showAlert("Промокод применен")
 
-}else{
-
-tg.showAlert("Неверный промокод")
+showCart()
 
 }
 
@@ -148,9 +119,110 @@ tg.showAlert("Неверный промокод")
 
 
 
-function v(id){
+function updateTotal(){
 
-return document.getElementById(id).value
+let subtotal=0
+
+for(let id in products){
+
+subtotal+=products[id].price*products[id].qty
+
+}
+
+
+if(subtotal>0){
+
+if(isActive('shop-screen')){
+
+tg.MainButton.setText(`В КОРЗИНУ $${subtotal.toFixed(2)}`)
+
+}
+
+else if(isActive('cart-screen')){
+
+tg.MainButton.setText("К ОФОРМЛЕНИЮ")
+
+}
+
+else if(isActive('delivery-screen')){
+
+tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ")
+
+}
+
+else{
+
+let final=isJarvis?subtotal*0.85:subtotal
+
+tg.MainButton.setText(`ОПЛАТИТЬ $${final.toFixed(2)}`)
+
+}
+
+tg.MainButton.show()
+
+}
+
+else{
+
+tg.MainButton.hide()
+
+}
+
+}
+
+
+
+function showCart(){
+
+switchScreen('cart-screen')
+
+let list=document.getElementById('cart-items-list')
+
+let summary=document.getElementById('cart-summary')
+
+list.innerHTML=''
+
+let sub=0
+
+
+for(let id in products){
+
+if(products[id].qty>0){
+
+let sum=products[id].qty*products[id].price
+
+sub+=sum
+
+list.innerHTML+=`<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum.toFixed(2)}</span></div>`
+
+}
+
+}
+
+
+if(isJarvis){
+
+let disc=sub*0.15
+
+summary.innerHTML=`
+
+<div>Сумма: $${sub.toFixed(2)}</div>
+
+<div>Скидка: -$${disc.toFixed(2)}</div>
+
+<b>Итого: $${(sub-disc).toFixed(2)}</b>
+
+`
+
+}
+
+else{
+
+summary.innerHTML=`<b>Сумма: $${sub.toFixed(2)}</b>`
+
+}
+
+updateTotal()
 
 }
 
@@ -158,7 +230,8 @@ return document.getElementById(id).value
 
 function showCheckout(){
 
-if(!v("fio")||!v("phone")||!v("country")||!v("city")||!v("address")||!v("email")){
+
+if(!v('fio')||!v('phone')||!v('country')||!v('city')||!v('address')||!v('email')){
 
 tg.showAlert("Пожалуйста заполните все поля")
 
@@ -167,88 +240,56 @@ return
 }
 
 
+switchScreen('checkout-screen')
 
-switchScreen("checkout-screen")
-
-
-
-let items=""
 
 let sub=0
 
+let items=""
 
 
 for(let id in products){
 
-let p=products[id]
+if(products[id].qty>0){
 
-if(p.qty>0){
+sub+=products[id].price*products[id].qty
 
-let sum=p.qty*p.price
-
-sub+=sum
-
-items+=`<div class="check-row"><span>${p.name} x${p.qty}</span><span>$${sum}</span></div>`
+items+=`<div>${products[id].name} x${products[id].qty}</div>`
 
 }
 
 }
-
-
-
-document.getElementById("check-order").innerHTML=`
-
-<div class="check-title">Товары</div>
-
-${items}
-
-`
-
-
-
-document.getElementById("check-delivery").innerHTML=`
-
-<div class="check-title">Данные клиента</div>
-
-<div class="check-row"><span>ФИО</span><span>${v("fio")}</span></div>
-
-<div class="check-row"><span>Телефон</span><span>${v("phone")}</span></div>
-
-<div class="check-row"><span>Страна</span><span>${v("country")}</span></div>
-
-<div class="check-row"><span>Город</span><span>${v("city")}</span></div>
-
-<div class="check-row"><span>Адрес СДЭК</span><span>${v("address")}</span></div>
-
-<div class="check-row"><span>Email</span><span>${v("email")}</span></div>
-
-`
-
 
 
 let final=isJarvis?sub*0.85:sub
 
-let discount=sub-final
+
+document.getElementById('check-order').innerHTML=items
 
 
+document.getElementById('check-delivery').innerHTML=
 
-let price=`<div class="check-row"><span>Сумма</span><span>$${sub.toFixed(2)}</span></div>`
+`
+
+<b>${v('fio')}</b><br>
+
+📞 ${v('phone')}<br>
+
+🌍 ${v('country')}<br>
+
+🏙 ${v('city')}<br>
+
+📦 ${v('address')}<br>
+
+📧 ${v('email')}
+
+`
 
 
-
-if(isJarvis){
-
-price+=`<div class="check-row"><span>Скидка</span><span>-$${discount.toFixed(2)}</span></div>`
-
-}
+document.getElementById('final-pay-amount').innerText=`К оплате: $${final.toFixed(2)}`
 
 
-
-price+=`<div class="check-total"><span>К оплате</span><span>$${final.toFixed(2)}</span></div>`
-
-
-
-document.getElementById("final-pay-amount").innerHTML=price
+updateTotal()
 
 }
 
@@ -256,30 +297,127 @@ document.getElementById("final-pay-amount").innerHTML=price
 
 function sendOrder(){
 
-let order={
 
-items:products,
+let cart={}
+
+let subtotal=0
+
+
+for(let id in products){
+
+if(products[id].qty>0){
+
+cart[id]={
+
+name:products[id].name,
+
+price:products[id].price,
+
+count:products[id].qty
+
+}
+
+subtotal+=products[id].price*products[id].qty
+
+}
+
+}
+
+
+let final=isJarvis?subtotal*0.85:subtotal
+
+
+let order={
 
 customer:{
 
-fio:v("fio"),
+fio:v('fio'),
 
-phone:v("phone"),
+phone:v('phone'),
 
-country:v("country"),
+country:v('country'),
 
-city:v("city"),
+city:v('city'),
 
-address:v("address"),
+cdek:v('address'),
 
-email:v("email")
+email:v('email')
+
+},
+
+cart:cart,
+
+promo:isJarvis?"JARVIS":"нет",
+
+total:final.toFixed(2)
 
 }
-
-}
-
 
 
 tg.sendData(JSON.stringify(order))
+
+tg.MainButton.hide()
+
+}
+
+
+
+function switchScreen(id){
+
+document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
+
+document.getElementById(id).classList.add('active')
+
+updateTotal()
+
+}
+
+
+
+function isActive(id){
+
+return document.getElementById(id).classList.contains('active')
+
+}
+
+
+
+function v(id){
+
+return document.getElementById(id).value||""
+
+}
+
+
+
+function showShop(){
+
+switchScreen('shop-screen')
+
+}
+
+
+
+function showDelivery(){
+
+switchScreen('delivery-screen')
+
+}
+
+
+
+function closeModal(){
+
+document.getElementById('info-modal').style.display='none'
+
+}
+
+
+
+function showInfo(id){
+
+document.getElementById('modal-body').innerHTML=`<h2>${products[id].name}</h2><p>${products[id].desc}</p>`
+
+document.getElementById('info-modal').style.display='flex'
 
 }
