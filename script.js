@@ -1,6 +1,12 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
+// Настройка системной кнопки Telegram
+tg.MainButton.setParams({
+    color: '#000000',
+    text_color: '#ffffff'
+});
+
 let products = {
     item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка." },
     item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер." }
@@ -8,18 +14,13 @@ let products = {
 
 let isJarvis = false;
 
-// ГЛАВНАЯ ФУНКЦИЯ КЛИКА
-window.handleFooterClick = function() {
-    if (isActive('shop-screen')) {
-        showCart();
-    } else if (isActive('cart-screen')) {
-        showDelivery();
-    } else if (isActive('delivery-screen')) {
-        showCheckout();
-    } else {
-        sendOrder();
-    }
-};
+// Единый слушатель для системной кнопки
+tg.onEvent('mainButtonClicked', function() {
+    if (isActive('shop-screen')) showCart();
+    else if (isActive('cart-screen')) showDelivery();
+    else if (isActive('delivery-screen')) showCheckout();
+    else sendOrder();
+});
 
 window.addToCart = (id) => { 
     products[id].qty = 1; 
@@ -50,24 +51,23 @@ window.applyPromo = () => {
 };
 
 function updateTotal() {
-    const footerBtn = document.getElementById('footer-btn');
     let subtotal = 0;
     for (let id in products) subtotal += products[id].price * products[id].qty;
     
     if (subtotal > 0) {
-        footerBtn.style.display = 'block';
         if (isActive('shop-screen')) {
-            footerBtn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
+            tg.MainButton.setText(`В КОРЗИНУ ($${subtotal.toFixed(2)})`);
         } else if (isActive('cart-screen')) {
-            footerBtn.innerText = `К ОФОРМЛЕНИЮ`;
+            tg.MainButton.setText("К ОФОРМЛЕНИЮ");
         } else if (isActive('delivery-screen')) {
-            footerBtn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
+            tg.MainButton.setText("ПРОВЕРИТЬ ДАННЫЕ");
         } else {
             const final = isJarvis ? subtotal * 0.85 : subtotal;
-            footerBtn.innerText = `ОПЛАТИТЬ $${final.toFixed(2)}`;
+            tg.MainButton.setText(`ОПЛАТИТЬ $${final.toFixed(2)}`);
         }
+        tg.MainButton.show();
     } else {
-        footerBtn.style.display = 'none';
+        tg.MainButton.hide();
     }
 }
 
@@ -136,5 +136,6 @@ window.showInfo = (id) => {
 };
 
 function sendOrder() {
-    tg.sendData("Заказ оформлен");
+    tg.sendData("Order Submitted");
+    tg.MainButton.hide();
 }
