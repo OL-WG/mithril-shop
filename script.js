@@ -8,6 +8,15 @@ let products = {
 
 let isJarvis = false;
 
+// Слушаем нажатие на главную кнопку через JS (самый надежный способ)
+const footerBtn = document.getElementById('footer-btn');
+footerBtn.addEventListener('click', () => {
+    if (isActive('shop-screen')) showCart();
+    else if (isActive('cart-screen')) showDelivery();
+    else if (isActive('delivery-screen')) showCheckout();
+    else sendOrder();
+});
+
 window.addToCart = (id) => { 
     products[id].qty = 1; 
     updateUI(id); 
@@ -37,15 +46,12 @@ function resetUI(id) {
     card.querySelector('.counter').style.display = 'none';
 }
 
-// Работа с промокодом и отображение цен
 window.applyPromo = () => {
     const input = document.getElementById('promo-input').value;
     if (input.toLowerCase() === 'jarvis') {
         isJarvis = true;
         tg.showAlert("Промокод JARVIS применен!");
         showCart(); 
-    } else {
-        tg.showAlert("Неверный промокод");
     }
 };
 
@@ -53,31 +59,20 @@ function updateTotal() {
     let subtotal = 0;
     for (let id in products) subtotal += products[id].price * products[id].qty;
     
-    const btn = document.getElementById('footer-btn');
     if (subtotal > 0) {
-        btn.style.display = 'block';
-        // Назначаем обработчик клика программно для надежности
-        btn.onclick = handleFooterClick; 
-
+        footerBtn.style.display = 'block';
         if (isActive('shop-screen')) {
-            btn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
+            footerBtn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
         } else if (isActive('cart-screen')) {
-            btn.innerText = `К ОФОРМЛЕНИЮ`;
+            footerBtn.innerText = `К ОФОРМЛЕНИЮ`;
         } else if (isActive('delivery-screen')) {
-            btn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
+            footerBtn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
         } else {
-            btn.innerText = `ПОДТВЕРДИТЬ И ОПЛАТИТЬ`;
+            footerBtn.innerText = `ПОДТВЕРДИТЬ И ОПЛАТИТЬ`;
         }
     } else {
-        btn.style.display = 'none';
+        footerBtn.style.display = 'none';
     }
-}
-
-function handleFooterClick() {
-    if (isActive('shop-screen')) showCart();
-    else if (isActive('cart-screen')) showDelivery();
-    else if (isActive('delivery-screen')) showCheckout();
-    else sendOrder();
 }
 
 function showCart() {
@@ -122,7 +117,6 @@ function showCheckout() {
     document.getElementById('check-order').innerHTML = orderHtml;
     document.getElementById('check-delivery').innerHTML = `<b>ФИО:</b> ${v('fio')}<br><b>Тел:</b> ${v('phone')}<br><b>Город:</b> ${v('city')}<br><b>СДЭК:</b> ${v('address')}`;
     document.getElementById('final-pay-amount').innerText = `$${final.toFixed(2)}`;
-    updateTotal();
 }
 
 window.showInfo = (id) => {
@@ -151,8 +145,8 @@ function sendOrder() {
     tg.sendData(message);
 }
 
-const isActive = (id) => document.getElementById(id).classList.contains('active');
-const v = (id) => document.getElementById(id).value || "—";
+function isActive(id) { return document.getElementById(id).classList.contains('active'); }
+function v(id) { return document.getElementById(id).value || "—"; }
 
 function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -162,4 +156,3 @@ function switchScreen(id) {
 
 window.showShop = () => { switchScreen('shop-screen'); updateTotal(); };
 window.showDelivery = () => { switchScreen('delivery-screen'); updateTotal(); };
-window.showCart = () => { showCart(); };
