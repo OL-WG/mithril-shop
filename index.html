@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-<title>MorozovShop</title>
+<title>Jarvis Store</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -15,100 +14,100 @@
 
 </head>
 
+
 <body>
 
 
-<div id="shop-screen" class="screen active">
+<div id="catalog-screen" class="screen active">
 
-<h2 class="main-title">MITHRILARM</h2>
+<h1 class="title-left">Каталог</h1>
 
-<div class="container">
+<div class="products">
 
 
-<div class="card" id="item1">
+<div class="product">
 
-<img src="ruchka.webp">
+<img src="https://via.placeholder.com/150">
 
-<h3>Ручка Arm</h3>
+<h3 class="product-name">Ручка Arm</h3>
 
-<div class="price">$35.00</div>
+<div class="price">$35</div>
 
-<button class="btn-black add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+<div class="qty">
 
-<div class="counter">
+<button onclick="changeQty('arm',-1)">-</button>
 
-<button onclick="changeQty('item1',-1)">-</button>
+<span id="qty-arm">0</span>
 
-<span class="qty">1</span>
-
-<button onclick="changeQty('item1',1)">+</button>
+<button onclick="changeQty('arm',1)">+</button>
 
 </div>
-
-<button class="btn-info" onclick="showInfo('item1')">ИНФО</button>
 
 </div>
 
 
 
-<div class="card" id="item2">
+<div class="product">
 
-<img src="expander.webp">
+<img src="https://via.placeholder.com/150">
 
-<h3>Эспандер</h3>
+<h3 class="product-name">Эспандер</h3>
 
-<div class="price">$12.00</div>
+<div class="price">$12</div>
 
-<button class="btn-black add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+<div class="qty">
 
-<div class="counter">
+<button onclick="changeQty('expander',-1)">-</button>
 
-<button onclick="changeQty('item2',-1)">-</button>
+<span id="qty-expander">0</span>
 
-<span class="qty">1</span>
-
-<button onclick="changeQty('item2',1)">+</button>
+<button onclick="changeQty('expander',1)">+</button>
 
 </div>
-
-<button class="btn-info" onclick="showInfo('item2')">ИНФО</button>
 
 </div>
 
 
 </div>
 
+
+<button class="cart-btn" onclick="showCart()">
+Корзина (<span id="cart-count">0</span>)
+</button>
+
 </div>
+
 
 
 
 <div id="cart-screen" class="screen">
 
-<div class="header-nav" onclick="showShop()">✕ Назад</div>
+<div class="header-nav" onclick="showCatalog()">Назад</div>
 
 <h2 class="title-left">Корзина</h2>
 
-<div id="cart-items-list" class="cart-list"></div>
-
+<div id="cart-items"></div>
 
 <div class="promo-container">
 
-<input type="text" id="promo-input" placeholder="Промокод">
+<input id="promo-input" placeholder="Промокод">
 
 <button class="btn-ok-bw" onclick="applyPromo()">OK</button>
 
 </div>
 
+<div class="total" id="cart-total"></div>
 
-<div id="cart-summary" class="summary"></div>
+<button class="checkout-btn" onclick="showDelivery()">Оформить</button>
 
 </div>
 
 
 
+
 <div id="delivery-screen" class="screen">
 
-<div class="header-nav" onclick="showCart()">✕ Назад</div>
+<div class="header-nav" onclick="showCart()">Назад</div>
 
 <h2 class="title-left">Доставка</h2>
 
@@ -116,7 +115,7 @@
 
 <input type="text" id="fio" placeholder="ФИО">
 
-<input type="text" id="phone" placeholder="Номер телефона">
+<input type="tel" id="phone" placeholder="Номер телефона" pattern="[0-9]*" inputmode="numeric">
 
 <input type="text" id="country" placeholder="Страна">
 
@@ -128,13 +127,16 @@
 
 </div>
 
+<button class="checkout-btn" onclick="showCheckout()">Продолжить</button>
+
 </div>
+
 
 
 
 <div id="checkout-screen" class="screen">
 
-<div class="header-nav" onclick="showDelivery()">✕ Назад</div>
+<div class="header-nav" onclick="showDelivery()">Назад</div>
 
 <h2 class="title-left">Проверка заказа</h2>
 
@@ -142,21 +144,9 @@
 
 <div id="check-delivery"></div>
 
-<h3 id="final-pay-amount"></h3>
+<div id="final-pay-amount"></div>
 
-</div>
-
-
-
-<div id="info-modal" class="modal">
-
-<div class="modal-content">
-
-<span class="close-modal" onclick="closeModal()">✕</span>
-
-<div id="modal-body"></div>
-
-</div>
+<button class="checkout-btn" onclick="sendOrder()">Оплатить</button>
 
 </div>
 
