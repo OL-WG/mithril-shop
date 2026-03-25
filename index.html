@@ -71,7 +71,7 @@
             <div class="group-label">ДОСТАВКА</div>
             <div id="check-delivery" class="group-content"></div>
         </div>
-        <div class="final-pay-row">
+        <div class="final-pay-row" style="padding: 0 20px; display: flex; justify-content: space-between; font-weight: bold; font-size: 20px; margin-top: 10px;">
             <span>К оплате:</span>
             <span id="final-pay-amount"></span>
         </div>
@@ -81,12 +81,8 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">✕</span>
             <div id="modal-body"></div>
-            <button class="btn-ok-bw" onclick="closeModal()">ПОНЯТНО</button>
+            <button class="btn-ok-bw" style="width: 100%;" onclick="closeModal()">ПОНЯТНО</button>
         </div>
-    </div>
-
-    <div class="footer-fixed">
-        <button id="footer-btn" class="btn-main-bw" onclick="handleFooterClick()"></button>
     </div>
 
     <script src="script.js"></script>
