@@ -8,14 +8,16 @@ let products = {
 
 let isJarvis = false;
 
-// Слушаем клик на главную кнопку
+// Инициализация кнопки один раз
 const footerBtn = document.getElementById('footer-btn');
-footerBtn.addEventListener('click', () => {
+
+footerBtn.onclick = function(e) {
+    e.preventDefault(); // Защита от двойного срабатывания
     if (isActive('shop-screen')) showCart();
     else if (isActive('cart-screen')) showDelivery();
     else if (isActive('delivery-screen')) showCheckout();
     else sendOrder();
-});
+};
 
 window.addToCart = (id) => { 
     products[id].qty = 1; 
@@ -46,16 +48,12 @@ function resetUI(id) {
     card.querySelector('.counter').style.display = 'none';
 }
 
-// Применение промокода и перерисовка цен
 window.applyPromo = () => {
-    const input = document.getElementById('promo-input').value;
-    if (input.toLowerCase() === 'jarvis') {
+    const val = document.getElementById('promo-input').value.toLowerCase();
+    if (val === 'jarvis') {
         isJarvis = true;
-        // Оставляем стандартное уведомление Telegram
         tg.showAlert("Промокод JARVIS применен!");
-        showCart(); // Перерисовываем корзину с новой детализацией
-    } else {
-        tg.showAlert("Неверный промокод");
+        showCart(); 
     }
 };
 
@@ -89,19 +87,14 @@ function showCart() {
         }
     }
     
-    // ЛОГИКА ОТОБРАЖЕНИЯ ЦЕН (справа)
     if (isJarvis) {
-        const discountVal = subtotal * 0.15;
-        const finalAmount = subtotal - discountVal;
-        
-        // Новая детализация: Исходная -> Снято -> Итог
+        let disc = subtotal * 0.15;
         summary.innerHTML = `
-            <span class="price-line price-old">Исходная сумма: $${subtotal.toFixed(2)}</span>
-            <span class="price-line price-discount">Скидка (15%): -$${discountVal.toFixed(2)}</span>
-            <span class="price-final">Итог к оплате: $${finalAmount.toFixed(2)}</span>
+            <span class="price-old">Исходная сумма: $${subtotal.toFixed(2)}</span>
+            <span class="price-discount">Скидка (15%): -$${disc.toFixed(2)}</span>
+            <span class="price-final">Итог к оплате: $${(subtotal - disc).toFixed(2)}</span>
         `;
     } else {
-        // Обычное отображение без скидки
         summary.innerHTML = `<span class="price-final">Сумма: $${subtotal.toFixed(2)}</span>`;
     }
     updateTotal();
@@ -121,14 +114,14 @@ function showCheckout() {
     document.getElementById('check-order').innerHTML = orderHtml;
     document.getElementById('check-delivery').innerHTML = `<b>Клиент:</b> ${v('fio')}<br><b>Тел:</b> ${v('phone')}<br><b>СДЭК:</b> ${v('city')}, ${v('address')}`;
     document.getElementById('final-pay-amount').innerText = `$${final.toFixed(2)}`;
+    updateTotal();
 }
 
 window.showInfo = (id) => {
     document.getElementById('modal-body').innerHTML = `
-        <h1 style="font-size:28px; margin-bottom:15px;">ИНФОРМАЦИЯ</h1>
         <h2 style="font-size:20px;">${products[id].name.toUpperCase()}</h2>
-        <p style="color:#888; line-height:1.5; font-size:15px; margin:20px 0;">${products[id].desc}</p>
-        <div style="margin-top:20px; font-size:18px; font-weight:bold;">СТОИМОСТЬ: ${products[id].price} $</div>
+        <p style="color:#888; margin:20px 0;">${products[id].desc}</p>
+        <div style="font-size:18px; font-weight:bold;">ЦЕНА: ${products[id].price} $</div>
     `;
     document.getElementById('info-modal').style.display = 'flex';
 };
@@ -137,16 +130,16 @@ window.closeModal = () => { document.getElementById('info-modal').style.display 
 
 function sendOrder() {
     let subtotal = 0;
-    let itemsText = "";
+    let items = "";
     for (let id in products) { 
         if(products[id].qty > 0) {
             subtotal += products[id].qty * products[id].price;
-            itemsText += `\n- ${products[id].name}: ${products[id].qty} шт.`;
+            items += `\n- ${products[id].name}: ${products[id].qty} шт.`;
         }
     }
     const final = isJarvis ? subtotal * 0.85 : subtotal;
-    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n\n📦 СДЭК: ${v('city')}, ${v('address')}\n🛒 Товары:${itemsText}\n\n${isJarvis ? '🎫 Промо: JARVIS (-15%)\n' : ''}✅ ИТОГО: $${final.toFixed(2)}`;
-    tg.sendData(message);
+    let msg = `🔥 НОВЫЙ ЗАКАЗ 🔥\n👤 ${v('fio')}\n📞 ${v('phone')}\n📦 ${v('city')}, ${v('address')}\n🛒 Товары:${items}\n✅ ИТОГО: $${final.toFixed(2)}`;
+    tg.sendData(msg);
 }
 
 function isActive(id) { return document.getElementById(id).classList.contains('active'); }
