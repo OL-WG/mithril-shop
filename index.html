@@ -4,88 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MorozovShop</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
-        #main-container { padding-bottom: 80px; text-align: center; }
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .product-item { background: #151515; border-radius: 15px; padding: 15px; border: 1px solid #222; }
-        .product-item img { width: 100%; height: 100px; object-fit: contain; }
-        .price { color: #888; font-weight: bold; margin: 10px 0; }
-        
-        /* Кнопки */
-        .btn-group { display: flex; flex-direction: column; gap: 8px; }
-        .add-btn { background: #fff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .info-btn { background: #222; color: #fff; border: 1px solid #333; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
-        
-        .count-ctrl { display: none; align-items: center; justify-content: space-between; }
-        .cnt-btn { background: #333; color: #fff; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 18px; }
-
-        /* Формы и Корзина */
-        .screen { display: none; padding: 15px; text-align: left; }
-        .active { display: block; }
-        input { width: 100%; padding: 12px; margin: 8px 0 15px; background: #111; border: 1px solid #333; border-radius: 10px; color: #fff; box-sizing: border-box; }
-        .promo-section { border: 1px solid #fff; padding: 15px; border-radius: 12px; margin: 15px 0; }
-        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
-    </style>
 </head>
 <body>
-    <div id="main-container">
-        <div id="main-screen" class="screen active">
-            <h2>MorozovShop</h2>
-            <div class="product-grid">
-                <div class="product-item">
-                    <img src="ruchka.webp">
-                    <b>Ручка Arm</b>
-                    <div class="price">$35.00</div>
-                    <div class="btn-group">
-                        <button id="add-Handle" class="add-btn" onclick="addToCart('Handle', 35)">ДОБАВИТЬ</button>
-                        <div id="ctrl-Handle" class="count-ctrl">
-                            <button class="cnt-btn" onclick="changeCount('Handle', -1)">-</button>
-                            <span id="count-Handle">1</span>
-                            <button class="cnt-btn" onclick="changeCount('Handle', 1)">+</button>
-                        </div>
-                    </div>
+    <div id="shop-screen" class="screen active">
+        <h2 class="main-title">MITHRILARM</h2>
+        <div class="container">
+            <div class="card" id="item1">
+                <img src="ruchka.webp">
+                <h3>Ручка Arm</h3>
+                <div class="price">$35.00</div>
+                
+                <button class="btn-white add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+                <div class="counter">
+                    <button onclick="changeQty('item1', -1)">-</button>
+                    <span class="qty">1</span>
+                    <button onclick="changeQty('item1', 1)">+</button>
                 </div>
-                <div class="product-item">
-                    <img src="expander.webp">
-                    <b>Эспандер</b>
-                    <div class="price">$12.00</div>
-                    <div class="btn-group">
-                        <button id="add-Expander" class="add-btn" onclick="addToCart('Expander', 12)">ДОБАВИТЬ</button>
-                        <div id="ctrl-Expander" class="count-ctrl">
-                            <button class="cnt-btn" onclick="changeCount('Expander', -1)">-</button>
-                            <span id="count-Expander">1</span>
-                            <button class="cnt-btn" onclick="changeCount('Expander', 1)">+</button>
-                        </div>
-                    </div>
+                <button class="btn-description" onclick="showInfo('item1')">ОПИСАНИЕ</button>
+            </div>
+
+            <div class="card" id="item2">
+                <img src="expander.webp">
+                <h3>Эспандер</h3>
+                <div class="price">$12.00</div>
+                
+                <button class="btn-white add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+                <div class="counter">
+                    <button onclick="changeQty('item2', -1)">-</button>
+                    <span class="qty">1</span>
+                    <button onclick="changeQty('item2', 1)">+</button>
                 </div>
+                <button class="btn-description" onclick="showInfo('item2')">ОПИСАНИЕ</button>
             </div>
         </div>
+    </div>
 
-        <div id="cart-screen" class="screen">
-            <h3>Корзина</h3>
-            <div id="cart-list"></div>
-            <div class="promo-section">
-                <label>Промокод</label>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="promo-input" placeholder="Код (JARVIS)">
-                    <button onclick="applyPromo()" class="add-btn" style="height:42px; margin-top:8px;">OK</button>
-                </div>
-                <div id="promo-msg" style="font-size:12px;"></div>
+    <div id="cart-screen" class="screen">
+        <div class="header-nav"><span onclick="showShop()">✕ Назад</span></div>
+        <h2 class="title-left">Корзина</h2>
+        <div id="cart-items-list" class="cart-list"></div>
+        <div class="promo-container">
+            <div class="promo-block">
+                <input type="text" id="promo-input" placeholder="Jarvis">
+                <button class="btn-ok-black" onclick="applyPromo()">ОК</button>
             </div>
-            <div id="total-price" style="font-size:20px; font-weight:bold; text-align:right;"></div>
         </div>
+        <div class="summary">
+            <div id="total-sum">Сумма: $0</div>
+            <div id="total-final">Итог: $0</div>
+        </div>
+    </div>
 
-        <div id="address-screen" class="screen">
-            <h3>Доставка</h3>
+    <div id="delivery-screen" class="screen">
+        <div class="header-nav"><span onclick="showCart()">✕ Назад</span></div>
+        <h2 class="title-left">Доставка</h2>
+        <div class="form-container">
             <input type="text" id="fio" placeholder="ФИО">
-            <input type="tel" id="phone" placeholder="Телефон">
+            <input type="text" id="phone" placeholder="Телефон">
+            <input type="text" id="country" placeholder="Страна">
             <input type="text" id="city" placeholder="Город">
-            <input type="text" id="cdek" placeholder="Адрес СДЭК">
+            <input type="text" id="address" placeholder="Адрес СДЭК">
             <input type="email" id="email" placeholder="Email">
         </div>
     </div>
+
+    <div id="checkout-screen" class="screen">
+        <div class="header-nav"><span onclick="showDelivery()">✕ Назад</span></div>
+        <h2 class="title-left">Проверка данных</h2>
+        <div class="data-group">
+            <div class="group-label">ЗАКАЗ</div>
+            <div id="check-order" class="group-content"></div>
+        </div>
+        <div class="data-group">
+            <div class="group-label">ПОЛУЧАТЕЛЬ И ДОСТАВКА</div>
+            <div id="check-delivery" class="group-content"></div>
+        </div>
+        <div class="final-pay-row">
+            <span>К оплате:</span>
+            <span id="final-pay-amount"></span>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">✕</span>
+            <div id="modal-body"></div>
+            <button class="btn-white-modal" onclick="closeModal()">ПОНЯТНО</button>
+        </div>
+    </div>
+
+    <div class="footer-fixed">
+        <button id="footer-btn" class="btn-main" onclick="handleFooterClick()"></button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
