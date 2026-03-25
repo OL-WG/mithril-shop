@@ -2,8 +2,8 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let products = {
-    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для армрестлинга. Разработана для эффективной тренировки хвата и кисти." },
-    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер с регулируемой нагрузкой. Компактный тренажер для силы твоих рук." }
+    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для армрестлинга." },
+    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер с регулируемой нагрузкой." }
 };
 
 let isJarvis = false;
@@ -37,12 +37,13 @@ function resetUI(id) {
     card.querySelector('.counter').style.display = 'none';
 }
 
+// Применение промокода с визуальным зачеркиванием
 window.applyPromo = () => {
     const input = document.getElementById('promo-input').value;
     if (input.toLowerCase() === 'jarvis') {
         isJarvis = true;
-        tg.showAlert("Промокод JARVIS применен! Скидка 15%");
-        showCart(); 
+        tg.showAlert("Промокод JARVIS применен!");
+        showCart(); // Обновляем экран корзины
     } else {
         tg.showAlert("Неверный промокод");
     }
@@ -88,9 +89,19 @@ function showCart() {
             list.innerHTML += `<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
         }
     }
-    const final = isJarvis ? subtotal * 0.85 : subtotal;
-    document.getElementById('total-sum').innerText = `Сумма: $${subtotal}`;
-    document.getElementById('total-final').innerText = `Итог: $${final.toFixed(2)}`;
+    
+    const sumEl = document.getElementById('total-sum');
+    const finalEl = document.getElementById('total-final');
+
+    if (isJarvis) {
+        const discounted = subtotal * 0.85;
+        sumEl.innerHTML = `<span class="old-price">Сумма: $${subtotal}</span>`;
+        finalEl.style.display = 'block';
+        finalEl.innerHTML = `<span class="new-price">Итог: $${discounted.toFixed(2)}</span>`;
+    } else {
+        sumEl.innerText = `Сумма: $${subtotal}`;
+        finalEl.style.display = 'none';
+    }
     updateTotal();
 }
 
@@ -114,7 +125,7 @@ function showCheckout() {
 window.showInfo = (id) => {
     document.getElementById('modal-body').innerHTML = `
         <h1 style="font-size:28px; margin-bottom:15px;">ИНФОРМАЦИЯ</h1>
-        <h2 style="font-size:20px; color:#fff;">${products[id].name.toUpperCase()}</h2>
+        <h2 style="font-size:20px;">${products[id].name.toUpperCase()}</h2>
         <p style="color:#888; line-height:1.5; font-size:15px; margin:20px 0;">${products[id].desc}</p>
         <div style="margin-top:20px; font-size:18px; font-weight:bold;">СТОИМОСТЬ: ${products[id].price} $</div>
     `;
@@ -133,7 +144,7 @@ function sendOrder() {
         }
     }
     const final = isJarvis ? subtotal * 0.85 : subtotal;
-    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n\n📦 Доставка: ${v('country')}, ${v('city')}\n🏢 СДЭК: ${v('address')}\n\n🛒 Товары:${itemsText}\n\n${isJarvis ? '🎫 Промо: JARVIS (-15%)\n' : ''}✅ ИТОГО: $${final.toFixed(2)}`;
+    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n\n📦 Доставка: ${v('country')}, ${v('city')}\n🛒 Товары:${itemsText}\n\n✅ ИТОГО: $${final.toFixed(2)}`;
     tg.sendData(message);
 }
 
