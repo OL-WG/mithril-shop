@@ -8,13 +8,15 @@ let products = {
 
 let isJarvis = false;
 
+// Работа с главной кнопкой через один надежный Listener
 const footerBtn = document.getElementById('footer-btn');
-footerBtn.onclick = function() {
+footerBtn.addEventListener('click', function(e) {
+    e.preventDefault();
     if (isActive('shop-screen')) showCart();
     else if (isActive('cart-screen')) showDelivery();
     else if (isActive('delivery-screen')) showCheckout();
     else sendOrder();
-};
+});
 
 window.addToCart = (id) => { 
     products[id].qty = 1; 
@@ -35,6 +37,7 @@ window.changeQty = (id, delta) => {
     updateTotal(); 
 };
 
+// Промокод
 document.getElementById('apply-promo-btn').onclick = () => {
     if (document.getElementById('promo-input').value.toLowerCase() === 'jarvis') {
         isJarvis = true;
@@ -46,13 +49,16 @@ document.getElementById('apply-promo-btn').onclick = () => {
 function updateTotal() {
     let subtotal = 0;
     for (let id in products) subtotal += products[id].price * products[id].qty;
+    
     if (subtotal > 0) {
         footerBtn.style.display = 'block';
         if (isActive('shop-screen')) footerBtn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
         else if (isActive('cart-screen')) footerBtn.innerText = `К ОФОРМЛЕНИЮ`;
         else if (isActive('delivery-screen')) footerBtn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
-        else footerBtn.innerText = `ОПЛАТИТЬ`;
-    } else footerBtn.style.display = 'none';
+        else footerBtn.innerText = `ОПЛАТИТЬ $${(isJarvis ? subtotal * 0.85 : subtotal).toFixed(2)}`;
+    } else {
+        footerBtn.style.display = 'none';
+    }
 }
 
 function showCart() {
@@ -70,12 +76,11 @@ function showCart() {
         }
     }
     
-    // ЛОГИКА СУММ: Сумма -> Скидка -> Итог (все 17px)
     if (isJarvis) {
         let disc = sub * 0.15;
         summary.innerHTML = `
             <div class="summary-line old-price"><span>Сумма:</span><span>$${sub.toFixed(2)}</span></div>
-            <div class="summary-line discount-line"><span>Скидка (15%):</span><span>-$${disc.toFixed(2)}</span></div>
+            <div class="summary-line"><span>Скидка (15%):</span><span>-$${disc.toFixed(2)}</span></div>
             <div class="summary-line price-final"><span>Итог к оплате:</span><span>$${(sub-disc).toFixed(2)}</span></div>
         `;
     } else {
@@ -96,7 +101,7 @@ function showCheckout() {
     }
     const final = isJarvis ? sub * 0.85 : sub;
     document.getElementById('check-order').innerHTML = items;
-    document.getElementById('check-delivery').innerHTML = `${v('fio')}<br>${v('phone')}<br>${v('city')}, ${v('address')}`;
+    document.getElementById('check-delivery').innerHTML = `<b>${v('fio')}</b><br>${v('phone')}<br>${v('city')}, ${v('address')}`;
     document.getElementById('final-pay-amount').innerText = `$${final.toFixed(2)}`;
     updateTotal();
 }
@@ -109,6 +114,7 @@ function switchScreen(id) {
 
 function isActive(id) { return document.getElementById(id).classList.contains('active'); }
 function v(id) { return document.getElementById(id).value || "—"; }
+
 window.showShop = () => switchScreen('shop-screen');
 window.showDelivery = () => switchScreen('delivery-screen');
 window.showCart = () => showCart();
@@ -119,5 +125,5 @@ window.showInfo = (id) => {
 };
 
 function sendOrder() {
-    tg.sendData("Заказ отправлен!");
+    tg.sendData("Оформление заказа");
 }
