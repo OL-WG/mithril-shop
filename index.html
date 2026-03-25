@@ -15,7 +15,6 @@
                 <img src="ruchka.webp">
                 <h3>Ручка Arm</h3>
                 <div class="price">$35.00</div>
-                
                 <button class="btn-white add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
                 <div class="counter">
                     <button onclick="changeQty('item1', -1)">-</button>
@@ -29,7 +28,6 @@
                 <img src="expander.webp">
                 <h3>Эспандер</h3>
                 <div class="price">$12.00</div>
-                
                 <button class="btn-white add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
                 <div class="counter">
                     <button onclick="changeQty('item2', -1)">-</button>
@@ -53,7 +51,7 @@
         </div>
         <div class="summary">
             <div id="total-sum">Сумма: $0</div>
-            <div id="total-final" style="display: none;">Итог: $0</div>
+            <div id="total-final" style="display: none;"></div>
         </div>
     </div>
 
@@ -96,7 +94,7 @@
     </div>
 
     <div class="footer-fixed">
-        <button id="footer-btn" class="btn-main" onclick="handleFooterClick()"></button>
+        <button id="footer-btn" class="btn-main"></button>
     </div>
 
     <script src="script.js"></script>
