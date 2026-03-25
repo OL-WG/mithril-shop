@@ -37,13 +37,13 @@ function resetUI(id) {
     card.querySelector('.counter').style.display = 'none';
 }
 
-// Применение промокода с визуальным зачеркиванием
+// Работа с промокодом и отображение цен
 window.applyPromo = () => {
     const input = document.getElementById('promo-input').value;
     if (input.toLowerCase() === 'jarvis') {
         isJarvis = true;
         tg.showAlert("Промокод JARVIS применен!");
-        showCart(); // Обновляем экран корзины
+        showCart(); 
     } else {
         tg.showAlert("Неверный промокод");
     }
@@ -56,6 +56,9 @@ function updateTotal() {
     const btn = document.getElementById('footer-btn');
     if (subtotal > 0) {
         btn.style.display = 'block';
+        // Назначаем обработчик клика программно для надежности
+        btn.onclick = handleFooterClick; 
+
         if (isActive('shop-screen')) {
             btn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
         } else if (isActive('cart-screen')) {
@@ -70,12 +73,12 @@ function updateTotal() {
     }
 }
 
-window.handleFooterClick = () => {
+function handleFooterClick() {
     if (isActive('shop-screen')) showCart();
     else if (isActive('cart-screen')) showDelivery();
     else if (isActive('delivery-screen')) showCheckout();
     else sendOrder();
-};
+}
 
 function showCart() {
     switchScreen('cart-screen');
@@ -117,7 +120,7 @@ function showCheckout() {
     }
     const final = isJarvis ? subtotal * 0.85 : subtotal;
     document.getElementById('check-order').innerHTML = orderHtml;
-    document.getElementById('check-delivery').innerHTML = `<b>ФИО:</b> ${v('fio')}<br><b>Тел:</b> ${v('phone')}<br><b>Страна:</b> ${v('country')}<br><b>Город:</b> ${v('city')}<br><b>Пункт СДЭК:</b> ${v('address')}<br><b>Email:</b> ${v('email')}`;
+    document.getElementById('check-delivery').innerHTML = `<b>ФИО:</b> ${v('fio')}<br><b>Тел:</b> ${v('phone')}<br><b>Город:</b> ${v('city')}<br><b>СДЭК:</b> ${v('address')}`;
     document.getElementById('final-pay-amount').innerText = `$${final.toFixed(2)}`;
     updateTotal();
 }
@@ -144,7 +147,7 @@ function sendOrder() {
         }
     }
     const final = isJarvis ? subtotal * 0.85 : subtotal;
-    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n\n📦 Доставка: ${v('country')}, ${v('city')}\n🛒 Товары:${itemsText}\n\n✅ ИТОГО: $${final.toFixed(2)}`;
+    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n\n📦 СДЭК: ${v('city')}, ${v('address')}\n🛒 Товары:${itemsText}\n\n✅ ИТОГО: $${final.toFixed(2)}`;
     tg.sendData(message);
 }
 
