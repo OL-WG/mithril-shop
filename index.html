@@ -15,25 +15,25 @@
                 <img src="ruchka.webp">
                 <h3>Ручка Arm</h3>
                 <div class="price">$35.00</div>
-                <button class="btn-white add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+                <button class="btn-black add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
                 <div class="counter">
                     <button onclick="changeQty('item1', -1)">-</button>
                     <span class="qty">1</span>
                     <button onclick="changeQty('item1', 1)">+</button>
                 </div>
-                <button class="btn-description" onclick="showInfo('item1')">ОПИСАНИЕ</button>
+                <button class="btn-info" onclick="showInfo('item1')">ИНФО</button>
             </div>
             <div class="card" id="item2">
                 <img src="expander.webp">
                 <h3>Эспандер</h3>
                 <div class="price">$12.00</div>
-                <button class="btn-white add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+                <button class="btn-black add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
                 <div class="counter">
                     <button onclick="changeQty('item2', -1)">-</button>
                     <span class="qty">1</span>
                     <button onclick="changeQty('item2', 1)">+</button>
                 </div>
-                <button class="btn-description" onclick="showInfo('item2')">ОПИСАНИЕ</button>
+                <button class="btn-info" onclick="showInfo('item2')">ИНФО</button>
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@
         
         <div class="promo-container">
             <input type="text" id="promo-input" placeholder="Промокод">
-            <button class="btn-ok-black" onclick="applyPromo()">ОК</button>
+            <button class="btn-ok-bw" id="apply-promo-btn">ОК</button>
         </div>
         
         <div class="summary" id="cart-summary"></div>
@@ -66,21 +66,30 @@
     <div id="checkout-screen" class="screen">
         <div class="header-nav"><span onclick="showDelivery()">✕ Назад</span></div>
         <h2 class="title-left">Проверка</h2>
-        <div class="data-group"><div class="group-label">ЗАКАЗ</div><div id="check-order" class="group-content"></div></div>
-        <div class="data-group"><div class="group-label">ДОСТАВКА</div><div id="check-delivery" class="group-content"></div></div>
-        <div class="final-pay-row"><span>К оплате:</span><span id="final-pay-amount"></span></div>
+        <div class="data-group">
+            <div class="group-label">ЗАКАЗ</div>
+            <div id="check-order" class="group-content"></div>
+        </div>
+        <div class="data-group">
+            <div class="group-label">ДОСТАВКА</div>
+            <div id="check-delivery" class="group-content"></div>
+        </div>
+        <div class="final-row">
+            <span>К оплате:</span>
+            <span id="final-pay-amount"></span>
+        </div>
     </div>
 
     <div id="info-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">✕</span>
             <div id="modal-body"></div>
-            <button class="btn-white-modal" onclick="closeModal()">ПОНЯТНО</button>
+            <button class="btn-ok-bw" onclick="closeModal()">ПОНЯТНО</button>
         </div>
     </div>
 
     <div class="footer-fixed">
-        <button id="footer-btn" class="btn-main"></button>
+        <button id="footer-btn" class="btn-main-bw"></button>
     </div>
 
     <script src="script.js"></script>
