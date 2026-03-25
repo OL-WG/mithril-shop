@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
 <title>MorozovShop</title>
 
 <link rel="stylesheet" href="style.css">
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 </head>
 
 <body>
 
+
 <div id="shop-screen" class="screen active">
 
 <h2 class="main-title">MITHRILARM</h2>
 
 <div class="container">
+
 
 <div class="card" id="item1">
 
@@ -26,9 +33,7 @@
 
 <div class="price">$35.00</div>
 
-<button class="btn-black add-trigger" onclick="addToCart('item1')">
-ДОБАВИТЬ
-</button>
+<button class="btn-black add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
 
 <div class="counter">
 
@@ -40,11 +45,10 @@
 
 </div>
 
-<button class="btn-info" onclick="showInfo('item1')">
-ИНФО
-</button>
+<button class="btn-info" onclick="showInfo('item1')">ИНФО</button>
 
 </div>
+
 
 
 <div class="card" id="item2">
@@ -55,9 +59,7 @@
 
 <div class="price">$12.00</div>
 
-<button class="btn-black add-trigger" onclick="addToCart('item2')">
-ДОБАВИТЬ
-</button>
+<button class="btn-black add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
 
 <div class="counter">
 
@@ -69,104 +71,81 @@
 
 </div>
 
-<button class="btn-info" onclick="showInfo('item2')">
-ИНФО
-</button>
+<button class="btn-info" onclick="showInfo('item2')">ИНФО</button>
+
+</div>
+
 
 </div>
 
 </div>
 
-</div>
 
 
 <div id="cart-screen" class="screen">
 
-<div class="header-nav">
-
-<span onclick="showShop()">✕ Назад</span>
-
-</div>
+<div class="header-nav" onclick="showShop()">✕ Назад</div>
 
 <h2 class="title-left">Корзина</h2>
 
 <div id="cart-items-list" class="cart-list"></div>
 
+
 <div class="promo-container">
 
 <input type="text" id="promo-input" placeholder="Промокод">
 
-<button class="btn-ok-bw" onclick="applyPromo()">ОК</button>
+<button class="btn-ok-bw" onclick="applyPromo()">OK</button>
 
 </div>
+
 
 <div id="cart-summary" class="summary"></div>
 
 </div>
 
 
+
 <div id="delivery-screen" class="screen">
 
-<div class="header-nav">
-
-<span onclick="showCart()">✕ Назад</span>
-
-</div>
+<div class="header-nav" onclick="showCart()">✕ Назад</div>
 
 <h2 class="title-left">Доставка</h2>
 
 <div class="form-container">
 
-<input id="fio" type="text" placeholder="ФИО">
+<input type="text" id="fio" placeholder="ФИО">
 
-<input id="phone" type="text" placeholder="Телефон">
+<input type="text" id="phone" placeholder="Номер телефона">
 
-<input id="city" type="text" placeholder="Город">
+<input type="text" id="country" placeholder="Страна">
 
-<input id="address" type="text" placeholder="Адрес СДЭК">
+<input type="text" id="city" placeholder="Город">
+
+<input type="text" id="address" placeholder="Адрес СДЭК">
+
+<input type="email" id="email" placeholder="Email">
 
 </div>
 
 </div>
+
 
 
 <div id="checkout-screen" class="screen">
 
-<div class="header-nav">
+<div class="header-nav" onclick="showDelivery()">✕ Назад</div>
 
-<span onclick="showDelivery()">✕ Назад</span>
-
-</div>
-
-<h2 class="title-left">Проверка</h2>
-
-<div class="data-group">
-
-<div class="group-label">ЗАКАЗ</div>
+<h2 class="title-left">Проверка заказа</h2>
 
 <div id="check-order"></div>
 
-</div>
-
-
-<div class="data-group">
-
-<div class="group-label">ДОСТАВКА</div>
-
 <div id="check-delivery"></div>
 
-</div>
-
-
-<div class="final-pay-row">
-
-<span>К оплате:</span>
-
-<span id="final-pay-amount"></span>
+<h3 id="final-pay-amount"></h3>
 
 </div>
 
-</div>
 
 
 <div id="info-modal" class="modal">
@@ -177,8 +156,6 @@
 
 <div id="modal-body"></div>
 
-<button class="btn-ok-bw" onclick="closeModal()">ПОНЯТНО</button>
-
 </div>
 
 </div>
@@ -187,4 +164,5 @@
 <script src="script.js"></script>
 
 </body>
+
 </html>
