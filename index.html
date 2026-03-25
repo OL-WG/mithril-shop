@@ -44,7 +44,7 @@
         <div id="cart-items-list" class="cart-list"></div>
         <div class="promo-container">
             <input type="text" id="promo-input" placeholder="Промокод">
-            <button class="btn-ok-bw" id="apply-promo-btn">ОК</button>
+            <button class="btn-ok-bw" onclick="applyPromo()">ОК</button>
         </div>
         <div class="summary" id="cart-summary"></div>
     </div>
@@ -86,7 +86,7 @@
     </div>
 
     <div class="footer-fixed">
-        <button id="footer-btn" class="btn-main-bw"></button>
+        <button id="footer-btn" class="btn-main-bw" onclick="handleFooterClick()"></button>
     </div>
 
     <script src="script.js"></script>
