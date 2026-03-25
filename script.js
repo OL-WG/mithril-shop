@@ -2,21 +2,21 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let products = {
-    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка." },
-    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер." }
+    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для армрестлинга." },
+    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер с регулируемой нагрузкой." }
 };
 
 let isJarvis = false;
 
 // Централизованная логика главной кнопки
 const footerBtn = document.getElementById('footer-btn');
-footerBtn.onclick = function(e) {
-    e.preventDefault(); 
+
+footerBtn.addEventListener('click', () => {
     if (isActive('shop-screen')) showCart();
     else if (isActive('cart-screen')) showDelivery();
     else if (isActive('delivery-screen')) showCheckout();
     else sendOrder();
-};
+});
 
 window.addToCart = (id) => { 
     products[id].qty = 1; 
@@ -37,7 +37,8 @@ window.changeQty = (id, delta) => {
     updateTotal(); 
 };
 
-window.applyPromo = () => {
+// Исправленная логика промокода (Black & White алерты)
+document.getElementById('apply-promo-btn').onclick = () => {
     const val = document.getElementById('promo-input').value.toLowerCase();
     if (val === 'jarvis') {
         isJarvis = true;
@@ -74,17 +75,16 @@ function showCart() {
         if (products[id].qty > 0) {
             let sum = products[id].qty * products[id].price;
             subtotal += sum;
-            // Формат строки: Лево/Право
+            // ЛЕВО/ПРАВО выравнивание товаров
             list.innerHTML += `<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
         }
     }
     
-    // Переделал HTML-структуру сумм для Лево/Право
+    // ЛЕВО/ПРАВО выравнивание сумм
     if (isJarvis) {
         let disc = subtotal * 0.15;
         summary.innerHTML = `
             <div class="summary-line old-price"><span>Сумма:</span><span>$${subtotal.toFixed(2)}</span></div>
-            <div class="summary-line new-price"><span>Скидка (Jarvis):</span><span>-$${disc.toFixed(2)}</span></div>
             <div class="summary-line price-final"><span>Итог к оплате:</span><span>$${(subtotal - disc).toFixed(2)}</span></div>
         `;
     } else {
@@ -111,7 +111,11 @@ function showCheckout() {
 }
 
 window.showInfo = (id) => {
-    document.getElementById('modal-body').innerHTML = `<h2>${products[id].name.toUpperCase()}</h2><p style="color:#888; margin:20px 0;">${products[id].desc}</p><div style="font-size:18px; font-weight:bold;">ЦЕНА: ${products[id].price} $</div>`;
+    document.getElementById('modal-body').innerHTML = `
+        <h2 style="font-size:20px;">${products[id].name.toUpperCase()}</h2>
+        <p style="color:#888; line-height:1.5; margin:20px 0;">${products[id].desc}</p>
+        <div style="font-size:18px; font-weight:bold;">ЦЕНА: ${products[id].price} $</div>
+    `;
     document.getElementById('info-modal').style.display = 'flex';
 };
 
@@ -125,6 +129,7 @@ function sendOrder() {
 
 function isActive(id) { return document.getElementById(id).classList.contains('active'); }
 function v(id) { return document.getElementById(id).value || "—"; }
+
 function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
