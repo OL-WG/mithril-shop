@@ -1,100 +1,151 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-let cart = {};
-let step = 'main';
-let discount = 0;
-let promoCode = "Нет";
+let products = {
+    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для армрестлинга. Разработана для эффективной тренировки хвата и кисти." },
+    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер с регулируемой нагрузкой. Компактный тренажер для силы твоих рук." }
+};
 
-function addToCart(id, price) {
-    cart[id] = { count: 1, price: price };
-    document.getElementById(`add-${id}`).style.display = 'none';
-    document.getElementById(`ctrl-${id}`).style.display = 'flex';
-    updateMainBtn();
+let isJarvis = false;
+
+window.addToCart = (id) => { 
+    products[id].qty = 1; 
+    updateUI(id); 
+    updateTotal(); 
+};
+
+window.changeQty = (id, delta) => { 
+    products[id].qty += delta; 
+    if (products[id].qty <= 0) { 
+        products[id].qty = 0; 
+        resetUI(id); 
+    }
+    updateUI(id); 
+    updateTotal(); 
+};
+
+function updateUI(id) {
+    const card = document.getElementById(id);
+    card.querySelector('.add-trigger').style.display = 'none';
+    card.querySelector('.counter').style.display = 'flex';
+    card.querySelector('.qty').innerText = products[id].qty;
 }
 
-function changeCount(id, delta) {
-    cart[id].count += delta;
-    if (cart[id].count <= 0) {
-        delete cart[id];
-        document.getElementById(`add-${id}`).style.display = 'block';
-        document.getElementById(`ctrl-${id}`).style.display = 'none';
+function resetUI(id) {
+    const card = document.getElementById(id);
+    card.querySelector('.add-trigger').style.display = 'block';
+    card.querySelector('.counter').style.display = 'none';
+}
+
+window.applyPromo = () => {
+    const input = document.getElementById('promo-input').value;
+    if (input.toLowerCase() === 'jarvis') {
+        isJarvis = true;
+        tg.showAlert("Промокод JARVIS применен! Скидка 15%");
+        showCart(); 
     } else {
-        document.getElementById(`count-${id}`).innerText = cart[id].count;
+        tg.showAlert("Неверный промокод");
     }
-    updateMainBtn();
-}
+};
 
-function updateMainBtn() {
-    let sum = 0;
-    for (let id in cart) sum += cart[id].count * cart[id].price;
-    if (sum > 0 && step === 'main') {
-        tg.MainButton.setText(`В КОРЗИНУ ($${sum})`);
-        tg.MainButton.show();
-    } else if (sum === 0) {
-        tg.MainButton.hide();
-    }
-}
-
-function applyPromo() {
-    let input = document.getElementById('promo-input').value.toUpperCase();
-    let msg = document.getElementById('promo-msg');
-    if (input === 'JARVIS') {
-        discount = 0.1;
-        promoCode = 'JARVIS';
-        msg.innerText = "Скидка 10% применена!";
-        msg.style.color = "#4CAF50";
+function updateTotal() {
+    let subtotal = 0;
+    for (let id in products) subtotal += products[id].price * products[id].qty;
+    
+    const btn = document.getElementById('footer-btn');
+    if (subtotal > 0) {
+        btn.style.display = 'block';
+        if (isActive('shop-screen')) {
+            btn.innerText = `В КОРЗИНУ ($${subtotal.toFixed(2)})`;
+        } else if (isActive('cart-screen')) {
+            btn.innerText = `К ОФОРМЛЕНИЮ`;
+        } else if (isActive('delivery-screen')) {
+            btn.innerText = `ПРОВЕРИТЬ ДАННЫЕ`;
+        } else {
+            btn.innerText = `ПОДТВЕРДИТЬ И ОПЛАТИТЬ`;
+        }
     } else {
-        discount = 0;
-        msg.innerText = "Неверный код.";
-        msg.style.color = "#FF4444";
+        btn.style.display = 'none';
     }
-    renderCart();
 }
 
-function renderCart() {
-    let list = document.getElementById('cart-list');
+window.handleFooterClick = () => {
+    if (isActive('shop-screen')) showCart();
+    else if (isActive('cart-screen')) showDelivery();
+    else if (isActive('delivery-screen')) showCheckout();
+    else sendOrder();
+};
+
+function showCart() {
+    switchScreen('cart-screen');
+    const list = document.getElementById('cart-items-list');
     list.innerHTML = '';
-    let sum = 0;
-    for (let id in cart) {
-        let cost = cart[id].count * cart[id].price;
-        sum += cost;
-        list.innerHTML += `<div class="cart-item"><span>${id} x${cart[id].count}</span><span>$${cost}</span></div>`;
+    let subtotal = 0;
+    for (let id in products) {
+        if (products[id].qty > 0) {
+            let sum = products[id].qty * products[id].price;
+            subtotal += sum;
+            list.innerHTML += `<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
+        }
     }
-    let total = sum * (1 - discount);
-    document.getElementById('total-price').innerText = `Итого: $${total.toFixed(2)}`;
+    const final = isJarvis ? subtotal * 0.85 : subtotal;
+    document.getElementById('total-sum').innerText = `Сумма: $${subtotal}`;
+    document.getElementById('total-final').innerText = `Итог: $${final.toFixed(2)}`;
+    updateTotal();
 }
 
-tg.MainButton.onClick(() => {
-    if (step === 'main') {
-        step = 'cart';
-        document.getElementById('main-screen').classList.remove('active');
-        document.getElementById('cart-screen').classList.add('active');
-        renderCart();
-        tg.MainButton.setText("ДАЛЕЕ");
-        tg.BackButton.show();
-    } else if (step === 'cart') {
-        step = 'address';
-        document.getElementById('cart-screen').classList.remove('active');
-        document.getElementById('address-screen').classList.add('active');
-        tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
-    } else if (step === 'address') {
-        let data = {
-            customer: {
-                fio: document.getElementById('fio').value,
-                phone: document.getElementById('phone').value,
-                city: document.getElementById('city').value,
-                cdek: document.getElementById('cdek').value,
-                email: document.getElementById('email').value
-            },
-            cart: cart,
-            promo: promoCode,
-            total: document.getElementById('total-price').innerText
-        };
-        tg.sendData(JSON.stringify(data));
+function showCheckout() {
+    switchScreen('checkout-screen');
+    let orderHtml = '';
+    let subtotal = 0;
+    for (let id in products) {
+        if (products[id].qty > 0) {
+            subtotal += products[id].qty * products[id].price;
+            orderHtml += `<div>${products[id].name} — ${products[id].qty} шт.</div>`;
+        }
     }
-});
+    const final = isJarvis ? subtotal * 0.85 : subtotal;
+    document.getElementById('check-order').innerHTML = orderHtml;
+    document.getElementById('check-delivery').innerHTML = `<b>ФИО:</b> ${v('fio')}<br><b>Тел:</b> ${v('phone')}<br><b>Страна:</b> ${v('country')}<br><b>Город:</b> ${v('city')}<br><b>Пункт СДЭК:</b> ${v('address')}<br><b>Email:</b> ${v('email')}`;
+    document.getElementById('final-pay-amount').innerText = `$${final.toFixed(2)}`;
+    updateTotal();
+}
 
-tg.BackButton.onClick(() => {
-    location.reload(); // Простой способ вернуться в начало
-});
+window.showInfo = (id) => {
+    document.getElementById('modal-body').innerHTML = `
+        <h1 style="font-size:28px; margin-bottom:15px;">ИНФОРМАЦИЯ</h1>
+        <h2 style="font-size:20px; color:#fff;">${products[id].name.toUpperCase()}</h2>
+        <p style="color:#888; line-height:1.5; font-size:15px; margin:20px 0;">${products[id].desc}</p>
+        <div style="margin-top:20px; font-size:18px; font-weight:bold;">СТОИМОСТЬ: ${products[id].price} $</div>
+    `;
+    document.getElementById('info-modal').style.display = 'flex';
+};
+
+window.closeModal = () => { document.getElementById('info-modal').style.display = 'none'; };
+
+function sendOrder() {
+    let subtotal = 0;
+    let itemsText = "";
+    for (let id in products) { 
+        if(products[id].qty > 0) {
+            subtotal += products[id].qty * products[id].price;
+            itemsText += `\n- ${products[id].name}: ${products[id].qty} шт.`;
+        }
+    }
+    const final = isJarvis ? subtotal * 0.85 : subtotal;
+    let message = `🔥 НОВЫЙ ЗАКАЗ 🔥\n\n👤 Клиент: ${v('fio')}\n📞 Тел: ${v('phone')}\n\n📦 Доставка: ${v('country')}, ${v('city')}\n🏢 СДЭК: ${v('address')}\n\n🛒 Товары:${itemsText}\n\n${isJarvis ? '🎫 Промо: JARVIS (-15%)\n' : ''}✅ ИТОГО: $${final.toFixed(2)}`;
+    tg.sendData(message);
+}
+
+const isActive = (id) => document.getElementById(id).classList.contains('active');
+const v = (id) => document.getElementById(id).value || "—";
+
+function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+window.showShop = () => { switchScreen('shop-screen'); updateTotal(); };
+window.showDelivery = () => { switchScreen('delivery-screen'); updateTotal(); };
+window.showCart = () => { showCart(); };
