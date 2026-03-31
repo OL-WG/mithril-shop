@@ -15,8 +15,8 @@ let products = {
 
 let isJarvis = false;
 
-// ПРЯМАЯ ПРИВЯЗКА ФУНКЦИИ К КНОПКЕ
-function handleMainButtonClick() {
+// Регистрация события нажатия главной кнопки
+tg.MainButton.onClick(function() {
     if (isActive('shop-screen')) {
         showCart();
     }
@@ -29,10 +29,7 @@ function handleMainButtonClick() {
     else if (isActive('checkout-screen')) {
         sendOrder();
     }
-}
-
-// Регистрация события (делаем один раз)
-tg.MainButton.onClick(handleMainButtonClick);
+});
 
 function addToCart(id) {
     let card = document.getElementById(id);
@@ -93,7 +90,7 @@ function updateTotal() {
         tg.MainButton.setParams({
             text: text,
             is_visible: true,
-            is_active: true // ГАРАНТИРУЕМ КЛИКАБЕЛЬНОСТЬ
+            is_active: true
         });
     }
     else {
@@ -123,7 +120,7 @@ function showCart() {
         let disc = sub * 0.15;
         summary.innerHTML = `
             <div>Сумма: $${sub.toFixed(2)}</div>
-            <div>Скидка: -$${disc.toFixed(2)} (Промокод: JARVIS)</div>
+            <div>Скидка: -$${disc.toFixed(2)}</div>
             <b>Итого: $${(sub - disc).toFixed(2)}</b>
         `;
     }
@@ -140,7 +137,6 @@ function showCheckout() {
     }
 
     switchScreen('checkout-screen');
-
     let sub = 0;
     let items = "";
 
@@ -153,22 +149,12 @@ function showCheckout() {
 
     let final = isJarvis ? sub * 0.85 : sub;
     document.getElementById('check-order').innerHTML = `<b>Ваш заказ:</b><br>${items}`;
-
     document.getElementById('check-delivery').innerHTML = `
         <b>Данные доставки:</b><br>
         ФИО: ${v('fio')}<br>
-        Телефон: ${v('phone')}<br>
-        Страна: ${v('country')}<br>
-        Город: ${v('city')}<br>
-        Адрес: ${v('address')}<br>
-        Email: ${v('email')}
+        Тел: ${v('phone')}<br>
+        Адрес: ${v('country')}, ${v('city')}, ${v('address')}
     `;
-    
-    let promoBlock = document.getElementById('check-promo-info');
-    if (promoBlock) {
-        promoBlock.innerText = isJarvis ? "Промокод: JARVIS (Скидка 15%)" : "";
-    }
-
     document.getElementById('final-pay-amount').innerText = `К оплате: $${final.toFixed(2)}`;
     updateTotal();
 }
@@ -188,9 +174,7 @@ function sendOrder() {
         }
     }
 
-    let final = isJarvis ? subtotal * 0.85 : subtotal;
-
-    let order = {
+    let orderData = {
         customer: {
             fio: v('fio'),
             phone: v('phone'),
@@ -201,17 +185,18 @@ function sendOrder() {
         },
         cart: cart,
         promo: isJarvis ? "JARVIS" : "нет",
-        total: final.toFixed(2)
+        total: (isJarvis ? subtotal * 0.85 : subtotal).toFixed(2)
     };
 
-    tg.sendData(JSON.stringify(order));
-    tg.MainButton.hide();
+    // ОТПРАВКА ДАННЫХ
+    tg.sendData(JSON.stringify(orderData));
+    tg.close(); // Закрываем приложение
 }
 
 function switchScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    window.scrollTo(0, 0); 
+    window.scrollTo(0, 0);
     updateTotal();
 }
 
