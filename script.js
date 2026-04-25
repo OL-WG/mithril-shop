@@ -1,3 +1,4 @@
+// ==================== TELEGRAM WEB APP ====================
 let tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
@@ -14,22 +15,19 @@ let products = {
 
 let isJarvis = false;
 
-function v(id) { 
-    return (document.getElementById(id) || {}).value ? document.getElementById(id).value.trim() : ''; 
+function v(id) {
+    const element = document.getElementById(id);
+    return element ? element.value.trim() : '';
 }
 
-// Проверка, все ли поля доставки заполнены
 function isDeliveryFormValid() {
     const fields = ['fio', 'phone', 'country', 'city', 'address', 'email'];
     for (let field of fields) {
-        if (!v(field)) {
-            return false;
-        }
+        if (!v(field)) return false;
     }
     return true;
 }
 
-// Показать предупреждение о незаполненных полях
 function showDeliveryWarning() {
     alert("⚠️ Пожалуйста, заполните все поля доставки:\n\n• ФИО\n• Телефон\n• Страна\n• Город\n• Адрес СДЭК\n• Email");
 }
@@ -47,24 +45,26 @@ function showScreen(id) {
 function updateProductCard(id) {
     const card = document.getElementById(id);
     if (!card) return;
+
     const addBtn = card.querySelector('.add-trigger');
     const counter = card.querySelector('.counter');
     const qtySpan = counter ? counter.querySelector('.qty') : null;
     const qty = products[id].qty;
 
     if (qty > 0) {
-        addBtn.style.display = 'none';
-        counter.style.display = 'flex';
+        if (addBtn) addBtn.style.display = 'none';
+        if (counter) counter.style.display = 'flex';
         if (qtySpan) qtySpan.textContent = qty;
     } else {
-        addBtn.style.display = 'block';
-        counter.style.display = 'none';
+        if (addBtn) addBtn.style.display = 'block';
+        if (counter) counter.style.display = 'none';
     }
 }
 
 function addToCart(id) {
     products[id].qty = 1;
     updateProductCard(id);
+    if (isActive('cart-screen')) updateCart();
 }
 
 function changeQty(id, delta) {
@@ -96,33 +96,25 @@ function updateCart() {
     const total = subtotal - discount;
 
     let summaryHTML = `<p>Итого без скидки: <strong>$${subtotal}</strong></p>`;
-
     if (isJarvis && discount > 0) {
-        summaryHTML += `
-            <p style="color: #ff4444; font-weight: bold; margin: 8px 0;">
-                −$${discount} (скидка 15% по промокоду JARVIS)
-            </p>`;
+        summaryHTML += `<p style="color: #ff4444; font-weight: bold; margin: 8px 0;">−$${discount} (скидка 15% по промокоду JARVIS)</p>`;
     }
-
     summaryHTML += `<p style="font-size: 18px; margin-top: 12px;">К оплате: <strong>$${total}</strong></p>`;
 
-    document.getElementById('cart-items-list').innerHTML = html || '<p style="text-align:center; padding:20px;">Корзина пуста</p>';
+    document.getElementById('cart-items-list').innerHTML = html || '<p style="text-align:center; padding:20px; color:#888;">Корзина пуста</p>';
     document.getElementById('cart-summary').innerHTML = summaryHTML;
 }
 
 function showShop() { showScreen('shop-screen'); }
 function showCart() { updateCart(); showScreen('cart-screen'); }
-
-function showDelivery() {
-    showScreen('delivery-screen');
-}
+function showDelivery() { showScreen('delivery-screen'); }
 
 function showCheckout() {
     if (!isDeliveryFormValid()) {
         showDeliveryWarning();
-        return;                    // ← НЕ пускаем дальше!
+        return;
     }
-
+    // ... (остальная часть showCheckout остаётся как раньше)
     let subtotal = 0;
     let orderHTML = '';
     for (let id in products) {
@@ -186,24 +178,11 @@ function closeModal() {
 }
 
 function sendOrder() {
-    const orderData = {
-        customer: {
-            fio: v('fio'),
-            phone: v('phone'),
-            country: v('country'),
-            city: v('city'),
-            cdek: v('address'),
-            email: v('email')
-        },
-        cart: {},
-        promo: isJarvis ? "JARVIS" : "нет",
-        total: 0
-    };
-
+    let cart = {};
     let subtotal = 0;
     for (let id in products) {
         if (products[id].qty > 0) {
-            orderData.cart[id] = {
+            cart[id] = {
                 name: products[id].name,
                 price: products[id].price,
                 count: products[id].qty
@@ -213,38 +192,41 @@ function sendOrder() {
     }
 
     const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    orderData.total = subtotal - discount;
+    const total = subtotal - discount;
+
+    const orderData = {
+        customer: {
+            fio: v('fio'),
+            phone: v('phone'),
+            country: v('country'),
+            city: v('city'),
+            cdek: v('address'),
+            email: v('email')
+        },
+        cart: cart,
+        promo: isJarvis ? "JARVIS" : "нет",
+        total: total
+    };
 
     tg.sendData(JSON.stringify(orderData));
     setTimeout(() => tg.close(), 500);
 }
 
-// Обработка нажатия Главной кнопки Telegram
 tg.MainButton.onClick(() => {
-    if (isActive('shop-screen')) {
-        showCart();
-    }
-    else if (isActive('cart-screen')) {
-        showDelivery();
-    }
-    else if (isActive('delivery-screen')) {
-        showCheckout();           // здесь происходит проверка
-    }
-    else if (isActive('checkout-screen')) {
-        sendOrder();
-    }
+    if (isActive('shop-screen')) showCart();
+    else if (isActive('cart-screen')) showDelivery();
+    else if (isActive('delivery-screen')) showCheckout();
+    else if (isActive('checkout-screen')) sendOrder();
 });
 
 function updateMainButton() {
-    if (isActive('shop-screen')) {
-        tg.MainButton.setText('🛒 Перейти в корзину');
-    } else if (isActive('cart-screen')) {
-        tg.MainButton.setText('🚚 Далее: Доставка');
-    } else if (isActive('delivery-screen')) {
-        tg.MainButton.setText('✅ Проверить заказ');
-    } else if (isActive('checkout-screen')) {
-        tg.MainButton.setText('💳 ОФОРМИТЬ ЗАКАЗ');
-    }
+    let text = '';
+    if (isActive('shop-screen')) text = '🛒 Перейти в корзину';
+    else if (isActive('cart-screen')) text = '🚚 Далее: Доставка';
+    else if (isActive('delivery-screen')) text = '✅ Проверить заказ';
+    else if (isActive('checkout-screen')) text = '💳 ОФОРМИТЬ ЗАКАЗ';
+
+    tg.MainButton.setText(text);
     tg.MainButton.show();
 }
 
