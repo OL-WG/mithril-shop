@@ -2,300 +2,300 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Apex Shop - Jarvis Card</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Armshop Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Основные стили страницы, используем переменные темы Telegram */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #0a0a0c); /* По умолчанию темный */
-            --text-color: var(--tg-theme-text-color, #ffffff);
-            --hint-color: var(--tg-theme-hint-color, #8e8e93);
-            --button-color: var(--tg-theme-button-color, #ffffff);
-            --button-text-color: var(--tg-theme-button-text-color, #000000);
-            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #1c1c1e);
-            
-            /* Цвета для бейджей, копируем с оригинала */
-            --color-new: #19d4fd;
-            --color-duration: #30d1a9;
-            --color-win: #19d4fd;
+            --bg-color: #0a0a0c;
+            --secondary-bg: #1c1c1e;
+            --text-color: #ffffff;
+            --hint-color: #8e8e93;
+            --accent-new: #19d4fd;
+            --accent-duration: #30d1a9;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 16px;
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px; /* Место под MainButton */
         }
 
-        /* Заголовок Mini App (для теста) */
-        .app-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .app-title {
-            font-size: 17px;
-            font-weight: 600;
-            margin: 0;
-        }
-        .app-subtitle {
-            font-size: 13px;
-            color: var(--hint-color);
-            margin: 0;
-            font-weight: 400;
-        }
+        .screen { display: none; }
+        .active { display: block; }
 
-        /* Основной контейнер карточки товара */
+        /* СТИЛЬ КАРТОЧКИ APEX */
         .product-card {
-            background-color: var(--secondary-bg-color);
+            background-color: var(--secondary-bg);
             border-radius: 20px;
             overflow: hidden;
             padding: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
             position: relative;
         }
 
-        /* Область изображения */
-        .card-image-area {
+        .image-container {
             position: relative;
             width: 100%;
-            height: 200px;
-            background-color: #000;
+            height: 180px;
+            background: #000;
+            border-radius: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            margin-bottom: 16px;
         }
 
-        /* Логотипы и графика внутри изображения */
-        .jarvis-graphics {
-            text-align: center;
-            opacity: 0.8;
-        }
-        .jarvis-symbol {
-            font-size: 64px;
-            color: #ff3b30; /* Красный цвет */
-            margin-bottom: -15px;
-            display: block;
-        }
-        .jarvis-text-big {
-            font-family: "Impact", "Haettenschweiler", "Arial Narrow Bold", sans-serif;
-            font-size: 68px;
-            font-weight: 900;
-            letter-spacing: -2px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
-            position: relative;
-            z-index: 1;
-        }
-        .jarvis-subtext {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: -5px;
-            display: block;
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        /* Верхние бейджи */
-        .badge-top {
+        .badge {
             position: absolute;
-            top: 12px;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-new {
-            left: 12px;
-            color: #000;
-            background-color: var(--color-new);
-            box-shadow: 0 0 10px rgba(25, 212, 253, 0.5);
-        }
-        .badge-duration {
-            right: 12px;
-            color: #000;
-            background-color: var(--color-duration);
-            box-shadow: 0 0 10px rgba(48, 209, 169, 0.5);
-        }
-
-        /* Текстовый бейдж Windows */
-        .badge-win {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            color: var(--color-win);
-            border: 1px solid rgba(25, 212, 253, 0.5);
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 4px 8px;
-            border-radius: 6px;
+            top: 10px;
+            padding: 4px 10px;
+            border-radius: 10px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
+        .badge-new { left: 10px; background: var(--accent-new); color: #000; }
+        .badge-info { right: 10px; background: var(--accent-duration); color: #000; }
 
-        /* Информация о товаре */
-        .product-info {
-            margin-bottom: 20px;
-        }
         .product-title {
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
             margin: 0 0 4px 0;
         }
-        .product-description {
+
+        .product-desc {
             font-size: 13px;
-            color: #c7c7cc;
-            line-height: 1.4;
-            margin: 0;
-            font-weight: 400;
+            color: var(--hint-color);
+            margin-bottom: 15px;
         }
 
-        /* Блок цены и локации */
-        .price-location-row {
+        .price-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 20px;
-        }
-        .location-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .location-label {
-            font-size: 10px;
-            color: var(--hint-color);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .location-value {
-            font-size: 12px;
-            color: #c7c7cc;
-            display: flex;
             align-items: center;
-            gap: 5px;
+            margin-top: 10px;
         }
-        .flag-icon { width: 14px; height: auto; }
-        .price-info {
-            text-align: right;
-        }
-        .price-value {
-            font-size: 22px;
-            font-weight: 800;
-        }
-        .price-currency { font-weight: 600; }
 
-        /* Кнопки действий */
-        .action-buttons {
-            display: flex;
-            gap: 12px;
+        .price-tag {
+            font-size: 20px;
+            font-weight: bold;
         }
+
+        /* КНОПКИ И СЧЕТЧИК */
+        .controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
         .btn {
             flex: 1;
             height: 44px;
             border-radius: 22px;
-            font-size: 15px;
-            font-weight: 600;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.1s;
-        }
-        .btn:active { opacity: 0.7; }
-        
-        .btn-info {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-        }
-        .btn-pay {
-            background-color: var(--button-color);
-            color: var(--button-text-color);
+            transition: 0.2s;
         }
 
-        /* SVG Иконки */
-        .icon { width: 18px; height: 18px; fill: currentColor; }
+        .btn-info { background: rgba(255,255,255,0.1); color: #fff; flex: 0.4; }
+        .btn-add { background: #fff; color: #000; }
+
+        .counter {
+            display: none; /* Скрыт по умолчанию */
+            flex: 1;
+            background: #fff;
+            color: #000;
+            border-radius: 22px;
+            height: 44px;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .counter button {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .qty { font-weight: bold; font-size: 16px; }
+
+        /* МОДАЛКА */
+        #info-modal {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 20px;
+            width: 80%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-header">
-        <h1 class="app-title">Apex Shop</h1>
-        <p class="app-subtitle">мини-приложение</p>
+    <div id="shop-screen" class="screen active">
+        <div id="products-list">
+            </div>
     </div>
 
-    <div class="product-card">
-        
-        <div class="card-image-area">
-            <div class="badge-top badge-new">+ New</div>
-            <div class="badge-top badge-duration">1 месяц</div>
-            
-            <div class="jarvis-graphics">
-                <span class="jarvis-symbol">|||||</span>
-                <div class="jarvis-text-big">JARVIS</div>
-                <span class="jarvis-subtext">Industries</span>
-            </div>
-            
-            <div class="badge-win">
-                <svg class="icon" viewBox="0 0 20 20"><path d="M0 2.228l8.136-1.11v7.6h-8.136v-6.49zm0 7.75l8.136.08v7.658l-8.136-1.12v-6.618zm9.108-8.916l10.892-1.63v9.232h-10.892v-7.602zm0 8.948h10.892v9.378l-10.892-1.64v-7.738z"/></svg>
-                Windows
-            </div>
-        </div>
+    <div id="cart-screen" class="screen">
+        <h2>Корзина</h2>
+        <div id="cart-items-list"></div>
+        <div id="cart-summary"></div>
+    </div>
 
-        <div class="product-info">
-            <h2 class="product-title">Jarvis Industries</h2>
-            <p class="product-description">
-                Профессиональная платформа с тремя тарифами МК-I, МК-II, МК-III.
-            </p>
+    <div id="info-modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="modal-body"></div>
+            <button class="btn btn-add" onclick="closeModal()" style="margin-top:20px; width:100%">Закрыть</button>
         </div>
-
-        <div class="price-location-row">
-            <div class="location-info">
-                <span class="location-label">цена от</span>
-                <div class="location-value">
-                    <img class="flag-icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU">
-                    Рубли · live
-                </div>
-            </div>
-            <div class="price-info">
-                <span class="price-value">1 490 <span class="price-currency">₽</span></span>
-            </div>
-        </div>
-
-        <div class="action-buttons">
-            <button class="btn btn-info">
-                <svg class="icon" viewBox="0 0 20 20"><path d="M10 0c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10-4.477-10-10-10zm1 15h-2v-6h2v6zm0-8h-2v-2h2v2z"/></svg>
-                Инфо
-            </button>
-            <button class="btn btn-pay">
-                <svg class="icon" viewBox="0 0 20 20"><path d="M18 4h-16c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-10c0-1.1-.9-2-2-2zm0 12h-16v-6h16v6zm0-8h-16v-2h16v2z"/></svg>
-                Оплатить
-            </button>
-        </div>
-
     </div>
 
     <script>
-        // Инициализация Telegram Web App, чтобы применить цвета темы пользователя
         let tg = window.Telegram.WebApp;
+        tg.expand();
         tg.ready();
-        tg.expand(); // Расширить на весь экран
+
+        // ТВОИ ТОВАРЫ (добавь ссылки на свои фото в img)
+        let products = {
+            item1: { 
+                name: "Ручка Arm", 
+                price: 35, 
+                qty: 0, 
+                desc: "Профессиональная ручка для тренировок.",
+                img: "https://via.placeholder.com/300x200?text=ARM+HANDLE" // ЗАМЕНИ НА СВОЮ ССЫЛКУ
+            },
+            item2: { 
+                name: "Эспандер", 
+                price: 12, 
+                qty: 0, 
+                desc: "Кистевой эспандер для силы хвата.",
+                img: "https://via.placeholder.com/300x200?text=EXPANDER" // ЗАМЕНИ НА СВОЮ ССЫЛКУ
+            }
+        };
+
+        function renderProducts() {
+            let html = '';
+            for (let id in products) {
+                let p = products[id];
+                html += `
+                <div class="product-card" id="${id}">
+                    <div class="image-container">
+                        <div class="badge badge-new">+ NEW</div>
+                        <div class="badge badge-info">В наличии</div>
+                        <img src="${p.img}" alt="${p.name}">
+                    </div>
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-desc">${p.desc}</div>
+                    
+                    <div class="price-row">
+                        <div class="price-tag">$${p.price}</div>
+                        <div class="controls">
+                            <button class="btn btn-info" onclick="showInfo('${id}')">Инфо</button>
+                            
+                            <button class="btn btn-add add-trigger" onclick="addToCart('${id}')">
+                                <span>Добавить</span>
+                            </button>
+
+                            <div class="counter">
+                                <button onclick="changeQty('${id}', -1)">−</button>
+                                <span class="qty">0</span>
+                                <button onclick="changeQty('${id}', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            document.getElementById('products-list').innerHTML = html;
+        }
+
+        function addToCart(id) {
+            products[id].qty = 1;
+            updateVisuals(id);
+        }
+
+        function changeQty(id, delta) {
+            products[id].qty += delta;
+            if (products[id].qty < 0) products[id].qty = 0;
+            updateVisuals(id);
+        }
+
+        function updateVisuals(id) {
+            const card = document.getElementById(id);
+            const addBtn = card.querySelector('.add-trigger');
+            const counter = card.querySelector('.counter');
+            const qtySpan = card.querySelector('.qty');
+            const qty = products[id].qty;
+
+            if (qty > 0) {
+                addBtn.style.display = 'none';
+                counter.style.display = 'flex';
+                qtySpan.innerText = qty;
+            } else {
+                addBtn.style.display = 'flex';
+                counter.style.display = 'none';
+            }
+            updateMainButton();
+        }
+
+        function showInfo(id) {
+            const item = products[id];
+            document.getElementById('modal-body').innerHTML = `
+                <h2 style="color:#fff">${item.name}</h2>
+                <p style="color:#8e8e93">${item.desc}</p>
+                <h3 style="color:#19d4fd">$${item.price}</h3>
+            `;
+            document.getElementById('info-modal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
+
+        function updateMainButton() {
+            let count = 0;
+            for (let id in products) count += products[id].qty;
+            
+            if (count > 0) {
+                tg.MainButton.setText(`🛒 ПЕРЕЙТИ В КОРЗИНУ (${count})`);
+                tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        tg.MainButton.onClick(() => {
+            alert("Переход в корзину...");
+        });
+
+        window.onload = renderProducts;
     </script>
 </body>
 </html>
