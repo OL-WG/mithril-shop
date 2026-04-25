@@ -2,300 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Armshop Mini App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MorozovShop</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-color: #0a0a0c;
-            --secondary-bg: #1c1c1e;
-            --text-color: #ffffff;
-            --hint-color: #8e8e93;
-            --accent-new: #19d4fd;
-            --accent-duration: #30d1a9;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 16px;
-            padding-bottom: 80px; /* Место под MainButton */
-        }
-
-        .screen { display: none; }
-        .active { display: block; }
-
-        /* СТИЛЬ КАРТОЧКИ APEX */
-        .product-card {
-            background-color: var(--secondary-bg);
-            border-radius: 20px;
-            overflow: hidden;
-            padding: 16px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .image-container {
-            position: relative;
-            width: 100%;
-            height: 180px;
-            background: #000;
-            border-radius: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .image-container img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .badge {
-            position: absolute;
-            top: 10px;
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .badge-new { left: 10px; background: var(--accent-new); color: #000; }
-        .badge-info { right: 10px; background: var(--accent-duration); color: #000; }
-
-        .product-title {
-            font-size: 18px;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin: 0 0 4px 0;
-        }
-
-        .product-desc {
-            font-size: 13px;
-            color: var(--hint-color);
-            margin-bottom: 15px;
-        }
-
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .price-tag {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        /* КНОПКИ И СЧЕТЧИК */
-        .controls {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .btn {
-            flex: 1;
-            height: 44px;
-            border-radius: 22px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-
-        .btn-info { background: rgba(255,255,255,0.1); color: #fff; flex: 0.4; }
-        .btn-add { background: #fff; color: #000; }
-
-        .counter {
-            display: none; /* Скрыт по умолчанию */
-            flex: 1;
-            background: #fff;
-            color: #000;
-            border-radius: 22px;
-            height: 44px;
-            align-items: center;
-            justify-content: space-between;
-            overflow: hidden;
-        }
-
-        .counter button {
-            width: 44px;
-            height: 44px;
-            border: none;
-            background: none;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .qty { font-weight: bold; font-size: 16px; }
-
-        /* МОДАЛКА */
-        #info-modal {
-            display: none;
-            position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 20px;
-            width: 80%;
-            text-align: center;
-        }
-    </style>
 </head>
 <body>
 
     <div id="shop-screen" class="screen active">
-        <div id="products-list">
+        <h2 class="main-title">MorozovShop</h2>
+        <div class="container">
+            <div class="card" id="item1">
+                <img src="ruchka.webp">
+                <h3>Ручка Arm</h3>
+                <div class="price">$35.00</div>
+                <button class="btn-black add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+                <div class="counter">
+                    <button onclick="changeQty('item1',-1)">-</button>
+                    <span class="qty">1</span>
+                    <button onclick="changeQty('item1',1)">+</button>
+                </div>
+                <button class="btn-info" onclick="showInfo('item1')">ИНФО</button>
             </div>
-    </div>
 
-    <div id="cart-screen" class="screen">
-        <h2>Корзина</h2>
-        <div id="cart-items-list"></div>
-        <div id="cart-summary"></div>
-    </div>
-
-    <div id="info-modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div id="modal-body"></div>
-            <button class="btn btn-add" onclick="closeModal()" style="margin-top:20px; width:100%">Закрыть</button>
+            <div class="card" id="item2">
+                <img src="expander.webp">
+                <h3>Эспандер</h3>
+                <div class="price">$12.00</div>
+                <button class="btn-black add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+                <div class="counter">
+                    <button onclick="changeQty('item2',-1)">-</button>
+                    <span class="qty">1</span>
+                    <button onclick="changeQty('item2',1)">+</button>
+                </div>
+                <button class="btn-info" onclick="showInfo('item2')">ИНФО</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+    <div id="cart-screen" class="screen">
+        <div class="header-nav" onclick="showShop()">✕ Назад</div>
+        <h2 class="title-left">Корзина</h2>
+        <div id="cart-items-list" class="cart-list"></div>
+        
+        <div class="promo-wrapper">
+            <div class="promo-container">
+                <input type="text" id="promo-input" placeholder="Промокод">
+                <button class="btn-ok-bw" onclick="applyPromo()">OK</button>
+            </div>
+        </div>
 
-        // ТВОИ ТОВАРЫ (добавь ссылки на свои фото в img)
-        let products = {
-            item1: { 
-                name: "Ручка Arm", 
-                price: 35, 
-                qty: 0, 
-                desc: "Профессиональная ручка для тренировок.",
-                img: "https://via.placeholder.com/300x200?text=ARM+HANDLE" // ЗАМЕНИ НА СВОЮ ССЫЛКУ
-            },
-            item2: { 
-                name: "Эспандер", 
-                price: 12, 
-                qty: 0, 
-                desc: "Кистевой эспандер для силы хвата.",
-                img: "https://via.placeholder.com/300x200?text=EXPANDER" // ЗАМЕНИ НА СВОЮ ССЫЛКУ
-            }
-        };
+        <div id="cart-summary" class="summary"></div>
+    </div>
 
-        function renderProducts() {
-            let html = '';
-            for (let id in products) {
-                let p = products[id];
-                html += `
-                <div class="product-card" id="${id}">
-                    <div class="image-container">
-                        <div class="badge badge-new">+ NEW</div>
-                        <div class="badge badge-info">В наличии</div>
-                        <img src="${p.img}" alt="${p.name}">
-                    </div>
-                    <div class="product-title">${p.name}</div>
-                    <div class="product-desc">${p.desc}</div>
-                    
-                    <div class="price-row">
-                        <div class="price-tag">$${p.price}</div>
-                        <div class="controls">
-                            <button class="btn btn-info" onclick="showInfo('${id}')">Инфо</button>
-                            
-                            <button class="btn btn-add add-trigger" onclick="addToCart('${id}')">
-                                <span>Добавить</span>
-                            </button>
+    <div id="delivery-screen" class="screen">
+        <div class="header-nav" onclick="showCart()">✕ Назад</div>
+        <h2 class="title-left">Доставка</h2>
+        <div class="form-container">
+            <input type="text" id="fio" placeholder="ФИО">
+            <input type="tel" id="phone" placeholder="Номер телефона">
+            <input type="text" id="country" placeholder="Страна">
+            <input type="text" id="city" placeholder="Город">
+            <input type="text" id="address" placeholder="Адрес СДЭК">
+            <input type="email" id="email" placeholder="Email (любой)">
+        </div>
+    </div>
 
-                            <div class="counter">
-                                <button onclick="changeQty('${id}', -1)">−</button>
-                                <span class="qty">0</span>
-                                <button onclick="changeQty('${id}', 1)">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            }
-            document.getElementById('products-list').innerHTML = html;
-        }
+    <div id="checkout-screen" class="screen">
+        <div class="header-nav" onclick="showDelivery()">✕ Назад</div>
+        <h2 class="title-left">Проверка заказа</h2>
+        <div id="check-order" class="check-section"></div>
+        <div id="check-delivery" class="check-section"></div>
+        <div id="check-promo-info" class="promo-status"></div>
+        <h3 id="final-pay-amount"></h3>
+    </div>
 
-        function addToCart(id) {
-            products[id].qty = 1;
-            updateVisuals(id);
-        }
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">✕</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
 
-        function changeQty(id, delta) {
-            products[id].qty += delta;
-            if (products[id].qty < 0) products[id].qty = 0;
-            updateVisuals(id);
-        }
-
-        function updateVisuals(id) {
-            const card = document.getElementById(id);
-            const addBtn = card.querySelector('.add-trigger');
-            const counter = card.querySelector('.counter');
-            const qtySpan = card.querySelector('.qty');
-            const qty = products[id].qty;
-
-            if (qty > 0) {
-                addBtn.style.display = 'none';
-                counter.style.display = 'flex';
-                qtySpan.innerText = qty;
-            } else {
-                addBtn.style.display = 'flex';
-                counter.style.display = 'none';
-            }
-            updateMainButton();
-        }
-
-        function showInfo(id) {
-            const item = products[id];
-            document.getElementById('modal-body').innerHTML = `
-                <h2 style="color:#fff">${item.name}</h2>
-                <p style="color:#8e8e93">${item.desc}</p>
-                <h3 style="color:#19d4fd">$${item.price}</h3>
-            `;
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
-
-        function updateMainButton() {
-            let count = 0;
-            for (let id in products) count += products[id].qty;
-            
-            if (count > 0) {
-                tg.MainButton.setText(`🛒 ПЕРЕЙТИ В КОРЗИНУ (${count})`);
-                tg.MainButton.show();
-            } else {
-                tg.MainButton.hide();
-            }
-        }
-
-        tg.MainButton.onClick(() => {
-            alert("Переход в корзину...");
-        });
-
-        window.onload = renderProducts;
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
