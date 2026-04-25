@@ -3,107 +3,117 @@ body {
     color: #fff;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
-    padding: 0;
-    overflow-x: hidden;
 }
 
-.screen { display: none; flex-direction: column; min-height: 100vh; padding-bottom: 100px; }
-.active { display: flex; }
-
-.header-area { text-align: center; padding: 20px 0; }
-.main-title { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 2px; }
-.subtitle { margin: 5px 0; font-size: 10px; color: #8e8e93; letter-spacing: 1px; }
-
-/* КАРТОЧКИ */
-.products-list { padding: 16px; }
+.screen {
+    padding: 20px;
+}
 
 .product-card {
     background: #111;
     border-radius: 24px;
     padding: 16px;
     margin-bottom: 20px;
-    border: 1px solid #222;
 }
 
 .image-box {
-    background: #000;
     height: 200px;
+    background: #000;
     border-radius: 18px;
-    position: relative;
     display: flex;
-    justify-content: center;
     align-items: center;
-    overflow: hidden;
+    justify-content: center;
 }
 
-.image-box img { max-height: 85%; max-width: 85%; object-fit: contain; }
-
-.badge {
-    position: absolute;
-    top: 12px;
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 10px;
-    font-weight: 800;
+.image-box img {
+    max-width: 80%;
 }
-.badge-new { left: 12px; background: #00f2ff; color: #000; }
-.badge-stock { right: 12px; background: #30d1a9; color: #000; }
 
-.product-info h3 { font-size: 18px; margin: 15px 0 5px 0; font-weight: 800; }
-.description { font-size: 13px; color: #8e8e93; margin: 0 0 15px 0; line-height: 1.4; }
-
-.price-row { display: flex; justify-content: space-between; align-items: center; }
-.price-val { font-size: 22px; font-weight: 800; }
-
-.controls { display: flex; gap: 8px; flex: 1; justify-content: flex-end; }
-
-/* КНОПКИ */
-.btn-add-main {
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 13px;
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .btn-info-small {
     background: rgba(255,255,255,0.1);
     color: #fff;
     border: none;
+    padding: 10px;
     border-radius: 20px;
-    padding: 10px 15px;
-    font-size: 13px;
 }
 
-.quantity-control {
+/* ===== MODAL ===== */
+
+.modal {
     display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 420px;
+    background: #111;
+    border-radius: 28px;
+    overflow: hidden;
+}
+
+/* ===== INFO STYLE ===== */
+
+.info-image-box {
+    height: 220px;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-image-box img {
+    max-width: 80%;
+}
+
+.info-content {
+    padding: 20px;
+}
+
+.info-label {
+    font-size: 10px;
+    color: #888;
+}
+
+.info-title {
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.info-subtitle {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.info-desc {
+    font-size: 13px;
+    color: #ccc;
+    margin-top: 10px;
+}
+
+.info-price {
+    font-size: 22px;
+    font-weight: 900;
+    margin-top: 10px;
+}
+
+.info-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    border-radius: 20px;
     background: #fff;
     color: #000;
-    border-radius: 20px;
-    align-items: center;
-    padding: 2px;
-    gap: 15px;
-}
-.quantity-control.show { display: flex; }
-
-.qty-btn {
-    background: #f0f0f0;
     border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 20px;
-    font-weight: bold;
+    font-weight: 700;
 }
-.qty { font-weight: 800; font-size: 15px; }
-
-/* ОСТАЛЬНОЕ */
-.header-nav { padding: 15px; font-size: 14px; color: #8e8e93; }
-.title-left { padding: 0 20px; font-size: 28px; font-weight: 800; margin: 10px 0; }
-.form-container, .promo-wrapper { padding: 0 20px; }
-input { background: #111; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; width: 100%; margin-bottom: 10px; box-sizing: border-box; }
-.btn-ok-bw { background: #fff; color: #000; border-radius: 10px; padding: 0 20px; font-weight: bold; }
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-.modal-content { background: #111; width: 80%; border-radius: 24px; padding: 30px; position: relative; border: 1px solid #222; }
