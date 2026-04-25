@@ -1,187 +1,239 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
+tg.ready();
 
-// Настройка стиля главной кнопки: Черный фон, Белые буквы
 tg.MainButton.setParams({
     color: '#000000',
     text_color: '#ffffff'
 });
 
 let products = {
-    item1: {
-        id: 'item1',
-        name: 'Рукоятка "AXE"',
-        price: 35,
-        qty: 0,
-        img: 'ruchka.webp',
-        desc: 'Для силы пронации и силы подъема.',
-        fullDesc: 'Рукоятка "AXE" — это универсальный тренировочный инструмент, специально разработанный для развития силы пронации и силы подъема. Инновационная конструкция обеспечивает точное задействование мышц, что делает ее идеальной для армрестлеров, стремящихся к совершенствованию техники и развитию взрывной силы.'
-    },
-    item2: {
-        id: 'item2',
-        name: 'Эспандер',
-        price: 12,
-        qty: 0,
-        img: 'expander.webp',
-        desc: 'Для развития силы хвата.',
-        fullDesc: 'Профессиональный кистевой эспандер MithrilArm. Разработан для тренировки связок и мышц предплечья. Высокая надежность и долговечность.'
-    }
+    item1: { name: "Ручка Arm", price: 35, qty: 0, desc: "Профессиональная ручка для тренировок." },
+    item2: { name: "Эспандер", price: 12, qty: 0, desc: "Кистевой эспандер для силы хвата." }
 };
 
 let isJarvis = false;
 
-// Отрисовка товаров
-function renderProducts() {
-    const list = document.querySelector('.products-list');
-    list.innerHTML = '';
-    for (let id in products) {
-        const p = products[id];
-        list.innerHTML += `
-            <div class="product-card">
-                <div class="image-box">
-                    <div class="badge badge-new">+ NEW</div>
-                    <div class="badge badge-stock">В НАЛИЧИИ</div>
-                    <img src="${p.img}">
-                </div>
-                <div class="product-info">
-                    <h3>${p.name}</h3>
-                    <p class="description">${p.desc}</p>
-                    <div class="price-row">
-                        <div class="price-val">$${p.price}.00</div>
-                        <div class="controls">
-                            <button class="btn-info-small" onclick="showInfo('${p.id}')">ИНФО</button>
-                            <button class="btn-add-main" id="add-btn-${p.id}" onclick="addToCart('${p.id}')" ${p.qty > 0 ? 'style="display:none"' : ''}>ДОБАВИТЬ</button>
-                            <div class="quantity-control ${p.qty > 0 ? 'show' : ''}" id="qty-ctrl-${p.id}">
-                                <button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button>
-                                <span class="qty" id="qty-val-${p.id}">${p.qty}</span>
-                                <button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-    }
+function v(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
 }
 
-// Навигация
+function isDeliveryFormValid() {
+    const fields = ['fio', 'phone', 'country', 'city', 'address', 'email'];
+    for (let field of fields) {
+        if (!v(field)) return false;
+    }
+    return true;
+}
+
+function showDeliveryWarning() {
+    alert("⚠️ Пожалуйста, заполните все поля доставки:\n\n• ФИО\n• Телефон\n• Страна\n• Город\n• Адрес СДЭК\n• Email");
+}
+
+function isActive(screen) {
+    return document.getElementById(screen).classList.contains('active');
+}
+
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     updateMainButton();
 }
 
-function showShop() { showScreen('shop-screen'); }
-function showCart() { renderCart(); showScreen('cart-screen'); }
-function showDelivery() { showScreen('delivery-screen'); }
-function showCheckout() { renderCheckout(); showScreen('checkout-screen'); }
+function updateProductCard(id) {
+    const card = document.getElementById(id);
+    if (!card) return;
 
-// Логика корзины
+    const addBtn = card.querySelector('.add-trigger');
+    const qtyControl = card.querySelector('.quantity-control');
+    const qtySpan = qtyControl ? qtyControl.querySelector('.qty') : null;
+    const qty = products[id].qty;
+
+    if (qty > 0) {
+        if (addBtn) addBtn.style.display = 'none';
+        if (qtyControl) qtyControl.classList.add('show');
+        if (qtySpan) qtySpan.textContent = qty;
+    } else {
+        if (addBtn) addBtn.style.display = 'block';
+        if (qtyControl) qtyControl.classList.remove('show');
+    }
+}
+
 function addToCart(id) {
     products[id].qty = 1;
-    renderProducts();
-    updateMainButton();
+    updateProductCard(id);
+    if (isActive('cart-screen')) updateCart();
 }
 
 function changeQty(id, delta) {
-    products[id].qty += delta;
-    if (products[id].qty < 0) products[id].qty = 0;
-    renderProducts();
-    updateMainButton();
+    let qty = products[id].qty + delta;
+    if (qty < 0) qty = 0;
+    products[id].qty = qty;
+    updateProductCard(id);
+    if (isActive('cart-screen')) updateCart();
 }
 
-// Рендеринг корзины
-function renderCart() {
+function updateCart() {
     let html = '';
     let subtotal = 0;
+
     for (let id in products) {
         if (products[id].qty > 0) {
-            let p = products[id];
-            subtotal += p.price * p.qty;
-            html += `<div class="cart-item"><span>${p.name} x${p.qty}</span><span>$${p.price * p.qty}</span></div>`;
+            const item = products[id];
+            const sum = item.price * item.qty;
+            subtotal += sum;
+            html += `
+                <div class="cart-item">
+                    <div><strong>${item.name}</strong><br>${item.qty} шт. × $${item.price}</div>
+                    <div>$${sum}</div>
+                </div>`;
         }
     }
-    document.getElementById('cart-items-list').innerHTML = html || '<p style="text-align:center; padding:20px;">Корзина пуста</p>';
-    document.getElementById('cart-summary').innerHTML = `Итого: <b>$${subtotal}</b>`;
+
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
+    let summaryHTML = `<p>Итого без скидки: <strong>$${subtotal}</strong></p>`;
+    if (isJarvis && discount > 0) {
+        summaryHTML += `<p style="color: #ff4444; font-weight: bold;">−$${discount} (скидка 15% по JARVIS)</p>`;
+    }
+    summaryHTML += `<p style="font-size: 18px; margin-top: 15px;">К оплате: <strong>$${total}</strong></p>`;
+
+    document.getElementById('cart-items-list').innerHTML = html || '<p style="text-align:center; padding:30px; color:#666;">Корзина пуста</p>';
+    document.getElementById('cart-summary').innerHTML = summaryHTML;
 }
 
-// Рендеринг финальной проверки
-function renderCheckout() {
+function showShop() { showScreen('shop-screen'); }
+function showCart() { updateCart(); showScreen('cart-screen'); }
+function showDelivery() { showScreen('delivery-screen'); }
+
+function showCheckout() {
+    if (!isDeliveryFormValid()) {
+        showDeliveryWarning();
+        return;
+    }
+
     let subtotal = 0;
     let orderHTML = '';
     for (let id in products) {
         if (products[id].qty > 0) {
-            let p = products[id];
-            let sum = p.price * p.qty;
+            const item = products[id];
+            const sum = item.price * item.qty;
             subtotal += sum;
-            orderHTML += `<div>${p.name} x${p.qty} — $${sum}</div>`;
+            orderHTML += `<div>${item.name} × ${item.qty} — $${sum}</div>`;
         }
     }
-    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    const final = subtotal - discount;
 
-    document.getElementById('check-order').innerHTML = orderHTML;
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
+    document.getElementById('check-order').innerHTML = orderHTML || 'Нет товаров';
     document.getElementById('check-delivery').innerHTML = `
-        <br><b>Получатель:</b> ${document.getElementById('fio').value}<br>
-        <b>Адрес:</b> ${document.getElementById('city').value}, ${document.getElementById('address').value}`;
-    document.getElementById('final-pay-amount').innerHTML = `<div class="summary">К оплате: <b>$${final}</b></div>`;
+        ФИО: ${v('fio')}<br>
+        Телефон: ${v('phone')}<br>
+        Страна: ${v('country')}<br>
+        Город: ${v('city')}<br>
+        Адрес: ${v('address')}<br>
+        Email: ${v('email')}
+    `;
+
+    let checkoutHTML = `<p>Итого без скидки: <strong>$${subtotal}</strong></p>`;
+    if (isJarvis && discount > 0) {
+        checkoutHTML += `<p style="color: #ff4444; font-weight: bold;">−$${discount} (скидка 15%)</p>`;
+    }
+    checkoutHTML += `<h3 style="margin-top: 15px;">К оплате: <strong>$${total}</strong></h3>`;
+
+    document.getElementById('final-pay-amount').innerHTML = checkoutHTML;
+    document.getElementById('check-promo-info').innerHTML = isJarvis ? '🎟 Промокод JARVIS применён' : '';
+
+    showScreen('checkout-screen');
 }
 
-// Главная кнопка TG
-function updateMainButton() {
-    const active = document.querySelector('.screen.active').id;
-    if (active === 'shop-screen') {
-        let count = Object.values(products).reduce((a, b) => a + b.qty, 0);
-        if (count > 0) {
-            tg.MainButton.setText(`🛒 В КОРЗИНУ (${count})`);
-            tg.MainButton.show();
-        } else tg.MainButton.hide();
-    } else if (active === 'cart-screen') {
-        tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ');
-    } else if (active === 'delivery-screen') {
-        tg.MainButton.setText('✅ ПРОВЕРИТЬ ЗАКАЗ');
-    } else if (active === 'checkout-screen') {
-        tg.MainButton.setText('💳 ПОДТВЕРДИТЬ И ОПЛАТИТЬ');
+function applyPromo() {
+    const code = document.getElementById('promo-input').value.trim().toUpperCase();
+    if (code === 'JARVIS') {
+        isJarvis = true;
+        alert('✅ Промокод JARVIS применён! Скидка 15%');
+    } else {
+        isJarvis = false;
+        alert('❌ Неправильный промокод');
     }
+    if (isActive('cart-screen')) updateCart();
+}
+
+function showInfo(id) {
+    const item = products[id];
+    document.getElementById('modal-body').innerHTML = `
+        <h3>${item.name}</h3>
+        <p>${item.desc}</p>
+        <p><strong>Цена: $${item.price}</strong></p>
+    `;
+    document.getElementById('info-modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('info-modal').style.display = 'none';
+}
+
+function sendOrder() {
+    let cart = {};
+    let subtotal = 0;
+    for (let id in products) {
+        if (products[id].qty > 0) {
+            cart[id] = {
+                name: products[id].name,
+                price: products[id].price,
+                count: products[id].qty
+            };
+            subtotal += products[id].price * products[id].qty;
+        }
+    }
+
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
+    const orderData = {
+        customer: {
+            fio: v('fio'),
+            phone: v('phone'),
+            country: v('country'),
+            city: v('city'),
+            cdek: v('address'),
+            email: v('email')
+        },
+        cart: cart,
+        promo: isJarvis ? "JARVIS" : "нет",
+        total: total
+    };
+
+    tg.sendData(JSON.stringify(orderData));
+    setTimeout(() => tg.close(), 500);
 }
 
 tg.MainButton.onClick(() => {
-    const active = document.querySelector('.screen.active').id;
-    if (active === 'shop-screen') showCart();
-    else if (active === 'cart-screen') showDelivery();
-    else if (active === 'delivery-screen') {
-        if (document.getElementById('fio').value.length < 3) alert('Заполните данные доставки');
-        else showCheckout();
-    }
-    else if (active === 'checkout-screen') sendOrder();
+    if (isActive('shop-screen')) showCart();
+    else if (isActive('cart-screen')) showDelivery();
+    else if (isActive('delivery-screen')) showCheckout();
+    else if (isActive('checkout-screen')) sendOrder();
 });
 
-// Работа с заказом
-function sendOrder() {
-    let orderData = {
-        cart: products,
-        customer: { fio: document.getElementById('fio').value, phone: document.getElementById('phone').value },
-        total: document.getElementById('final-pay-amount').innerText
-    };
-    tg.sendData(JSON.stringify(orderData));
+function updateMainButton() {
+    let text = '';
+    if (isActive('shop-screen')) text = '🛒 Перейти в корзину';
+    else if (isActive('cart-screen')) text = '🚚 Далее: Доставка';
+    else if (isActive('delivery-screen')) text = '✅ Проверить заказ';
+    else if (isActive('checkout-screen')) text = '💳 ОФОРМИТЬ ЗАКАЗ';
+    
+    tg.MainButton.setText(text);
+    tg.MainButton.show();
 }
 
-// Модалка
-function showInfo(id) {
-    const p = products[id];
-    document.getElementById('modal-product-img').src = p.img;
-    document.getElementById('modal-product-title').innerText = p.name;
-    document.getElementById('modal-product-desc').innerText = p.fullDesc;
-    document.getElementById('modal-product-price').innerText = `$${p.price}.00`;
-    document.getElementById('info-modal').style.display = 'flex';
-}
-function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
-
-function applyPromo() {
-    if (document.getElementById('promo-input').value.toUpperCase() === 'JARVIS') {
-        isJarvis = true;
-        alert('Скидка 15% применена!');
-        renderCart();
-    }
+function initProducts() {
+    for (let id in products) updateProductCard(id);
 }
 
-window.onload = () => { renderProducts(); tg.ready(); };
+window.onload = () => {
+    initProducts();
+    updateMainButton();
+};
