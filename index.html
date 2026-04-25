@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MithrilArm</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -10,54 +10,63 @@
 <body>
 
     <div id="shop-screen" class="screen active">
-        <h2 class="main-title">MITHRILARM</h2>
+        <div class="header-area">
+            <h2 class="main-title">MITHRILARM</h2>
+            <p class="subtitle">МАГАЗИН СПОРТИВНОГО ИНВЕНТАРЯ</p>
+        </div>
         
-        <div class="products-grid">
-
-            <!-- Товар 1 -->
+        <div class="products-list">
             <div class="product-card" id="item1">
-                <div class="product-image">
+                <div class="image-box">
+                    <div class="badge badge-new">+ NEW</div>
+                    <div class="badge badge-stock">В НАЛИЧИИ</div>
                     <img src="ruchka.webp" alt="Ручка Arm">
                 </div>
                 <div class="product-info">
-                    <h3>Ручка Arm</h3>
-                    <div class="price">$35.00</div>
-                    <p class="description">Профессиональная ручка для тренировок</p>
+                    <h3>РУЧКА ARM</h3>
+                    <p class="description">Профессиональная ручка для тренировок армрестлеров.</p>
                     
-                    <button class="btn-add add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
-                    
-                    <div class="quantity-control">
-                        <button class="qty-btn" onclick="changeQty('item1', -1)">−</button>
-                        <span class="qty">1</span>
-                        <button class="qty-btn" onclick="changeQty('item1', 1)">+</button>
+                    <div class="price-row">
+                        <div class="price-val">$35.00</div>
+                        <div class="controls">
+                            <button class="btn-info-small" onclick="showInfo('item1')">ИНФО</button>
+                            <button class="btn-add-main add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+                            
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="changeQty('item1', -1)">−</button>
+                                <span class="qty">1</span>
+                                <button class="qty-btn" onclick="changeQty('item1', 1)">+</button>
+                            </div>
+                        </div>
                     </div>
-
-                    <button class="btn-info" onclick="showInfo('item1')">ИНФО</button>
                 </div>
             </div>
 
-            <!-- Товар 2 -->
             <div class="product-card" id="item2">
-                <div class="product-image">
+                <div class="image-box">
+                    <div class="badge badge-new">+ NEW</div>
+                    <div class="badge badge-stock">В НАЛИЧИИ</div>
                     <img src="expander.webp" alt="Эспандер">
                 </div>
                 <div class="product-info">
-                    <h3>Эспандер</h3>
-                    <div class="price">$12.00</div>
-                    <p class="description">Кистевой эспандер для силы хвата</p>
+                    <h3>ЭСПАНДЕР</h3>
+                    <p class="description">Кистевой эспандер для развития взрывной силы хвата.</p>
                     
-                    <button class="btn-add add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
-                    
-                    <div class="quantity-control">
-                        <button class="qty-btn" onclick="changeQty('item2', -1)">−</button>
-                        <span class="qty">1</span>
-                        <button class="qty-btn" onclick="changeQty('item2', 1)">+</button>
+                    <div class="price-row">
+                        <div class="price-val">$12.00</div>
+                        <div class="controls">
+                            <button class="btn-info-small" onclick="showInfo('item2')">ИНФО</button>
+                            <button class="btn-add-main add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+                            
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="changeQty('item2', -1)">−</button>
+                                <span class="qty">1</span>
+                                <button class="qty-btn" onclick="changeQty('item2', 1)">+</button>
+                            </div>
+                        </div>
                     </div>
-
-                    <button class="btn-info" onclick="showInfo('item2')">ИНФО</button>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -65,14 +74,12 @@
         <div class="header-nav" onclick="showShop()">✕ Назад</div>
         <h2 class="title-left">Корзина</h2>
         <div id="cart-items-list" class="cart-list"></div>
-        
         <div class="promo-wrapper">
             <div class="promo-container">
                 <input type="text" id="promo-input" placeholder="Промокод">
                 <button class="btn-ok-bw" onclick="applyPromo()">OK</button>
             </div>
         </div>
-
         <div id="cart-summary" class="summary"></div>
     </div>
 
