@@ -2,8 +2,8 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 tg.MainButton.setParams({
-    color: '#000000',
-    text_color: '#ffffff'
+    color: '#ffffff',
+    text_color: '#000000'
 });
 
 let products = {
@@ -12,22 +12,28 @@ let products = {
         price: 35, 
         qty: 0, 
         img: 'ruchka.webp',
-        desc: "Профессиональный инструмент для развития силы пронации и подъема. Инновационная конструкция обеспечивает точное задействование мышц." 
+        desc: "Профессиональный инструмент для развития силы пронации и подъема." 
     },
     item2: { 
         name: "ЭСПАНДЕР", 
         price: 12, 
         qty: 0, 
         img: 'expander.webp',
-        desc: "Кистевой эспандер для развития взрывной силы хвата. Идеально подходит для подготовки к соревнованиям." 
+        desc: "Кистевой эспандер для развития взрывной силы хвата." 
     }
 };
 
 let isJarvis = false;
 
+// ГЛАВНАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    
+    // Авто-обновление при входе на экран
+    if (id === 'cart-screen') updateCart();
+    if (id === 'checkout-screen') updateCheckout();
+    
     updateMainButton();
 }
 
@@ -59,69 +65,98 @@ function changeQty(id, delta) {
     updateProductUI(id);
 }
 
-function showInfo(id) {
-    const p = products[id];
-    document.getElementById('modal-product-img').src = p.img;
-    document.getElementById('modal-product-title').innerText = p.name;
-    document.getElementById('modal-product-desc').innerText = p.desc;
-    document.getElementById('modal-product-price').innerText = `$${p.price}.00`;
-    document.getElementById('info-modal').style.display = 'flex';
-}
-
-function closeModal() {
-    document.getElementById('info-modal').style.display = 'none';
-}
-
+// КОРЗИНА
 function updateCart() {
     let html = '';
     let subtotal = 0;
+    let hasItems = false;
+
     for (let id in products) {
         if (products[id].qty > 0) {
             const sum = products[id].price * products[id].qty;
             subtotal += sum;
-            html += `<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
+            hasItems = true;
+            html += `
+                <div class="cart-item">
+                    <span>${products[id].name} x${products[id].qty}</span>
+                    <span>$${sum}</span>
+                </div>`;
         }
     }
+
+    if (!hasItems) {
+        document.getElementById('cart-items-list').innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Корзина пуста</p>';
+        document.getElementById('cart-summary').innerHTML = '';
+        return;
+    }
+
     const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
     const total = subtotal - discount;
     
-    document.getElementById('cart-items-list').innerHTML = html || '<p style="text-align:center; padding:20px;">Корзина пуста</p>';
+    document.getElementById('cart-items-list').innerHTML = html;
     document.getElementById('cart-summary').innerHTML = `
-        <p>Сумма: $${subtotal}</p>
-        ${isJarvis ? `<p style="color:#30d1a9">Скидка: -$${discount}</p>` : ''}
-        <h3>Итого: $${total}</h3>
+        <div style="padding: 20px; border-top: 1px solid #222;">
+            <p>Сумма: $${subtotal}</p>
+            ${isJarvis ? `<p style="color:#30d1a9">Скидка (JARVIS): -$${discount}</p>` : ''}
+            <h3 style="font-size: 24px;">Итого: $${total}</h3>
+        </div>
     `;
 }
 
 function applyPromo() {
     const code = document.getElementById('promo-input').value.trim().toUpperCase();
-    if (code === 'JARVIS') {
-        isJarvis = true;
-        alert('✅ Промокод применен!');
-    } else {
-        isJarvis = false;
-        alert('❌ Неверный код');
-    }
+    isJarvis = (code === 'JARVIS');
+    if (isJarvis) alert('✅ Скидка 15% применена!');
+    else alert('❌ Код не найден');
     updateCart();
 }
 
+// ЭКРАН ПРОВЕРКИ (CHECKOUT)
+function updateCheckout() {
+    let itemsHtml = '<h3>Ваш заказ:</h3>';
+    let subtotal = 0;
+    
+    for (let id in products) {
+        if (products[id].qty > 0) {
+            const sum = products[id].price * products[id].qty;
+            subtotal += sum;
+            itemsHtml += `<p>${products[id].name} x${products[id].qty} — $${sum}</p>`;
+        }
+    }
+    
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
+    const deliveryHtml = `
+        <h3>Доставка:</h3>
+        <p><b>Получатель:</b> ${document.getElementById('fio').value}</p>
+        <p><b>Телефон:</b> ${document.getElementById('phone').value}</p>
+        <p><b>Адрес:</b> ${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}</p>
+    `;
+
+    document.getElementById('check-order').innerHTML = itemsHtml;
+    document.getElementById('check-delivery').innerHTML = deliveryHtml;
+    document.getElementById('final-pay-amount').innerHTML = `
+        <div style="padding: 20px; background: #111; border-radius: 15px; margin-top: 10px;">
+            <h2 style="margin:0;">К оплате: $${total}</h2>
+        </div>
+    `;
+}
+
+// ТЕЛЕГРАМ КНОПКИ
 function updateMainButton() {
     const active = document.querySelector('.screen.active').id;
     if (active === 'shop-screen') {
         let count = Object.values(products).reduce((a, b) => a + b.qty, 0);
         if (count > 0) {
-            tg.MainButton.setText(`🛒 КОРЗИНА (${count})`);
-            tg.MainButton.show();
+            tg.MainButton.setText(`🛒 КОРЗИНА (${count})`).show();
         } else tg.MainButton.hide();
     } else if (active === 'cart-screen') {
-        tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ');
-        tg.MainButton.show();
+        tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ').show();
     } else if (active === 'delivery-screen') {
-        tg.MainButton.setText('✅ ПРОВЕРИТЬ ЗАКАЗ');
-        tg.MainButton.show();
+        tg.MainButton.setText('✅ ПРОВЕРИТЬ ЗАКАЗ').show();
     } else if (active === 'checkout-screen') {
-        tg.MainButton.setText('💳 ОПЛАТИТЬ');
-        tg.MainButton.show();
+        tg.MainButton.setText('📤 ОТПРАВИТЬ ЗАКАЗ').show();
     }
 }
 
@@ -131,13 +166,32 @@ tg.MainButton.onClick(() => {
     else if (active === 'cart-screen') showScreen('delivery-screen');
     else if (active === 'delivery-screen') showScreen('checkout-screen');
     else if (active === 'checkout-screen') {
-        // Здесь логика отправки в бот
-        tg.sendData(JSON.stringify({order: "data"}));
+        // Сбор данных для бота
+        const orderData = {
+            fio: document.getElementById('fio').value,
+            phone: document.getElementById('phone').value,
+            address: `${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}`,
+            email: document.getElementById('email').value,
+            items: Object.values(products).filter(p => p.qty > 0).map(p => `${p.name} x${p.qty}`),
+            promo: isJarvis ? "JARVIS" : "Нет",
+            total: document.getElementById('final-pay-amount').innerText
+        };
+        tg.sendData(JSON.stringify(orderData)); // Отправка в бот
     }
 });
 
+function showInfo(id) {
+    const p = products[id];
+    document.getElementById('modal-product-img').src = p.img;
+    document.getElementById('modal-product-title').innerText = p.name;
+    document.getElementById('modal-product-desc').innerText = p.desc;
+    document.getElementById('modal-product-price').innerText = `$${p.price}.00`;
+    document.getElementById('info-modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
 function showShop() { showScreen('shop-screen'); }
-function showCart() { updateCart(); showScreen('cart-screen'); }
+function showCart() { showScreen('cart-screen'); }
 function showDelivery() { showScreen('delivery-screen'); }
 
 window.onload = () => { tg.ready(); updateMainButton(); };
