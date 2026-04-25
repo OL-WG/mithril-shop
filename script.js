@@ -2,8 +2,8 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 tg.MainButton.setParams({
-    color: '#ffffff',
-    text_color: '#000000'
+    color: '#000000', // Черный фон кнопки
+    text_color: '#ffffff' // Белые буквы
 });
 
 let products = {
@@ -25,18 +25,17 @@ let products = {
 
 let isJarvis = false;
 
-// ГЛАВНАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
-    // Авто-обновление при входе на экран
     if (id === 'cart-screen') updateCart();
     if (id === 'checkout-screen') updateCheckout();
     
     updateMainButton();
 }
 
+// 1. ИСПРАВЛЕНИЕ СМЕЩЕНИЯ КНОПКИ ИНФО (через фиксацию структуры в UI)
 function updateProductUI(id) {
     const card = document.getElementById(id);
     const qty = products[id].qty;
@@ -46,11 +45,11 @@ function updateProductUI(id) {
 
     if (qty > 0) {
         addBtn.style.display = 'none';
-        qtyCtrl.classList.add('show');
+        qtyCtrl.style.display = 'flex'; // Показываем контроллер вместо кнопки добавить
         qtySpan.innerText = qty;
     } else {
         addBtn.style.display = 'block';
-        qtyCtrl.classList.remove('show');
+        qtyCtrl.style.display = 'none';
     }
     updateMainButton();
 }
@@ -65,7 +64,6 @@ function changeQty(id, delta) {
     updateProductUI(id);
 }
 
-// КОРЗИНА
 function updateCart() {
     let html = '';
     let subtotal = 0;
@@ -111,7 +109,7 @@ function applyPromo() {
     updateCart();
 }
 
-// ЭКРАН ПРОВЕРКИ (CHECKOUT)
+// 3. ОТОБРАЖЕНИЕ ПРОМОКОДА И ЗАЧЕРКНУТОЙ ЦЕНЫ
 function updateCheckout() {
     let itemsHtml = '<h3>Ваш заказ:</h3>';
     let subtotal = 0;
@@ -136,16 +134,41 @@ function updateCheckout() {
 
     document.getElementById('check-order').innerHTML = itemsHtml;
     document.getElementById('check-delivery').innerHTML = deliveryHtml;
-    document.getElementById('final-pay-amount').innerHTML = `
-        <div style="padding: 20px; background: #111; border-radius: 15px; margin-top: 10px;">
-            <h2 style="margin:0;">К оплате: $${total}</h2>
-        </div>
-    `;
+    
+    // Блок цены с зачеркиванием
+    let priceBlock = '';
+    if (isJarvis) {
+        priceBlock = `
+            <div style="padding: 20px; background: #111; border-radius: 15px; margin-top: 10px;">
+                <p style="margin:0; color:#888; font-size:14px;">Промокод: JARVIS</p>
+                <p style="margin:5px 0; text-decoration: line-through; color: #ff4d4d; font-size:18px;">$${subtotal}</p>
+                <h2 style="margin:0; color:#fff;">К оплате: $${total}</h2>
+            </div>
+        `;
+    } else {
+        priceBlock = `
+            <div style="padding: 20px; background: #111; border-radius: 15px; margin-top: 10px;">
+                <h2 style="margin:0;">К оплате: $${subtotal}</h2>
+            </div>
+        `;
+    }
+    document.getElementById('final-pay-amount').innerHTML = priceBlock;
 }
 
-// ТЕЛЕГРАМ КНОПКИ
+// 2. ПРОВЕРКА ЗАПОЛНЕНИЯ ПОЛЕЙ
+function validateDelivery() {
+    const fields = ['fio', 'phone', 'country', 'city', 'address'];
+    for (let id of fields) {
+        if (!document.getElementById(id).value.trim()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function updateMainButton() {
     const active = document.querySelector('.screen.active').id;
+    // 4. КНОПКИ: ЧЕРНЫЙ ФОН, БЕЛЫЕ БУКВЫ (задано в параметрах tg.MainButton)
     if (active === 'shop-screen') {
         let count = Object.values(products).reduce((a, b) => a + b.qty, 0);
         if (count > 0) {
@@ -164,34 +187,23 @@ tg.MainButton.onClick(() => {
     const active = document.querySelector('.screen.active').id;
     if (active === 'shop-screen') showScreen('cart-screen');
     else if (active === 'cart-screen') showScreen('delivery-screen');
-    else if (active === 'delivery-screen') showScreen('checkout-screen');
+    else if (active === 'delivery-screen') {
+        // Проверка перед переходом
+        if (validateDelivery()) {
+            showScreen('checkout-screen');
+        } else {
+            tg.showAlert('⚠️ Пожалуйста, заполните все поля доставки!');
+        }
+    }
     else if (active === 'checkout-screen') {
-        // Сбор данных для бота
         const orderData = {
             fio: document.getElementById('fio').value,
             phone: document.getElementById('phone').value,
             address: `${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}`,
-            email: document.getElementById('email').value,
             items: Object.values(products).filter(p => p.qty > 0).map(p => `${p.name} x${p.qty}`),
             promo: isJarvis ? "JARVIS" : "Нет",
             total: document.getElementById('final-pay-amount').innerText
         };
-        tg.sendData(JSON.stringify(orderData)); // Отправка в бот
+        tg.sendData(JSON.stringify(orderData));
     }
 });
-
-function showInfo(id) {
-    const p = products[id];
-    document.getElementById('modal-product-img').src = p.img;
-    document.getElementById('modal-product-title').innerText = p.name;
-    document.getElementById('modal-product-desc').innerText = p.desc;
-    document.getElementById('modal-product-price').innerText = `$${p.price}.00`;
-    document.getElementById('info-modal').style.display = 'flex';
-}
-
-function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
-function showShop() { showScreen('shop-screen'); }
-function showCart() { showScreen('cart-screen'); }
-function showDelivery() { showScreen('delivery-screen'); }
-
-window.onload = () => { tg.ready(); updateMainButton(); };
