@@ -1,57 +1,49 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
+// Настройка главной кнопки
 tg.MainButton.setParams({
-    color: '#000000', // Черный фон кнопки
-    text_color: '#ffffff' // Белые буквы
+    color: '#000000',
+    text_color: '#ffffff'
 });
 
 let products = {
-    item1: { 
-        name: "РУЧКА ARM", 
-        price: 35, 
-        qty: 0, 
-        img: 'ruchka.webp',
-        desc: "Профессиональный инструмент для развития силы пронации и подъема." 
-    },
-    item2: { 
-        name: "ЭСПАНДЕР", 
-        price: 12, 
-        qty: 0, 
-        img: 'expander.webp',
-        desc: "Кистевой эспандер для развития взрывной силы хвата." 
-    }
+    item1: { name: "РУЧКА ARM", price: 35, qty: 0, desc: "Профессиональная ручка для развития силы пронации и подъема." },
+    item2: { name: "ЭСПАНДЕР", price: 12, qty: 0, desc: "Кистевой эспандер для развития взрывной силы хвата." }
 };
 
 let isJarvis = false;
+
+// 2. ИСПРАВЛЕННАЯ ФУНКЦИЯ НАЗАД
+tg.BackButton.onClick(() => {
+    const active = document.querySelector('.screen.active').id;
+    if (active === 'cart-screen') showScreen('shop-screen');
+    else if (active === 'delivery-screen') showScreen('cart-screen');
+    else if (active === 'checkout-screen') showScreen('delivery-screen');
+    else if (active === 'shop-screen') showScreen('welcome-screen');
+});
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     
+    // Показываем кнопку назад везде, кроме главного экрана
+    if (id === 'welcome-screen') tg.BackButton.hide();
+    else tg.BackButton.show();
+
     if (id === 'cart-screen') updateCart();
     if (id === 'checkout-screen') updateCheckout();
     
     updateMainButton();
 }
 
-// 1. ИСПРАВЛЕНИЕ СМЕЩЕНИЯ КНОПКИ ИНФО (через фиксацию структуры в UI)
-function updateProductUI(id) {
-    const card = document.getElementById(id);
-    const qty = products[id].qty;
-    const addBtn = card.querySelector('.add-trigger');
-    const qtyCtrl = card.querySelector('.quantity-control');
-    const qtySpan = card.querySelector('.qty');
-
-    if (qty > 0) {
-        addBtn.style.display = 'none';
-        qtyCtrl.style.display = 'flex'; // Показываем контроллер вместо кнопки добавить
-        qtySpan.innerText = qty;
-    } else {
-        addBtn.style.display = 'block';
-        qtyCtrl.style.display = 'none';
-    }
-    updateMainButton();
+// 1. ИСПРАВЛЕННАЯ ФУНКЦИЯ ИНФО (Через нативный попап)
+function showInfo(id) {
+    tg.showPopup({
+        title: products[id].name,
+        message: products[id].desc + "\n\nЦена: $" + products[id].price,
+        buttons: [{type: 'ok', text: 'Понятно'}]
+    });
 }
 
 function addToCart(id) {
@@ -64,123 +56,88 @@ function changeQty(id, delta) {
     updateProductUI(id);
 }
 
+function updateProductUI(id) {
+    const card = document.getElementById(id);
+    const qty = products[id].qty;
+    const addBtn = card.querySelector('.add-trigger');
+    const qtyCtrl = card.querySelector('.quantity-control');
+    const qtySpan = card.querySelector('.qty');
+
+    if (qty > 0) {
+        addBtn.style.display = 'none';
+        qtyCtrl.style.display = 'flex';
+        qtySpan.innerText = qty;
+    } else {
+        addBtn.style.display = 'block';
+        qtyCtrl.style.display = 'none';
+    }
+    updateMainButton();
+}
+
 function updateCart() {
     let html = '';
     let subtotal = 0;
-    let hasItems = false;
-
     for (let id in products) {
         if (products[id].qty > 0) {
-            const sum = products[id].price * products[id].qty;
+            let sum = products[id].price * products[id].qty;
             subtotal += sum;
-            hasItems = true;
-            html += `
-                <div class="cart-item">
-                    <span>${products[id].name} x${products[id].qty}</span>
-                    <span>$${sum}</span>
-                </div>`;
+            html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #222;">
+                <span>${products[id].name} x${products[id].qty}</span>
+                <span>$${sum}</span>
+            </div>`;
         }
     }
-
-    if (!hasItems) {
-        document.getElementById('cart-items-list').innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Корзина пуста</p>';
-        document.getElementById('cart-summary').innerHTML = '';
-        return;
-    }
-
-    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    const total = subtotal - discount;
+    document.getElementById('cart-items-list').innerHTML = html || '<p>Корзина пуста</p>';
     
-    document.getElementById('cart-items-list').innerHTML = html;
+    let discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
     document.getElementById('cart-summary').innerHTML = `
-        <div style="padding: 20px; border-top: 1px solid #222;">
+        <div style="text-align:right; margin-top:20px;">
             <p>Сумма: $${subtotal}</p>
-            ${isJarvis ? `<p style="color:#30d1a9">Скидка (JARVIS): -$${discount}</p>` : ''}
-            <h3 style="font-size: 24px;">Итого: $${total}</h3>
+            ${isJarvis ? `<p style="color:#30d1a9">Скидка: -$${discount}</p>` : ''}
+            <h3>Итого: $${subtotal - discount}</h3>
         </div>
     `;
 }
 
 function applyPromo() {
-    const code = document.getElementById('promo-input').value.trim().toUpperCase();
-    isJarvis = (code === 'JARVIS');
-    if (isJarvis) alert('✅ Скидка 15% применена!');
-    else alert('❌ Код не найден');
-    updateCart();
+    if (document.getElementById('promo-input').value.toLowerCase() === 'jarvis') {
+        isJarvis = true;
+        tg.showAlert('Промокод применен!');
+        updateCart();
+    } else tg.showAlert('Неверный код');
 }
 
-// 3. ОТОБРАЖЕНИЕ ПРОМОКОДА И ЗАЧЕРКНУТОЙ ЦЕНЫ
 function updateCheckout() {
-    let itemsHtml = '<h3>Ваш заказ:</h3>';
     let subtotal = 0;
-    
-    for (let id in products) {
-        if (products[id].qty > 0) {
-            const sum = products[id].price * products[id].qty;
-            subtotal += sum;
-            itemsHtml += `<p>${products[id].name} x${products[id].qty} — $${sum}</p>`;
-        }
-    }
-    
-    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    const total = subtotal - discount;
+    for (let id in products) { if(products[id].qty > 0) subtotal += products[id].price * products[id].qty; }
+    let total = isJarvis ? subtotal * 0.85 : subtotal;
 
-    const deliveryHtml = `
-        <h3>Доставка:</h3>
-        <p><b>Получатель:</b> ${document.getElementById('fio').value}</p>
-        <p><b>Телефон:</b> ${document.getElementById('phone').value}</p>
-        <p><b>Адрес:</b> ${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}</p>
-    `;
-
-    document.getElementById('check-order').innerHTML = itemsHtml;
-    document.getElementById('check-delivery').innerHTML = deliveryHtml;
+    document.getElementById('check-order').innerHTML = `<h3>Товары:</h3>` + 
+        Object.values(products).filter(p => p.qty > 0).map(p => `<p>${p.name} x${p.qty}</p>`).join('');
     
-    // Блок цены с зачеркиванием
-    let priceBlock = '';
-    if (isJarvis) {
-        priceBlock = `
-            <div style="padding: 20px; background: #111; border-radius: 15px; margin-top: 10px;">
-                <p style="margin:0; color:#888; font-size:14px;">Промокод: JARVIS</p>
-                <p style="margin:5px 0; text-decoration: line-through; color: #ff4d4d; font-size:18px;">$${subtotal}</p>
-                <h2 style="margin:0; color:#fff;">К оплате: $${total}</h2>
-            </div>
-        `;
-    } else {
-        priceBlock = `
-            <div style="padding: 20px; background: #111; border-radius: 15px; margin-top: 10px;">
-                <h2 style="margin:0;">К оплате: $${subtotal}</h2>
-            </div>
-        `;
-    }
-    document.getElementById('final-pay-amount').innerHTML = priceBlock;
-}
+    document.getElementById('check-delivery').innerHTML = `<h3>Доставка:</h3>
+        <p>${document.getElementById('fio').value}</p>
+        <p>${document.getElementById('phone').value}</p>
+        <p>${document.getElementById('address').value}</p>`;
 
-// 2. ПРОВЕРКА ЗАПОЛНЕНИЯ ПОЛЕЙ
-function validateDelivery() {
-    const fields = ['fio', 'phone', 'country', 'city', 'address'];
-    for (let id of fields) {
-        if (!document.getElementById(id).value.trim()) {
-            return false;
-        }
-    }
-    return true;
+    document.getElementById('final-pay-amount').innerHTML = `
+        <div style="background:#111; padding:15px; border-radius:15px;">
+            ${isJarvis ? `<p style="text-decoration:line-through; color:red;">$${subtotal}</p>` : ''}
+            <h2>К оплате: $${total}</h2>
+        </div>`;
 }
 
 function updateMainButton() {
     const active = document.querySelector('.screen.active').id;
-    // 4. КНОПКИ: ЧЕРНЫЙ ФОН, БЕЛЫЕ БУКВЫ (задано в параметрах tg.MainButton)
     if (active === 'shop-screen') {
         let count = Object.values(products).reduce((a, b) => a + b.qty, 0);
-        if (count > 0) {
-            tg.MainButton.setText(`🛒 КОРЗИНА (${count})`).show();
-        } else tg.MainButton.hide();
-    } else if (active === 'cart-screen') {
-        tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ').show();
-    } else if (active === 'delivery-screen') {
-        tg.MainButton.setText('✅ ПРОВЕРИТЬ ЗАКАЗ').show();
-    } else if (active === 'checkout-screen') {
-        tg.MainButton.setText('📤 ОТПРАВИТЬ ЗАКАЗ').show();
-    }
+        if (count > 0) tg.MainButton.setText(`🛒 КОРЗИНА (${count})`).show();
+        else tg.MainButton.hide();
+    } 
+    else if (active === 'cart-screen') tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ').show();
+    else if (active === 'delivery-screen') tg.MainButton.setText('✅ ПРОВЕРИТЬ ЗАКАЗ').show();
+    else if (active === 'checkout-screen') tg.MainButton.setText('💳 ОПЛАТИТЬ').show();
+    else tg.MainButton.hide();
 }
 
 tg.MainButton.onClick(() => {
@@ -188,22 +145,10 @@ tg.MainButton.onClick(() => {
     if (active === 'shop-screen') showScreen('cart-screen');
     else if (active === 'cart-screen') showScreen('delivery-screen');
     else if (active === 'delivery-screen') {
-        // Проверка перед переходом
-        if (validateDelivery()) {
-            showScreen('checkout-screen');
-        } else {
-            tg.showAlert('⚠️ Пожалуйста, заполните все поля доставки!');
-        }
+        if (document.getElementById('fio').value && document.getElementById('phone').value) showScreen('checkout-screen');
+        else tg.showAlert('Заполните данные доставки!');
     }
     else if (active === 'checkout-screen') {
-        const orderData = {
-            fio: document.getElementById('fio').value,
-            phone: document.getElementById('phone').value,
-            address: `${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}`,
-            items: Object.values(products).filter(p => p.qty > 0).map(p => `${p.name} x${p.qty}`),
-            promo: isJarvis ? "JARVIS" : "Нет",
-            total: document.getElementById('final-pay-amount').innerText
-        };
-        tg.sendData(JSON.stringify(orderData));
+        tg.sendData(JSON.stringify({order: "success"}));
     }
 });
