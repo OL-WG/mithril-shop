@@ -60,6 +60,7 @@ function changeQty(id, delta) {
 function updateCart() {
     let html = '';
     let subtotal = 0;
+
     for (let id in products) {
         if (products[id].qty > 0) {
             const item = products[id];
@@ -72,8 +73,24 @@ function updateCart() {
                 </div>`;
         }
     }
+
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
+    // Основной HTML корзины
+    let summaryHTML = `<p>Итого без скидки: <strong>$${subtotal}</strong></p>`;
+
+    if (isJarvis && discount > 0) {
+        summaryHTML += `
+            <p style="color: #ff4444; font-weight: bold; margin: 8px 0;">
+                −$${discount} (скидка 15% по промокоду JARVIS)
+            </p>`;
+    }
+
+    summaryHTML += `<p style="font-size: 18px; margin-top: 12px;">К оплате: <strong>$${total}</strong></p>`;
+
     document.getElementById('cart-items-list').innerHTML = html || '<p style="text-align:center; padding:20px;">Корзина пуста</p>';
-    document.getElementById('cart-summary').innerHTML = `<p>Итого: <strong>$${subtotal}</strong></p>`;
+    document.getElementById('cart-summary').innerHTML = summaryHTML;
 }
 
 function showShop() { showScreen('shop-screen'); }
@@ -91,6 +108,10 @@ function showCheckout() {
             orderHTML += `<div>${item.name} × ${item.qty} — $${sum}</div>`;
         }
     }
+
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
     document.getElementById('check-order').innerHTML = orderHTML || 'Нет товаров';
     document.getElementById('check-delivery').innerHTML = `
         ФИО: ${v('fio')}<br>
@@ -101,9 +122,14 @@ function showCheckout() {
         Email: ${v('email')}
     `;
 
-    const total = isJarvis ? subtotal * 0.85 : subtotal;
-    document.getElementById('final-pay-amount').innerHTML = `К оплате: <strong>$${total.toFixed(2)}</strong>`;
-    document.getElementById('check-promo-info').innerHTML = isJarvis ? '🎟 Промокод JARVIS применён (-15%)' : '';
+    let checkoutHTML = `<p>Итого без скидки: <strong>$${subtotal}</strong></p>`;
+    if (isJarvis && discount > 0) {
+        checkoutHTML += `<p style="color: #ff4444; font-weight: bold;">−$${discount} (скидка 15% по промокоду JARVIS)</p>`;
+    }
+    checkoutHTML += `<h3 style="margin-top: 15px;">К оплате: <strong>$${total}</strong></h3>`;
+
+    document.getElementById('final-pay-amount').innerHTML = checkoutHTML;
+    document.getElementById('check-promo-info').innerHTML = isJarvis ? '🎟 Промокод JARVIS применён' : '';
 
     showScreen('checkout-screen');
 }
@@ -148,6 +174,9 @@ function sendOrder() {
         }
     }
 
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    const total = subtotal - discount;
+
     const orderData = {
         customer: {
             fio: v('fio'),
@@ -159,7 +188,7 @@ function sendOrder() {
         },
         cart: cart,
         promo: isJarvis ? "JARVIS" : "нет",
-        total: isJarvis ? Math.round(subtotal * 0.85) : subtotal
+        total: total
     };
 
     tg.sendData(JSON.stringify(orderData));
