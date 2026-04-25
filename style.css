@@ -1,81 +1,131 @@
-:root {
-    --bg: #000;
-    --card: #111;
-    --text: #fff;
-    --hint: #8e8e93;
-}
-
 body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, sans-serif;
-    margin: 0; padding: 0; overflow-x: hidden;
+    background-color: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    user-select: none;
 }
 
-.screen { display: none; flex-direction: column; min-height: 100vh; padding-bottom: 100px; }
-.active { display: flex; }
+.screen {
+    display: none;
+    padding: 15px;
+    animation: fadeIn 0.3s ease;
+}
 
-.header-area { text-align: center; padding: 20px 0; }
-.main-title { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 2px; }
-.subtitle { margin: 5px 0; font-size: 10px; color: var(--hint); letter-spacing: 1px; }
+.screen.active {
+    display: block;
+}
 
-/* КАРТОЧКИ */
-.products-list { padding: 16px; }
+@keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+}
+
+/* ЭКРАН ВХОДА */
+.welcome-container {
+    height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-btn {
+    background: #fff; /* Белый фон */
+    color: #000;      /* Черные буквы */
+    padding: 18px 35px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+}
+
+/* КАРТОЧКИ ТОВАРОВ */
 .product-card {
-    background: var(--card);
-    border-radius: 24px;
-    padding: 16px;
+    background: #111;
+    border-radius: 20px;
+    padding: 15px;
     margin-bottom: 20px;
+    position: relative;
     border: 1px solid #222;
 }
 
-.image-box {
-    background: #000; height: 200px; border-radius: 18px;
-    position: relative; display: flex; justify-content: center; align-items: center;
+.product-card img {
+    width: 100%;
+    border-radius: 10px;
 }
-.image-box img { max-height: 85%; object-fit: contain; }
 
-.badge { position: absolute; top: 12px; padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 800; }
-.badge-new { left: 12px; background: #00f2ff; color: #000; }
-.badge-stock { right: 12px; background: #30d1a9; color: #000; }
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
 
-.product-info h3 { font-size: 18px; margin: 15px 0 5px 0; font-weight: 800; }
-.description { font-size: 13px; color: var(--hint); margin-bottom: 15px; }
+/* ГРУППА КНОПОК - Фиксируем ИНФО слева */
+.button-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
 
-/* КНОПКИ */
-.price-row { display: flex; justify-content: space-between; align-items: center; }
-.price-val { font-size: 22px; font-weight: 800; }
-.btn-add-main { background: #fff; color: #000; border: none; border-radius: 20px; padding: 10px 20px; font-weight: 700; cursor: pointer; }
-.btn-info-small { background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 20px; padding: 10px 15px; cursor: pointer; }
+button {
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
 
-.quantity-control { display: none; background: #fff; color: #000; border-radius: 20px; align-items: center; padding: 2px; gap: 15px; }
-.quantity-control.show { display: flex; }
-.qty-btn { background: #f0f0f0; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer; }
-.qty { font-weight: 800; }
+.info-btn {
+    background: #222;
+    color: #888;
+    padding: 8px 15px;
+}
 
-/* МОДАЛКА (ПО КАРТИНКЕ) */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-.modal-content { background: #0d0d0d; width: 90%; max-width: 400px; border-radius: 30px; border: 1px solid #222; overflow: hidden; position: relative; }
-.modal-image-area { height: 180px; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-.modal-image-area img { max-height: 80%; }
-.close-modal-icon { position: absolute; top: 15px; right: 20px; color: #555; font-size: 20px; cursor: pointer; }
+.add-trigger {
+    background: #fff;
+    color: #000;
+    padding: 8px 15px;
+}
 
-.modal-body-area { padding: 25px; }
-.modal-label { font-size: 10px; color: var(--hint); font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
-#modal-product-title { font-size: 28px; font-weight: 900; margin: 0; text-transform: uppercase; }
-.modal-subtitle { font-size: 12px; color: var(--hint); margin-bottom: 15px; }
-.modal-description { font-size: 14px; color: #ccc; line-height: 1.5; margin-bottom: 25px; }
+.quantity-control {
+    background: #fff;
+    color: #000;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+}
 
-.modal-price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-.modal-price-val { font-size: 24px; font-weight: 800; }
-.btn-modal-close { background: #fff; color: #000; border: none; width: 100%; height: 55px; border-radius: 28px; font-weight: 800; font-size: 16px; cursor: pointer; }
+.quantity-control button {
+    background: none;
+    color: #007aff;
+    padding: 8px 12px;
+    font-size: 18px;
+}
 
-/* КОРЗИНА И ВВОД */
-.title-left { padding: 0 20px; font-size: 28px; font-weight: 800; }
-input { background: #111; border: 1px solid #222; color: #fff; padding: 15px; border-radius: 12px; width: calc(100% - 40px); margin: 0 20px 10px 20px; box-sizing: border-box; }
-.promo-container { display: flex; padding: 0 20px; gap: 10px; }
-.promo-container input { margin: 0; width: 100%; }
-.btn-ok-bw { background: #fff; color: #000; border: none; border-radius: 12px; padding: 0 20px; font-weight: bold; cursor: pointer; }
-.cart-item { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #222; }
-.summary { padding: 20px; text-align: right; font-size: 18px; }
-.check-section { padding: 10px 20px; font-size: 14px; color: #ccc; }
+/* ФОРМЫ */
+input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.promo-section {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.promo-section button {
+    background: #fff;
+    padding: 0 20px;
+}
