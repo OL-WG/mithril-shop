@@ -14,7 +14,25 @@ let products = {
 
 let isJarvis = false;
 
-function v(id) { return document.getElementById(id).value || ''; }
+function v(id) { 
+    return (document.getElementById(id) || {}).value ? document.getElementById(id).value.trim() : ''; 
+}
+
+// Проверка, все ли поля доставки заполнены
+function isDeliveryFormValid() {
+    const fields = ['fio', 'phone', 'country', 'city', 'address', 'email'];
+    for (let field of fields) {
+        if (!v(field)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Показать предупреждение о незаполненных полях
+function showDeliveryWarning() {
+    alert("⚠️ Пожалуйста, заполните все поля доставки:\n\n• ФИО\n• Телефон\n• Страна\n• Город\n• Адрес СДЭК\n• Email");
+}
 
 function isActive(screen) {
     return document.getElementById(screen).classList.contains('active');
@@ -77,7 +95,6 @@ function updateCart() {
     const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
     const total = subtotal - discount;
 
-    // Основной HTML корзины
     let summaryHTML = `<p>Итого без скидки: <strong>$${subtotal}</strong></p>`;
 
     if (isJarvis && discount > 0) {
@@ -95,9 +112,17 @@ function updateCart() {
 
 function showShop() { showScreen('shop-screen'); }
 function showCart() { updateCart(); showScreen('cart-screen'); }
-function showDelivery() { showScreen('delivery-screen'); }
+
+function showDelivery() {
+    showScreen('delivery-screen');
+}
 
 function showCheckout() {
+    if (!isDeliveryFormValid()) {
+        showDeliveryWarning();
+        return;                    // ← НЕ пускаем дальше!
+    }
+
     let subtotal = 0;
     let orderHTML = '';
     for (let id in products) {
@@ -161,22 +186,6 @@ function closeModal() {
 }
 
 function sendOrder() {
-    let cart = {};
-    let subtotal = 0;
-    for (let id in products) {
-        if (products[id].qty > 0) {
-            cart[id] = {
-                name: products[id].name,
-                price: products[id].price,
-                count: products[id].qty
-            };
-            subtotal += products[id].price * products[id].qty;
-        }
-    }
-
-    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    const total = subtotal - discount;
-
     const orderData = {
         customer: {
             fio: v('fio'),
@@ -186,20 +195,44 @@ function sendOrder() {
             cdek: v('address'),
             email: v('email')
         },
-        cart: cart,
+        cart: {},
         promo: isJarvis ? "JARVIS" : "нет",
-        total: total
+        total: 0
     };
+
+    let subtotal = 0;
+    for (let id in products) {
+        if (products[id].qty > 0) {
+            orderData.cart[id] = {
+                name: products[id].name,
+                price: products[id].price,
+                count: products[id].qty
+            };
+            subtotal += products[id].price * products[id].qty;
+        }
+    }
+
+    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
+    orderData.total = subtotal - discount;
 
     tg.sendData(JSON.stringify(orderData));
     setTimeout(() => tg.close(), 500);
 }
 
+// Обработка нажатия Главной кнопки Telegram
 tg.MainButton.onClick(() => {
-    if (isActive('shop-screen')) showCart();
-    else if (isActive('cart-screen')) showDelivery();
-    else if (isActive('delivery-screen')) showCheckout();
-    else if (isActive('checkout-screen')) sendOrder();
+    if (isActive('shop-screen')) {
+        showCart();
+    }
+    else if (isActive('cart-screen')) {
+        showDelivery();
+    }
+    else if (isActive('delivery-screen')) {
+        showCheckout();           // здесь происходит проверка
+    }
+    else if (isActive('checkout-screen')) {
+        sendOrder();
+    }
 });
 
 function updateMainButton() {
