@@ -2,88 +2,300 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MorozovShop</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Apex Shop - Jarvis Card</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Основные стили страницы, используем переменные темы Telegram */
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #0a0a0c); /* По умолчанию темный */
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #8e8e93);
+            --button-color: var(--tg-theme-button-color, #ffffff);
+            --button-text-color: var(--tg-theme-button-text-color, #000000);
+            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #1c1c1e);
+            
+            /* Цвета для бейджей, копируем с оригинала */
+            --color-new: #19d4fd;
+            --color-duration: #30d1a9;
+            --color-win: #19d4fd;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Заголовок Mini App (для теста) */
+        .app-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .app-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--hint-color);
+            margin: 0;
+            font-weight: 400;
+        }
+
+        /* Основной контейнер карточки товара */
+        .product-card {
+            background-color: var(--secondary-bg-color);
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        /* Область изображения */
+        .card-image-area {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        /* Логотипы и графика внутри изображения */
+        .jarvis-graphics {
+            text-align: center;
+            opacity: 0.8;
+        }
+        .jarvis-symbol {
+            font-size: 64px;
+            color: #ff3b30; /* Красный цвет */
+            margin-bottom: -15px;
+            display: block;
+        }
+        .jarvis-text-big {
+            font-family: "Impact", "Haettenschweiler", "Arial Narrow Bold", sans-serif;
+            font-size: 68px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+        .jarvis-subtext {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: -5px;
+            display: block;
+        }
+
+        /* Верхние бейджи */
+        .badge-top {
+            position: absolute;
+            top: 12px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-new {
+            left: 12px;
+            color: #000;
+            background-color: var(--color-new);
+            box-shadow: 0 0 10px rgba(25, 212, 253, 0.5);
+        }
+        .badge-duration {
+            right: 12px;
+            color: #000;
+            background-color: var(--color-duration);
+            box-shadow: 0 0 10px rgba(48, 209, 169, 0.5);
+        }
+
+        /* Текстовый бейдж Windows */
+        .badge-win {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            color: var(--color-win);
+            border: 1px solid rgba(25, 212, 253, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Информация о товаре */
+        .product-info {
+            margin-bottom: 20px;
+        }
+        .product-title {
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 4px 0;
+        }
+        .product-description {
+            font-size: 13px;
+            color: #c7c7cc;
+            line-height: 1.4;
+            margin: 0;
+            font-weight: 400;
+        }
+
+        /* Блок цены и локации */
+        .price-location-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .location-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .location-label {
+            font-size: 10px;
+            color: var(--hint-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .location-value {
+            font-size: 12px;
+            color: #c7c7cc;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .flag-icon { width: 14px; height: auto; }
+        .price-info {
+            text-align: right;
+        }
+        .price-value {
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .price-currency { font-weight: 600; }
+
+        /* Кнопки действий */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.1s;
+        }
+        .btn:active { opacity: 0.7; }
+        
+        .btn-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+        .btn-pay {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+        }
+
+        /* SVG Иконки */
+        .icon { width: 18px; height: 18px; fill: currentColor; }
+    </style>
 </head>
 <body>
 
-    <div id="shop-screen" class="screen active">
-        <h2 class="main-title">MorozovShop</h2>
-        <div class="container">
-            <div class="card" id="item1">
-                <img src="ruchka.webp">
-                <h3>Ручка Arm</h3>
-                <div class="price">$35.00</div>
-                <button class="btn-black add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
-                <div class="counter">
-                    <button onclick="changeQty('item1',-1)">-</button>
-                    <span class="qty">1</span>
-                    <button onclick="changeQty('item1',1)">+</button>
-                </div>
-                <button class="btn-info" onclick="showInfo('item1')">ИНФО</button>
-            </div>
-
-            <div class="card" id="item2">
-                <img src="expander.webp">
-                <h3>Эспандер</h3>
-                <div class="price">$12.00</div>
-                <button class="btn-black add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
-                <div class="counter">
-                    <button onclick="changeQty('item2',-1)">-</button>
-                    <span class="qty">1</span>
-                    <button onclick="changeQty('item2',1)">+</button>
-                </div>
-                <button class="btn-info" onclick="showInfo('item2')">ИНФО</button>
-            </div>
-        </div>
+    <div class="app-header">
+        <h1 class="app-title">Apex Shop</h1>
+        <p class="app-subtitle">мини-приложение</p>
     </div>
 
-    <div id="cart-screen" class="screen">
-        <div class="header-nav" onclick="showShop()">✕ Назад</div>
-        <h2 class="title-left">Корзина</h2>
-        <div id="cart-items-list" class="cart-list"></div>
+    <div class="product-card">
         
-        <div class="promo-wrapper">
-            <div class="promo-container">
-                <input type="text" id="promo-input" placeholder="Промокод">
-                <button class="btn-ok-bw" onclick="applyPromo()">OK</button>
+        <div class="card-image-area">
+            <div class="badge-top badge-new">+ New</div>
+            <div class="badge-top badge-duration">1 месяц</div>
+            
+            <div class="jarvis-graphics">
+                <span class="jarvis-symbol">|||||</span>
+                <div class="jarvis-text-big">JARVIS</div>
+                <span class="jarvis-subtext">Industries</span>
+            </div>
+            
+            <div class="badge-win">
+                <svg class="icon" viewBox="0 0 20 20"><path d="M0 2.228l8.136-1.11v7.6h-8.136v-6.49zm0 7.75l8.136.08v7.658l-8.136-1.12v-6.618zm9.108-8.916l10.892-1.63v9.232h-10.892v-7.602zm0 8.948h10.892v9.378l-10.892-1.64v-7.738z"/></svg>
+                Windows
             </div>
         </div>
 
-        <div id="cart-summary" class="summary"></div>
-    </div>
-
-    <div id="delivery-screen" class="screen">
-        <div class="header-nav" onclick="showCart()">✕ Назад</div>
-        <h2 class="title-left">Доставка</h2>
-        <div class="form-container">
-            <input type="text" id="fio" placeholder="ФИО">
-            <input type="tel" id="phone" placeholder="Номер телефона">
-            <input type="text" id="country" placeholder="Страна">
-            <input type="text" id="city" placeholder="Город">
-            <input type="text" id="address" placeholder="Адрес СДЭК">
-            <input type="email" id="email" placeholder="Email (любой)">
+        <div class="product-info">
+            <h2 class="product-title">Jarvis Industries</h2>
+            <p class="product-description">
+                Профессиональная платформа с тремя тарифами МК-I, МК-II, МК-III.
+            </p>
         </div>
-    </div>
 
-    <div id="checkout-screen" class="screen">
-        <div class="header-nav" onclick="showDelivery()">✕ Назад</div>
-        <h2 class="title-left">Проверка заказа</h2>
-        <div id="check-order" class="check-section"></div>
-        <div id="check-delivery" class="check-section"></div>
-        <div id="check-promo-info" class="promo-status"></div>
-        <h3 id="final-pay-amount"></h3>
-    </div>
-
-    <div id="info-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">✕</span>
-            <div id="modal-body"></div>
+        <div class="price-location-row">
+            <div class="location-info">
+                <span class="location-label">цена от</span>
+                <div class="location-value">
+                    <img class="flag-icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg" alt="RU">
+                    Рубли · live
+                </div>
+            </div>
+            <div class="price-info">
+                <span class="price-value">1 490 <span class="price-currency">₽</span></span>
+            </div>
         </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-info">
+                <svg class="icon" viewBox="0 0 20 20"><path d="M10 0c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10-4.477-10-10-10zm1 15h-2v-6h2v6zm0-8h-2v-2h2v2z"/></svg>
+                Инфо
+            </button>
+            <button class="btn btn-pay">
+                <svg class="icon" viewBox="0 0 20 20"><path d="M18 4h-16c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-10c0-1.1-.9-2-2-2zm0 12h-16v-6h16v6zm0-8h-16v-2h16v2z"/></svg>
+                Оплатить
+            </button>
+        </div>
+
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Инициализация Telegram Web App, чтобы применить цвета темы пользователя
+        let tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Расширить на весь экран
+    </script>
 </body>
 </html>
