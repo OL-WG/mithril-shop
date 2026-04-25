@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MithrilArm Shop</title>
+    <title>MithrilArm</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -14,14 +14,72 @@
             <h2 class="main-title">MITHRILARM</h2>
             <p class="subtitle">МАГАЗИН СПОРТИВНОГО ИНВЕНТАРЯ</p>
         </div>
+        
         <div class="products-list">
+            <div class="product-card" id="item1">
+                <div class="image-box">
+                    <div class="badge badge-new">+ NEW</div>
+                    <div class="badge badge-stock">В НАЛИЧИИ</div>
+                    <img src="ruchka.webp" alt="Ручка Arm">
+                </div>
+                <div class="product-info">
+                    <h3>РУЧКА ARM</h3>
+                    <p class="description">Профессиональная ручка для тренировок армрестлеров.</p>
+                    
+                    <div class="price-row">
+                        <div class="price-val">$35.00</div>
+                        <div class="controls">
+                            <button class="btn-info-small" onclick="showInfo('item1')">ИНФО</button>
+                            <button class="btn-add-main add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+                            
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="changeQty('item1', -1)">−</button>
+                                <span class="qty">1</span>
+                                <button class="qty-btn" onclick="changeQty('item1', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <div class="product-card" id="item2">
+                <div class="image-box">
+                    <div class="badge badge-new">+ NEW</div>
+                    <div class="badge badge-stock">В НАЛИЧИИ</div>
+                    <img src="expander.webp" alt="Эспандер">
+                </div>
+                <div class="product-info">
+                    <h3>ЭСПАНДЕР</h3>
+                    <p class="description">Кистевой эспандер для развития взрывной силы хвата.</p>
+                    
+                    <div class="price-row">
+                        <div class="price-val">$12.00</div>
+                        <div class="controls">
+                            <button class="btn-info-small" onclick="showInfo('item2')">ИНФО</button>
+                            <button class="btn-add-main add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+                            
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="changeQty('item2', -1)">−</button>
+                                <span class="qty">1</span>
+                                <button class="qty-btn" onclick="changeQty('item2', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="cart-screen" class="screen">
         <div class="header-nav" onclick="showShop()">✕ Назад</div>
         <h2 class="title-left">Корзина</h2>
         <div id="cart-items-list" class="cart-list"></div>
+        <div class="promo-wrapper">
+            <div class="promo-container">
+                <input type="text" id="promo-input" placeholder="Промокод">
+                <button class="btn-ok-bw" onclick="applyPromo()">OK</button>
+            </div>
+        </div>
         <div id="cart-summary" class="summary"></div>
     </div>
 
@@ -31,36 +89,26 @@
         <div class="form-container">
             <input type="text" id="fio" placeholder="ФИО">
             <input type="tel" id="phone" placeholder="Номер телефона">
+            <input type="text" id="country" placeholder="Страна">
             <input type="text" id="city" placeholder="Город">
             <input type="text" id="address" placeholder="Адрес СДЭК">
+            <input type="email" id="email" placeholder="Email">
         </div>
     </div>
 
     <div id="checkout-screen" class="screen">
         <div class="header-nav" onclick="showDelivery()">✕ Назад</div>
-        <h2 class="title-left">Проверка</h2>
-        <div id="check-order" class="check-section" style="padding: 20px;"></div>
-        <div id="check-delivery" class="check-section" style="padding: 20px;"></div>
+        <h2 class="title-left">Проверка заказа</h2>
+        <div id="check-order" class="check-section"></div>
+        <div id="check-delivery" class="check-section"></div>
+        <div id="check-promo-info" class="promo-status"></div>
         <div id="final-pay-amount"></div>
     </div>
 
-    <div id="info-modal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-image-area">
-                <span class="close-modal-icon" onclick="closeModal()">✕</span>
-                <img id="modal-product-img" src="" alt="">
-            </div>
-            <div class="modal-body-area">
-                <div class="modal-small-hint">ИНФОРМАЦИЯ</div>
-                <h1 id="modal-product-title"></h1>
-                <div class="modal-subtitle">MithrilArm Professional Series</div>
-                <div class="modal-description" id="modal-product-desc"></div>
-                <div class="modal-price-row">
-                    <span class="modal-small-hint">СТОИМОСТЬ</span>
-                    <span class="modal-final-price" id="modal-product-price"></span>
-                </div>
-                <button class="btn-primary-white" onclick="closeModal()">ПОНЯТНО</button>
-            </div>
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">✕</span>
+            <div id="modal-body"></div>
         </div>
     </div>
 
