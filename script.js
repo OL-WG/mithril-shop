@@ -3,7 +3,7 @@ tg.expand();
 
 tg.MainButton.setParams({ color: '#000000', text_color: '#ffffff' });
 
-// ===== СТРАНЫ =====
+// ===== КОНФИГУРАЦИЯ СТРАН =====
 const COUNTRIES = [
     { code: '+7',   flag: '🇷🇺', name: 'Россия',         maxLen: 10 },
     { code: '+7',   flag: '🇰🇿', name: 'Казахстан',      maxLen: 10 },
@@ -31,12 +31,15 @@ const COUNTRIES = [
     { code: '+91',  flag: '🇮🇳', name: 'Индия',           maxLen: 10 },
 ];
 
-const KZ_PREFIXES = ['700','701','702','705','706','707','708','709','710','711','712','713','714','715','716','717','718','719','720','721','722','723','724','725','726','727','728','729','760','761','762','763','764','765','766','767','768','769','770','771','772','773','774','775','776','777','778','779'];
-
 let selectedCountry = COUNTRIES[0]; 
+let products = {
+    item1: { name: "РУЧКА ARM", price: 35, qty: 0, img: 'ruchka.webp', desc: "Профессиональный инструмент." },
+    item2: { name: "ЭСПАНДЕР", price: 12, qty: 0, img: 'expander.webp', desc: "Для развития силы хвата." }
+};
+let isJarvis = false;
 
+// ===== ФУНКЦИИ ИНТЕРФЕЙСА =====
 function initPhoneUI() {
-    renderCountryList(COUNTRIES);
     updateFlagUI();
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.phone-wrapper') && !e.target.closest('.country-dropdown')) {
@@ -50,117 +53,16 @@ function updateFlagUI() {
     document.getElementById('phone-code').innerText = selectedCountry.code;
 }
 
-function renderCountryList(list) {
-    const container = document.getElementById('country-list');
-    container.innerHTML = list.map((c, i) => `
-        <div class="country-item" onclick="selectCountry(${COUNTRIES.indexOf(c)})">
-            <span class="ci-flag">${c.flag}</span>
-            <span class="ci-name">${c.name}</span>
-            <span class="ci-code">${c.code}</span>
-        </div>
-    `).join('');
-}
-
-function filterCountries(q) {
-    const filtered = COUNTRIES.filter(c =>
-        c.name.toLowerCase().includes(q.toLowerCase()) || c.code.includes(q)
-    );
-    renderCountryList(filtered);
-}
-
-function toggleCountryDropdown() {
-    const dd = document.getElementById('country-dropdown');
-    dd.classList.toggle('open');
-    if (dd.classList.contains('open')) {
-        document.getElementById('country-search').value = '';
-        renderCountryList(COUNTRIES);
-        setTimeout(() => document.getElementById('country-search').focus(), 100);
-        const wrapper = document.querySelector('.phone-wrapper');
-        const rect = wrapper.getBoundingClientRect();
-        dd.style.top = (rect.bottom + window.scrollY + 6) + 'px';
-    }
-}
-
-function closeCountryDropdown() {
-    document.getElementById('country-dropdown').classList.remove('open');
-}
-
 function selectCountry(index) {
     selectedCountry = COUNTRIES[index];
     updateFlagUI();
     closeCountryDropdown();
     document.getElementById('phone').value = '';
-    document.getElementById('phone').focus();
-}
-
-function detectCountryByNumber(digits) {
-    if (!digits) return;
-    if (digits.startsWith('7') || digits.startsWith('8')) {
-        const prefix3 = digits.substring(0, 3);
-        if (KZ_PREFIXES.includes(prefix3)) {
-            selectedCountry = COUNTRIES.find(c => c.name === 'Казахстан');
-        } else if (digits.length >= 1) {
-            selectedCountry = COUNTRIES.find(c => c.name === 'Россия');
-        }
-        updateFlagUI(); return;
-    }
-    if (digits.startsWith('375')) { selectedCountry = COUNTRIES.find(c => c.name === 'Беларусь'); updateFlagUI(); return; }
-    if (digits.startsWith('380')) { selectedCountry = COUNTRIES.find(c => c.name === 'Украина'); updateFlagUI(); return; }
-    if (digits.startsWith('998')) { selectedCountry = COUNTRIES.find(c => c.name === 'Узбекистан'); updateFlagUI(); return; }
-    // ... (остальные проверки автоопределения)
-}
-
-function blockBadKeys(e) {
-    const blocked = ['-', '(', ')', ' ', '+'];
-    if (blocked.includes(e.key)) { e.preventDefault(); return; }
-    if (!/^\d$/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
-        e.preventDefault();
-    }
 }
 
 function handlePhoneInput(input) {
-    let digits = input.value.replace(/\D/g, '');
-    if (digits.startsWith('00')) digits = digits.substring(2);
-    detectCountryByNumber(digits);
-    digits = digits.substring(0, selectedCountry.maxLen);
+    let digits = input.value.replace(/\D/g, '').substring(0, selectedCountry.maxLen);
     input.value = digits;
-}
-
-// ===== ПРОДУКТЫ =====
-let products = {
-    item1: { name: "РУЧКА ARM", price: 35, qty: 0, img: 'ruchka.webp', desc: "Профессиональный инструмент для развития силы пронации и подъема." },
-    item2: { name: "ЭСПАНДЕР", price: 12, qty: 0, img: 'expander.webp', desc: "Кистевой эспандер для развития взрывной силы хвата." }
-};
-
-let isJarvis = false;
-
-function showToast(msg, type = '') {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.className = 'toast show ' + (type ? type + '-toast' : '');
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function validateDelivery() {
-    const textFields = ['fio', 'country', 'city', 'address', 'email'];
-    let valid = true;
-    textFields.forEach(id => {
-        const input = document.getElementById(id);
-        if (!input.value.trim()) { input.classList.add('error'); valid = false; }
-        else input.classList.remove('error');
-    });
-    const phoneInput = document.getElementById('phone');
-    const phoneDigits = phoneInput.value.replace(/\D/g, '');
-    const phoneWrapper = document.querySelector('.phone-wrapper');
-    if (phoneDigits.length < 7) {
-        phoneWrapper.classList.add('error');
-        valid = false;
-    } else {
-        phoneWrapper.classList.remove('error');
-    }
-    if (!valid) showToast('⚠️ Заполните все поля!', 'error');
-    return valid;
 }
 
 function showScreen(id) {
@@ -171,74 +73,60 @@ function showScreen(id) {
     updateMainButton();
 }
 
+function addToCart(id) { products[id].qty = 1; updateProductUI(id); }
+function changeQty(id, delta) { products[id].qty = Math.max(0, products[id].qty + delta); updateProductUI(id); }
+
 function updateProductUI(id) {
     const card = document.getElementById(id);
     const qty = products[id].qty;
     const addBtn = card.querySelector('.add-trigger');
     const qtyCtrl = card.querySelector('.quantity-control');
-    const qtySpan = card.querySelector('.qty');
-    if (qty > 0) { addBtn.style.display = 'none'; qtyCtrl.classList.add('show'); qtySpan.innerText = qty; }
+    if (qty > 0) { addBtn.style.display = 'none'; qtyCtrl.classList.add('show'); card.querySelector('.qty').innerText = qty; }
     else { addBtn.style.display = 'block'; qtyCtrl.classList.remove('show'); }
     updateMainButton();
 }
 
-function addToCart(id) { products[id].qty = 1; updateProductUI(id); }
-function changeQty(id, delta) { products[id].qty = Math.max(0, products[id].qty + delta); updateProductUI(id); }
-
 function updateCart() {
-    let html = '', subtotal = 0, hasItems = false;
-    for (let id in products) {
-        if (products[id].qty > 0) {
-            const sum = products[id].price * products[id].qty;
-            subtotal += sum; hasItems = true;
-            html += `<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
-        }
-    }
-    if (!hasItems) {
-        document.getElementById('cart-items-list').innerHTML = '<p style="text-align:center;padding:20px;color:#888;">Корзина пуста</p>';
-        document.getElementById('cart-summary').innerHTML = ''; return;
-    }
-    const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    const total = subtotal - discount;
-    document.getElementById('cart-items-list').innerHTML = html;
-    document.getElementById('cart-summary').innerHTML = `
-        <div style="padding:20px;border-top:1px solid #222;">
-            <p>Сумма: $${subtotal}</p>
-            ${isJarvis ? `<p style="color:#30d1a9">Скидка (JARVIS): -$${discount}</p>` : ''}
-            <h3 style="font-size:24px;">Итого: $${total}</h3>
-        </div>`;
-}
-
-function applyPromo() {
-    const code = document.getElementById('promo-input').value.trim().toUpperCase();
-    isJarvis = (code === 'JARVIS');
-    if (isJarvis) showToast('✅ Скидка 15% применена!', 'success');
-    else showToast('❌ Промокод не найден', 'error');
-    updateCart();
-}
-
-function updateCheckout() {
-    let itemsHtml = '<h3>Ваш заказ:</h3>', subtotal = 0;
+    let html = '', subtotal = 0;
     for (let id in products) {
         if (products[id].qty > 0) {
             const sum = products[id].price * products[id].qty;
             subtotal += sum;
-            itemsHtml += `<p>${products[id].name} x${products[id].qty} — $${sum}</p>`;
+            html += `<div class="cart-item"><span>${products[id].name} x${products[id].qty}</span><span>$${sum}</span></div>`;
         }
     }
     const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-    const total = subtotal - discount;
-    const fullPhone = selectedCountry.code + ' ' + document.getElementById('phone').value;
+    document.getElementById('cart-items-list').innerHTML = html || '<p>Корзина пуста</p>';
+    document.getElementById('cart-summary').innerHTML = `<h3>Итого: $${subtotal - discount}</h3>`;
+}
+
+function applyPromo() {
+    isJarvis = (document.getElementById('promo-input').value.trim().toUpperCase() === 'JARVIS');
+    updateCart();
+}
+
+function updateCheckout() {
+    let subtotal = 0, itemsHtml = '';
+    for (let id in products) {
+        if (products[id].qty > 0) {
+            subtotal += products[id].price * products[id].qty;
+            itemsHtml += `<p>${products[id].name} x${products[id].qty}</p>`;
+        }
+    }
+    const total = subtotal - (isJarvis ? Math.round(subtotal * 0.15) : 0);
     document.getElementById('check-order').innerHTML = itemsHtml;
-    document.getElementById('check-delivery').innerHTML = `
-        <h3>Доставка:</h3>
-        <p><b>Получатель:</b> ${document.getElementById('fio').value}</p>
-        <p><b>Телефон:</b> ${fullPhone}</p>
-        <p><b>Адрес:</b> ${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}</p>`;
-    document.getElementById('final-pay-amount').innerHTML = `
-        <div style="padding:20px;background:#111;border-radius:15px;margin-top:10px;">
-            <h2 style="margin:0;">К оплате: $${total}</h2>
-        </div>`;
+    document.getElementById('final-pay-amount').innerText = `К оплате: $${total}`;
+}
+
+function validateDelivery() {
+    const fields = ['fio', 'city', 'address'];
+    let valid = true;
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+        else el.classList.remove('error');
+    });
+    return valid;
 }
 
 function updateMainButton() {
@@ -247,53 +135,39 @@ function updateMainButton() {
         let count = Object.values(products).reduce((a, b) => a + b.qty, 0);
         if (count > 0) tg.MainButton.setText(`🛒 КОРЗИНА (${count})`).show();
         else tg.MainButton.hide();
-    } else if (active === 'cart-screen') tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ').show();
+    } 
+    else if (active === 'cart-screen') tg.MainButton.setText('🚚 ОФОРМИТЬ ДОСТАВКУ').show();
     else if (active === 'delivery-screen') tg.MainButton.setText('✅ ПРОВЕРИТЬ ЗАКАЗ').show();
     else if (active === 'checkout-screen') tg.MainButton.setText('📤 ОТПРАВИТЬ ЗАКАЗ').show();
 }
 
-// ===== ВАШ НОВЫЙ ОБРАБОТЧИК КЛИКА =====
+// ===== ОБРАБОТЧИК НАЖАТИЯ КНОПКИ (ИСПРАВЛЕН) =====
 tg.MainButton.onClick(() => {
     const active = document.querySelector('.screen.active').id;
     if (active === 'shop-screen') showScreen('cart-screen');
     else if (active === 'cart-screen') showScreen('delivery-screen');
     else if (active === 'delivery-screen') { if (validateDelivery()) showScreen('checkout-screen'); }
     else if (active === 'checkout-screen') {
-        // Считаем итог заново чтобы передать чистое число
         let subtotal = 0;
+        let itemsList = [];
         for (let id in products) {
-            if (products[id].qty > 0) subtotal += products[id].price * products[id].qty;
+            if (products[id].qty > 0) {
+                subtotal += products[id].price * products[id].qty;
+                itemsList.push(`${products[id].name} x${products[id].qty}`);
+            }
         }
-        const discount = isJarvis ? Math.round(subtotal * 0.15) : 0;
-        const total = subtotal - discount;
-
-        const fullPhone = selectedCountry.flag + ' ' + selectedCountry.code + ' ' + document.getElementById('phone').value;
+        const total = subtotal - (isJarvis ? Math.round(subtotal * 0.15) : 0);
 
         const orderData = {
             fio: document.getElementById('fio').value,
-            phone: fullPhone,
-            address: `${document.getElementById('country').value}, ${document.getElementById('city').value}, ${document.getElementById('address').value}`,
-            email: document.getElementById('email').value,
-            items: Object.values(products).filter(p => p.qty > 0).map(p => `${p.name} x${p.qty} — $${p.price * p.qty}`),
-            promo: isJarvis ? "JARVIS" : "Нет",
-            total: total  // чистое число
+            phone: selectedCountry.code + ' ' + document.getElementById('phone').value,
+            address: `${document.getElementById('city').value}, ${document.getElementById('address').value}`,
+            items: itemsList,
+            total: total,
+            promo: isJarvis ? "JARVIS" : "Нет"
         };
         tg.sendData(JSON.stringify(orderData));
     }
 });
-
-function showInfo(id) {
-    const p = products[id];
-    document.getElementById('modal-product-img').src = p.img;
-    document.getElementById('modal-product-title').innerText = p.name;
-    document.getElementById('modal-product-desc').innerText = p.desc;
-    document.getElementById('modal-product-price').innerText = `$${p.price}.00`;
-    document.getElementById('info-modal').style.display = 'flex';
-}
-
-function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
-function showShop() { showScreen('shop-screen'); }
-function showCart() { showScreen('cart-screen'); }
-function showDelivery() { showScreen('delivery-screen'); }
 
 window.onload = () => { tg.ready(); initPhoneUI(); updateMainButton(); };
