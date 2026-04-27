@@ -14,7 +14,6 @@
             <h2 class="main-title">MITHRILARM</h2>
             <p class="subtitle">МАГАЗИН СПОРТИВНОГО ИНВЕНТАРЯ</p>
         </div>
-        
         <div class="products-list">
             <div class="product-card" id="item1">
                 <div class="image-box">
@@ -29,11 +28,13 @@
                         <div class="price-val">$35.00</div>
                         <div class="controls">
                             <button class="btn-info-small" onclick="showInfo('item1')">ИНФО</button>
-                            <button class="btn-add-main add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
-                            <div class="quantity-control">
-                                <button class="qty-btn" onclick="changeQty('item1', -1)">−</button>
-                                <span class="qty">1</span>
-                                <button class="qty-btn" onclick="changeQty('item1', 1)">+</button>
+                            <div class="add-wrapper">
+                                <button class="btn-add-main add-trigger" onclick="addToCart('item1')">ДОБАВИТЬ</button>
+                                <div class="quantity-control">
+                                    <button class="qty-btn" onclick="changeQty('item1', -1)">−</button>
+                                    <span class="qty">1</span>
+                                    <button class="qty-btn" onclick="changeQty('item1', 1)">+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -53,11 +54,13 @@
                         <div class="price-val">$12.00</div>
                         <div class="controls">
                             <button class="btn-info-small" onclick="showInfo('item2')">ИНФО</button>
-                            <button class="btn-add-main add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
-                            <div class="quantity-control">
-                                <button class="qty-btn" onclick="changeQty('item2', -1)">−</button>
-                                <span class="qty">1</span>
-                                <button class="qty-btn" onclick="changeQty('item2', 1)">+</button>
+                            <div class="add-wrapper">
+                                <button class="btn-add-main add-trigger" onclick="addToCart('item2')">ДОБАВИТЬ</button>
+                                <div class="quantity-control">
+                                    <button class="qty-btn" onclick="changeQty('item2', -1)">−</button>
+                                    <span class="qty">1</span>
+                                    <button class="qty-btn" onclick="changeQty('item2', 1)">+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -84,7 +87,31 @@
         <h2 class="title-left">Доставка</h2>
         <div class="form-container">
             <input type="text" id="fio" placeholder="ФИО">
-            <input type="tel" id="phone" placeholder="Номер телефона">
+
+            <!-- УМНОЕ ПОЛЕ ТЕЛЕФОНА -->
+            <div class="phone-wrapper">
+                <div class="phone-flag-btn" id="phone-flag-btn" onclick="toggleCountryDropdown()">
+                    <span id="phone-flag">🇷🇺</span>
+                    <span id="phone-code">+7</span>
+                    <span class="phone-arrow">▾</span>
+                </div>
+                <input
+                    type="tel"
+                    id="phone"
+                    class="phone-input"
+                    placeholder="999 123 45 67"
+                    inputmode="numeric"
+                    oninput="handlePhoneInput(this)"
+                    onkeydown="blockBadKeys(event)"
+                >
+            </div>
+
+            <!-- ДРОПДАУН СТРАН -->
+            <div class="country-dropdown" id="country-dropdown">
+                <input type="text" id="country-search" placeholder="🔍 Поиск страны..." oninput="filterCountries(this.value)" onclick="event.stopPropagation()">
+                <div class="country-list" id="country-list"></div>
+            </div>
+
             <input type="text" id="country" placeholder="Страна">
             <input type="text" id="city" placeholder="Город">
             <input type="text" id="address" placeholder="Адрес СДЭК">
@@ -122,6 +149,8 @@
             </div>
         </div>
     </div>
+
+    <div id="toast" class="toast"></div>
 
     <script src="script.js"></script>
 </body>
